@@ -1,0 +1,141 @@
+<style>
+    .flsch-c1 {
+        border: none;
+        text-align: right;
+        padding-right: 0.5em;
+        margin-left: 0.2em;
+    }
+    .flsch-c2 {
+        background-color: #99ccff;
+        text-align: center;
+        border: 2px solid white;
+    }
+    .flsch-c3 {
+        background-color: white;
+        text-align: center;
+        border: 2px solid white;
+    }
+    .flsch-c3:hover {
+        border-color: var(--theme-color-accent);
+    }
+    .flsch-l1 {
+        background-color: white;
+        border: none;
+        text-align: center;
+    }
+    .flsch-text {
+        background-color: var(--theme-color-bg);
+        text-align: left;
+        padding-left: 0.5em;
+        overflow-y: auto;
+        font-size: 1.1em;
+        box-shadow: inset 6px 6px 10px 0 rgba(0, 0, 0, 0.1), inset -6px -6px 10px 0 rgba(255, 255, 255, 0.4);
+    }
+    .flsch-data {
+        text-align: center;
+        margin: 0 0.5em;
+        font-size: 1.2em;
+        box-shadow: 6px 6px 10px 0 rgba(0, 0, 0, 0.2);
+    }
+</style>
+
+<script>
+    function flSched(org) {
+        pname = org.pname;
+        if (org.scname!="") pname = org.scname;
+
+        // if this window is already opened, send a click to the header of it to make it come forward
+        if ($(pname + " Schedule")) {
+            $(pname + " Schedule").header.dispatchEvent(new Event('click'));
+            return;
+        }
+
+        // call server to get schedule data
+        $("spinner").style.display = "inline"; // start spinner
+        google.script.run.withSuccessHandler(ret => {
+            $("spinner").style.display = "none"; // stop spinner
+            if (ret == null) return;
+            res = JSON.parse(ret);
+
+            // create window
+            let fdata = {
+                _root: document.body,
+                _title: pname + " Schedule",
+                _blocking: false,
+                _scaled: true,
+                _headercolor: "var(--theme-color-system)",
+                _height: 35,
+                _width: 30,
+                _vrows: 19,
+                _cols: 7,
+                _licon: null,
+                _fontRatio: 0.5
+            };
+            let flw = flGrid(fdata);
+            flw.grid.style.backgroundColor = "white";
+            flw.grid.style.gridTemplateColumns = "15% 20% 20% 2.5% 20% 20% 2.5%";
+            flw.addEventListener("flWindowClosed", function(e) {
+                this.remove();
+            });
+            flw.addCell2 = function(value, x1, y1, x2 = x1+1, y2 = y1+1) {
+                let tmp = this.addCell(x1, y1, x2, y2);
+                tmp.classList.add("flsch-c" + x1);
+                tmp.classList.add("flsch-l" + y1);
+                tmp.innerHTML = value;
+                return tmp;
+            };
+
+            // adding labels
+            flw.addCell2("Plan", 2, 1);
+            flw.addCell2("CWV", 3, 1);
+            flw.addCell2("TR->OK2S Plan", 5, 3, 5, 4);
+            flw.addCell2("TR->OK2S CWV", 6, 3, 6, 4);
+            cmts = flw.addCell(5, 7, 7, 18);
+            cmts.classList.add("flsch-text");
+            flw.cmts = cmts;
+
+            // adding data
+            for (i=6; i<23; i++) {
+                labelc = flw.addCell2(res[1][i], 1, i-4);
+                dt1 = new Date(res[2][i]);
+                dt2 = new Date(res[3][i]);
+                if (!isNaN(dt1.getUTCMonth())) leftc = flw.addCell2((dt1.getUTCMonth()+1) + "/" + dt1.getUTCDate() + "/" + dt1.getUTCFullYear(), 2, i-4);
+                else leftc = flw.addCell2("", 2, i-4);
+                if (!isNaN(dt2.getUTCMonth())) {
+                    rightc = flw.addCell2((dt2.getUTCMonth()+1) + "/" + dt2.getUTCDate() + "/" + dt2.getUTCFullYear(), 3, i-4);
+                    rightc.comment = res[4][i];
+                    rightc.onmouseover = function(ev) {this.parentNode.root.cmts.innerHTML = this.comment.replace(/\u000A/ig,"<br>")};
+                    rightc.onmouseout = function(ev) {this.parentNode.root.cmts.innerHTML = ""};
+                    // color code the gap CWV/Plan
+                    let delta = (dt2-dt1)/(1000 * 60 * 60 * 24);
+                    if (isNaN(delta)) rightc.style.backgroundColor = "#99ccff";
+                    if (delta > 2) rightc.style.backgroundColor = "#ff9999";
+                    if ((delta>0) && (delta<=2)) rightc.style.backgroundColor = "#ffff99";
+                    if (delta<=0) rightc.style.backgroundColor = "#99ff99";
+                }
+                // current milestone
+                if (res[1][i] == res[3][2]) {
+                    labelc.style.backgroundColor = "var(--theme-color-accent)";
+                    labelc.style.color = "white";
+                    leftc.style.borderColor = "var(--theme-color-accent)";
+                    rightc.style.borderColor = "var(--theme-color-accent)";
+                }
+            }
+
+            // stats
+            tgt1 = flw.addCell(5, 4, 5, 6);
+            tgt1.classList.add("flsch-data");
+            tgt1.innerHTML = res[2][92].toFixed(1) + "wks";
+            tgt1.style.backgroundColor = "#99ccff";
+            tgt2 = flw.addCell(6, 4, 6, 6);
+            tgt2.classList.add("flsch-data");
+            tgt2.innerHTML = res[3][92].toFixed(1) + "wks";
+            delta = res[3][92] - res[2][92];
+            tgt2.style.backgroundColor = "white";
+            if (delta >= 1) tgt2.style.backgroundColor = "#ff9999";
+            if ((delta > 0) && (delta <1)) tgt2.style.backgroundColor = "#ffff99";
+            if (delta <= 0) tgt2.style.backgroundColor = "#99ff99";
+        }).getProductSchedule(pname);
+    }
+</script>
+

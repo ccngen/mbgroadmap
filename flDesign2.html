@@ -1,0 +1,69 @@
+<style>
+    .flex-id-img {
+        object-fit: contain;
+        /*max-height: 33%;*/
+        cursor: pointer;
+        border: 3px solid transparent;
+    }
+    .flex-id-img:hover {
+        border: 3px solid var(--theme-color-accent);
+    }
+</style>
+
+<script>
+    function flDesign(org) {
+        pname = org.pname;
+
+        // if this window is already opened, send a click to the header of it to make it come forward
+        if ($(pname + " Design")) {
+            $(pname + " Design").header.dispatchEvent(new Event('click'));
+            return;
+        }
+
+
+        // get design URLs from server
+        $("spinner").style.display = "inline"; // start spinner
+        google.script.run.withSuccessHandler(function(ret) {
+            $("spinner").style.display = "none"; // stop spinner
+
+            // create window
+            let fdata = {
+                _root: document.body,
+                _title: pname + " Design",
+                _blocking: false,
+                _scaled: true,
+                _headercolor: "var(--theme-color-system)",
+                _height: 36,
+                _width: 11,
+                _vrows: 3,
+                _cols: 1,
+                _licon: null,
+                _fontRatio: 0.5
+            };
+            let flw = flGrid(fdata);
+            flw.grid.style.backgroundColor = "white";
+            flw.addEventListener("flWindowClosed", function(e) {
+                this.remove();
+            });
+
+            var tmp = flw.addCell(1, 1);
+            let bty = $$$(tmp, "img", "flex-id-img");
+            bty.onclick = function (ev) {window.open(this.src);};
+            var tmp = flw.addCell(1, 2);
+            let cmf = $$$(tmp, "img", "flex-id-img");
+            cmf.onclick = function (ev) {window.open(this.src);};
+            var tmp = flw.addCell(1, 3);
+            let col = $$$(tmp, "img", "flex-id-img");
+            col.onclick = function (ev) {window.open(this.src);};
+
+            if (ret.btyURL!="") bty.src = ret.btyURL;
+            else bty.src = "https://via.placeholder.com/720x405.png?text=Image+Not+Available";
+            if (ret.cmfURL!="") cmf.src = ret.cmfURL;
+            else cmf.src = "https://via.placeholder.com/720x405.png?text=CMF+Not+Available";
+            if (ret.colURL!="") col.src = ret.colURL;
+            else col.src = "https://via.placeholder.com/720x405.png?text=Color+Collection+Not+Available";
+
+        }).getDesign(pname);
+    }
+
+</script>

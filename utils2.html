@@ -1,0 +1,459 @@
+<style>
+    .flw-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: transparent;
+        visibility: hidden;
+    }
+
+    .flw-window {
+        position: absolute;
+        display: grid;
+        overflow: hidden;
+        box-shadow: 0.5vh 0.5vh 1vh rgba(0, 0, 0, 0.3), -0.3vh -0.3vh 0.8vh rgba(0, 0, 0, 0.2);
+        visibility: visible;
+    }
+
+    .flw-header {
+        display: grid;
+        grid-template-columns: 1.5em auto 1.5em;
+        color: white;
+        width: 100%;
+        text-align: center;
+        cursor: move;
+    }
+
+    .flw-licon {
+        font-weight: bold;
+        transition-duration: 0.4s;
+    }
+
+    .flw-licon:hover {
+        color: var(--theme-color-fg2);
+    }
+
+    .flw-close {
+        font-weight: bold;
+        cursor: pointer;
+        transition-duration: 0.4s;
+    }
+
+    .flw-close:hover {
+        color: var(--theme-color-fg2);
+    }
+
+    .flw-body {
+        background-color: var(--theme-color-bg);
+        overflow-y: auto;
+    }
+
+    .flw-footer {
+        height: 0.25vh;
+        cursor: nwse-resize;
+    }
+
+    .msgb-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-sizing: border-box;
+        padding: 0.5em;
+        height: 100%;
+        width: 100%;
+        background-color: white;
+        color: black;
+    }
+
+    .msgb-okbutton {
+        background-color: var(--theme-color-fg2);
+        color: white;
+        text-align: center;
+        cursor: pointer;
+        transition-duration: 0.4s;
+    }
+
+    .msgb-okbutton:hover {
+        background-color: var(--theme-color-accent);
+    }
+
+    .flg-grid {
+        display: grid;
+        width: 100%;
+        height: 100%;
+        box-sizing: border-box;
+        background-color: white;
+    }
+
+    .flg-cell {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        box-sizing: border-box;
+        border: none;
+        color: black;
+        text-align: center;
+    }
+</style>
+
+<script>
+    // get Element by ID
+    function $(x) {return document.getElementById(x);}
+
+    // create DOM element
+    function $$$(_parent, _type, _class = "", _id = "") {
+        var ret = document.createElement(_type);
+        if (_class != "") ret.className = _class;
+        if (_id != "") ret.id = _id;
+        if (typeof _parent == "string") $(_parent).appendChild(ret);
+        else _parent.appendChild(ret);
+        return ret;
+    }
+
+    Element.prototype.onhover = function (hoverClass) {
+        this.onmouseover = this.onmouseout = function (ev) {this.classList.toggle(hoverClass);};
+    }
+
+    Element.prototype.onhoverPro = function (inFct, outFct)  {
+        this.onmouseover = inFct;
+        this.onmouseout = outFct;
+    }
+
+    /*
+      inputs:
+        dt._root            : anchor element of flw
+        dt._title           : flw title and also id
+        dt._blocking        : blocking true or false
+        dt._scaled          : scaled true or false for resizing
+        dt._headercolor     : header color
+        dt._height          : numeric height (will be vh)
+        dt._width           : numeric width (will be vw)
+        dt._licon           : text icon for left corner
+      properties:
+        mytitle
+        blocking
+        scaled
+        headercolor
+        height
+        width
+        liconTxt
+        headerHeight
+      objects: (each object has "root" property pointing to root)
+        root                : floating Window
+          root.backdrop
+          root.window
+              root.header
+                  root.licon
+                  root.htitle
+                  root.close
+              root.body
+              root.footer
+      events:
+        flWindowHasResized
+        flWindowLeftIcon
+        flWindowClosed
+    */
+    function makeFLW(dt) {
+        let flw = $$$(dt._root, "div", "", dt._title);
+        flw.mytitle = dt._title;
+        flw.blocking = dt._blocking;
+        flw.scaled = dt._scaled;
+        flw.headercolor = dt._headercolor;
+        flw.height = dt._height;
+        flw.width = dt._width;
+        flw.liconTxt = dt._licon;
+        flw.headerHeight = 1.5;
+
+        // drag & drop
+        flw.dragMouseDown = function(e) {
+            e = e || window.event;
+            const me = this.root;
+            me.window.data3 = e.clientX;
+            me.window.data4 = e.clientY;
+            document.onmouseup = me.closeDragElement;
+            document.onmousemove = function() { me.elementDrag(event, me) };
+        };
+        flw.elementDrag = function(e, me) {
+            e = e || window.event;
+            e.preventDefault();
+            me = me.window;
+            me.data1 = me.data3 - e.clientX;
+            me.data2 = me.data4 - e.clientY;
+            me.data3 = e.clientX;
+            me.data4 = e.clientY;
+            me.style.top = (me.offsetTop - me.data2) + "px";
+            if (me.offsetTop<0) me.style.top = "0px";
+            if (me.offsetTop+me.offsetHeight>window.innerHeight) me.style.top = (window.innerHeight-me.offsetHeight) + "px";
+            me.style.left = (me.offsetLeft - me.data1) + "px";
+            if (me.offsetLeft<0) me.style.left = "0px";
+            if (me.offsetLeft+me.offsetWidth>window.innerWidth) me.style.left = (window.innerWidth-me.offsetWidth) + "px";
+        };
+        flw.closeDragElement = function() {document.onmouseup = null; document.onmousemove = null;};
+
+        // resize
+        flw.dragMouseDownResize = function(e) {
+            e = e || window.event;
+            const me = this.root;
+            me.window.data3 = e.clientX;
+            me.window.data4 = e.clientY;
+            if (me.scaled) me.window.ratio = me.body.offsetHeight / me.body.offsetWidth;
+            else me.window.ratio = 0;
+            document.onmouseup = me.closeDragElementResize;
+            document.onmousemove = function() { me.elementDragResize(event, me) };
+        };
+        flw.elementDragResize = function(e, me) {
+            e = e || window.event;
+            e.preventDefault();
+            me.window.data1 = me.window.data3 - e.clientX;
+            me.window.data2 = me.window.data4 - e.clientY;
+            me.window.data3 = e.clientX;
+            me.window.data4 = e.clientY;
+            const oldW = me.body.offsetWidth;
+            const oldH = me.body.offsetHeight;
+            me.body.style.width = (me.body.offsetWidth - me.window.data1) + "px";
+            // don't make it narrower than the header
+            if (me.body.offsetWidth < me.window.offsetWidth) me.body.style.width = me.window.offsetWidth + "px";
+            // height whether it's proportional or not
+            if (me.window.ratio>0) me.body.style.height = (me.body.offsetWidth * me.window.ratio) + "px";
+            else me.body.style.height = (me.body.offsetHeight - me.window.data2) + "px";
+            // don't go outside of the window
+            if ((me.window.offsetLeft + me.window.offsetWidth > window.innerWidth) || (me.window.offsetTop + me.window.offsetHeight > window.innerHeight)) {
+                me.body.style.width = oldW + "px";
+                me.body.style.height = oldH + "px";
+            }
+            me.body.style.setProperty('--flw-height', me.body.style.height);
+            // fire hasResized event
+            let event = new CustomEvent("flWindowHasResized", { "detail": "flwindow has resized" });
+            me.dispatchEvent(event);
+        };
+        flw.closeDragElementResize = function() {document.onmouseup = null; document.onmousemove = null;};
+
+        // backdrop
+        flw.backdrop = $$$(flw, "div", "flw-backdrop");
+        flw.backdrop.root = flw;
+        if (flw.blocking) flw.backdrop.style.visibility = "visible";
+
+        // window
+        flw.window = $$$(flw.backdrop, "div", "flw-window");
+        flw.window.root = flw;
+        flw.window.style.gridTemplateRows = flw.headerHeight + "vh auto";
+        flw.window.style.top = "calc(50% - " + flw.height/2 + "vh)";
+        flw.window.style.left = "calc(50% - " + flw.width/2 + "vw)";
+
+        // header
+        flw.header = $$$(flw.window, "div", "flw-header");
+        flw.header.root = flw;
+        flw.header.style.height = flw.headerHeight + "vh";
+        flw.header.style.lineHeight = flw.headerHeight + "vh";
+        flw.header.style.fontSize = (flw.headerHeight * 0.7) + "vh";
+        flw.header.style.backgroundColor = flw.headercolor;
+        flw.header.onmousedown = flw.dragMouseDown;
+        flw.header.onclick = function() {
+            const x = document.activeElement; // find who has the focus
+            if (this.root.parentNode != null) this.root.parentNode.appendChild(this.root); // bring myself on top on click
+            x.focus(); // give back the focus
+        };
+
+        // left icon
+        flw.licon = $$$(flw.header, "div", "flw-licon");
+        flw.licon.root = flw;
+        if (flw.liconTxt) {
+            flw.licon.innerHTML = flw.liconTxt;
+            flw.licon.style.cursor = "pointer";
+        }
+        flw.licon.onclick = function() {
+            let event = new CustomEvent("flWindowLeftIcon", { "detail": "left icon clicked" });
+            this.root.dispatchEvent(event);
+        };
+
+        // header title
+        flw.htitle = $$$(flw.header, "div")
+        flw.htitle.root = flw;
+        flw.htitle.innerHTML = flw.mytitle;
+
+        // close button
+        flw.close = $$$(flw.header, "div", "flw-close");
+        flw.close.root = flw;
+        flw.close.innerHTML = "&times;";
+        flw.close.onclick = function() {
+            let event = new CustomEvent("flWindowClosed", { "detail": "flwindow to be closed" });
+            this.root.dispatchEvent(event);
+        };
+
+        // body
+        flw.body = $$$(flw.window, "div", "flw-body");
+        flw.body.root = flw;
+        flw.body.style.height = flw.height + "vh";
+        flw.body.style.width = flw.width + "vw";
+        flw.body.style.setProperty('--flw-height', flw.body.style.height);
+
+        // footer
+        flw.footer = $$$(flw.window, "div", "flw-footer");
+        flw.footer.root = flw;
+        flw.footer.onmousedown = flw.dragMouseDownResize;
+        flw.footer.style.backgroundColor = flw.headercolor;
+
+        // prevent keypress outside the window
+        flw.tabIndex = "-1";
+        flw.focus();
+        flw.onkeypress = function(e) {e.stopPropagation();};
+        return flw;
+    }
+
+    /*
+      inputs:
+        _title
+        _height
+        _width
+        _nbOfLines
+        _msg
+        _okButton
+      properties:
+        nbOfLines           : number of visible lines in the msgbox
+      objects:
+        root                : floating Window, blocking, scaled
+          root.backdrop
+          root.window
+            root.header
+              root.licon
+              root.htitle
+              root.close
+            root.body
+              root.inncnt   : inner container
+                root.msg    : message
+                root.okb    : ok button, if any
+            root.footer
+      events:
+        msgBoxOkClicked
+        flWindowHasResized
+        flWindowClosed
+    */
+    function msgBox(_title, _height, _width, _nbOfLines, _msg, _okButton = null) {
+        // window
+        let data = {
+            _root: document.body,
+            _title: _title,
+            _blocking: true,
+            _scaled: true,
+            _headercolor: "var(--theme-color-accent)",
+            _height: _height,
+            _width: _width,
+            _licon: null,
+        };
+        let msgB = makeFLW(data);
+        msgB.nbOfLines = _nbOfLines;
+        msgB.addEventListener("flWindowHasResized", function(e) {this.inncnt.style.fontSize = "calc(" + this.body.offsetHeight + "px / " + this.nbOfLines + " * 0.7)"});
+        msgB.backdrop.style.zIndex = "1001";
+
+        // inner container
+        msgB.inncnt = $$$(msgB.body, "div", "msgb-container");
+        msgB.inncnt.root = msgB;
+        msgB.inncnt.style.fontSize = "calc(" + msgB.body.offsetHeight + "px / " + msgB.nbOfLines + " * 0.7)";
+
+        // message
+        msgB.msg = $$$(msgB.inncnt, "div");
+        msgB.msg.root = msgB;
+        msgB.msg.style.textAlign = "left";
+        msgB.msg.innerHTML = _msg;
+
+        // ok button, if any
+        if (_okButton) {
+            msgB.okb = $$$(msgB.inncnt, "div", "msgb-okbutton");
+            msgB.okb.root = msgB;
+            msgB.okb.innerHTML = _okButton;
+            msgB.okb.onclick = function() {
+                let event = new CustomEvent("msgBoxOkClicked", { "detail": "Ok button clicked" });
+                this.root.dispatchEvent(event);
+            };
+        }
+
+        msgB.addEventListener("flWindowClosed", function(e) {this.remove()});
+        return msgB;
+    }
+
+    /*
+      inputs:
+        dt._root            : anchor element of flw
+        dt._title           : flw title and also id
+        dt._blocking        : blocking true or false
+        dt._scaled          : scaled true or false for resizing
+        dt._headercolor     : header color
+        dt._height          : numeric height (will be vh)
+        dt._width           : numeric width (will be vw)
+        dt._vrows           : number of visible rows
+        dt._cols            : number of columns
+        dt._licon           : text icon for left corner
+        dt._fontRatio       : font size ratio
+      properties:
+        mytitle
+        blocking
+        scaled
+        headercolor
+        height
+        width
+        vrows
+        cols
+        liconTxt
+        headerHeight
+        fontRatio
+      methods:
+        addCell             : add cell to grid at coordinates
+      objects: (each object has "root" property pointing to root)
+        root                : floating Window
+          root.backdrop
+          root.window
+              root.header
+                  root.licon
+                  root.htitle
+                  root.close
+              root.body
+                  root.grid
+              root.footer
+      events:
+        flWindowHasResized
+        flWindowLeftIcon
+        flWindowClosed
+    */
+    function flGrid(dt) {
+        let flg = makeFLW(dt);
+
+        // add grid
+        flg.grid = $$$(flg.body, "div", "flg-grid");
+        flg.grid.root = flg;
+        flg.fontRatio = dt._fontRatio;
+        flg.vrows = dt._vrows;
+        flg.cols = dt._cols;
+
+        // init grid
+        flg.grid.style.gridTemplateColumns = "repeat(" + flg.cols + ", calc(100%/" + flg.cols + "))";
+        if (flg.scaled) {
+            flg.grid.style.gridAutoRows = "calc(100% / " + flg.vrows + ")";
+            flg.grid.style.fontSize = "calc(" + flg.body.offsetHeight + "px / " + flg.vrows + " * " + flg.fontRatio + ")";
+        }
+        else {
+            flg.grid.style.gridAutoRows = "calc(" + flg.height + "vh / " + flg.vrows + ")";
+            flg.grid.style.fontSize = "calc(" + flg.height + "vh / " + flg.vrows + " * " + flg.fontRatio + ")";
+        }
+
+        // on flw resize
+        flg.addEventListener("flWindowHasResized", function(e) {
+            if (this.scaled) {
+                this.grid.style.gridAutoRows = "calc(100% / " + this.vrows + ")";
+                this.grid.style.fontSize = "calc(" + this.body.offsetHeight + "px / " + this.vrows + " * " + this.fontRatio + ")";
+            }
+        });
+
+        // add cell method
+        flg.addCell = function (x1, y1, x2 = x1+1, y2 = y1+1) {
+            let cell = $$$(flg.grid, "div", "flg-cell");
+            cell.style.gridRow = y1 + " / " + y2;
+            cell.style.gridColumn = x1 + " / " + x2;
+            return cell;
+        }
+
+        return flg;
+    }
+
+</script>

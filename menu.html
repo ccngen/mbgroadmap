@@ -1,0 +1,104 @@
+<style>
+    .menu-invisible {
+        position: fixed;
+        display: none;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: transparent;
+        z-index: 1;
+    }
+    .menu-wnd {
+        display: none;
+        position: absolute;
+        background-color: white;
+        color: var(--theme-color-fg2);
+        box-shadow: 0.5vh 0.5vh 1vh rgba(0, 0, 0, 0.3), -0.3vh -0.3vh 0.8vh rgba(0, 0, 0, 0.2);
+        flex-direction: column;
+        justify-content: space-around;
+    }
+    .menu-itm {
+        padding: 0.6em 1.4em 0.6em 1.2em;
+        cursor: pointer;
+        font-size: 1.2em;
+    }
+    .menu-itm:hover {
+        background-color: var(--theme-color-accent);
+        color: white;
+    }
+    .menu-dis {
+        pointer-events: none;
+        color: #ccc;
+    }
+    .submenu {
+        display: none;
+        background: #eee;
+    }
+    .submenu .menu-itm{
+        padding-left: 2em;
+    }
+</style>
+
+<html>
+<!--fleddat-cellH<div class="menu-invisible" id="menu-bg" onclick='if (this.callingCell.classList.contains("master-empty")) this.callingCell.style.backgroundColor=""; this.style.display="none";'>-->
+<div class="menu-invisible" id="menu-bg" onclick='menuClickEvent(this)'>
+    <div class="menu-wnd" id="ctx-menu1">
+        <div class="menu-itm" id="menu-itm3" onclick="menuClick(this, event)">Toggle Marketing/Status/Dev view</div>
+        <div class="menu-itm" id="menu-itm1" onclick="menuClick(this, event)">Create Project</div>
+        <!--<div class="menu-itm" id="menu-itm2" onclick="menuClick(this, event)">Export TMCs to Sheets</div>-->
+        <div>
+            <div class="menu-itm submenu-visible"> MOTOROLA  > </div>
+            <div class="submenu">
+                <div class="menu-itm" id="menu-itm4" onclick="menuClick(this, event)">ROW Roadmap</div>
+                <div class="menu-itm" id="menu-itm5" onclick="menuClick(this, event)">NA Roadmap</div>
+                <div class="menu-itm" id="menu-itm6" onclick="menuClick(this, event)">JP Roadmap</div>
+            </div>
+        </div>
+        <div>
+            <div class="menu-itm submenu-visible"> COMPETITORS  > </div>
+            <div class="submenu">
+                <div class="menu-itm" id="menu-itm95" onclick="menuClick(this, event)">Samsung Roadmap</div>
+                <div class="menu-itm" id="menu-itm90" onclick="menuClick(this, event)">Xiaomi Roadmap</div>
+                <div class="menu-itm" id="menu-itm91" onclick="menuClick(this, event)">Oppo Roadmap</div>
+                <div class="menu-itm" id="menu-itm92" onclick="menuClick(this, event)">Vivo Roadmap</div>
+                <div class="menu-itm" id="menu-itm93" onclick="menuClick(this, event)">Realme Roadmap</div>
+                <div class="menu-itm" id="menu-itm94" onclick="menuClick(this, event)">Honor Roadmap</div>
+            </div>
+        </div>
+        <div class="menu-itm" id="menu-itm7" onclick="menuClick(this, event)">Update</div>
+        <div class="menu-itm" id="menuItemUserContorle" onclick="showUserManage()">Manage Users</div>
+        <div class="menu-itm" id="menu-itm8" onclick="menuClick(this, event)">About</div>
+    </div>
+    <div class="menu-wnd" id="ctx-menu2">
+        <div class="menu-itm" id="menu-itm10" onclick="menuClick(this, event)">TMC Details</div>
+        <div class="menu-itm" id="menu-itm11" onclick="menuClick(this, event)">Product Specs</div>
+        <div class="menu-itm" id="menu-itm12" onclick="menuClick(this, event)">Schedule</div>
+        <div class="menu-itm" id="menu-itm13" onclick="menuClick(this, event)">Launch Plan</div>
+        <div class="menu-itm" id="menu-itm14" onclick="menuClick(this, event)">Business Case</div>
+        <div class="menu-itm" id="menu-itm15" onclick="menuClick(this, event)">Design</div>
+        <div class="menu-itm" id="menu-itm16" onclick="menuClick(this, event)">Product Deck</div>
+        <div class="menu-itm" id="menu-itm17" onclick="menuClick(this, event)">Edit Specs</div>
+        <div class="menu-itm" id="menu-itm18" onclick="menuClick(this, event)">Delete Project</div>
+        <div class="menu-itm" id="menu-itm19" onclick="menuClick(this, event)">Edit Project</div>
+    </div>
+</div>
+</html>
+
+<script>
+    document.querySelectorAll('.submenu-visible').forEach(el => {
+        el.addEventListener('click', function(e) {
+            e.stopPropagation()
+            const nextEl = e.target.nextElementSibling
+            nextEl.style.display = nextEl.style.display === 'block' ? 'none' : 'block'
+        })
+    })
+    function menuClickEvent(_this) {
+        if (_this.callingCell.classList.contains("master-empty"))
+            _this.callingCell.style.backgroundColor="";
+        _this.style.display="none";
+        document.querySelectorAll('.submenu').forEach((el) => {
+            el.style.display = 'none'
+        })
+    }
+</script>

@@ -1,0 +1,114 @@
+<style>
+    .fllaunch-grid::-webkit-scrollbar {
+        display: none;
+    }
+</style>
+
+<script>
+    function flLaunch(org) {
+        pname = org.pname;
+        scname = org.scname;
+        if (scname=="") scname = pname;
+        let fdata = {
+            _root: document.body,
+            _title: pname + " Launch Plan",
+            _blocking: false,
+            _scaled: false,
+            _headercolor: "var(--theme-color-system)",
+            _height: 34,
+            _width: 14,
+            _vrows: 19,
+            _cols: 3,
+            _licon: null,
+            _fontRatio: 0.5
+        };
+
+        // if this window is already opened, send a click to the header of it to make it come forward
+        if ($(pname + " Launch Plan")) {
+            $(pname + " Launch Plan").header.dispatchEvent(new Event('click'));
+            return;
+        }
+
+        // get product data
+        $("spinner").style.display = "inline"; // start spinner
+        google.script.run.withSuccessHandler(ret => {
+            $("spinner").style.display = "none"; // stop spinner
+            if (ret == null) return;
+            res = JSON.parse(ret);
+
+            // create window
+            let flw = flGrid(fdata);
+            flw.style.backgroundColor = "white";
+            flw.addEventListener("flWindowClosed", function(e) {
+                this.remove();
+            });
+            flw.grid.parentNode.style.backgroundColor = "white";
+            flw.grid.style.width = "90%";
+            flw.grid.style.margin = "auto";
+            flw.grid.classList.add("fllaunch-grid");
+            flw.body.style.overflowY = "hidden";
+            flw.grid.style.overflowY = "auto";
+
+            // create top labels
+            for ([i, itm] of ["", "Plan", "CWV"].entries())
+            {
+                let tmp = flw.addCell(i+1, 1);
+                tmp.innerHTML = itm;
+                tmp.style.textAlign = "center";
+                tmp.style.backgroundColor = "white";
+                tmp.style.top = "0";
+                tmp.style.position = "sticky";
+            }
+
+            // create data
+            for (i=23; i<=82; i++) {
+                // left label
+                label = flw.addCell(1, i-21);
+                label.innerHTML = res[1][i];
+                label.style.backgroundColor = "var(--theme-color-bg)";
+                if ((i-22)%3 == 0) label.style.borderBottom = "0.4em solid white";
+                else label.style.borderBottom = "none";
+
+                // plan
+                plancell = flw.addCell(2, i-21);
+                plan = new Date(res[2][i]);
+                if (isNaN(plan.getTime())) {
+                    plancell.innerHTML = "";
+                    plancell.style.backgroundColor = "var(--theme-color-bg)";
+                }
+                else {
+                    plancell.innerHTML = (plan.getUTCMonth()+1) + "/" + plan.getUTCDate() + "/" + plan.getUTCFullYear();
+                    plancell.style.textAlign = "center";
+                    plancell.style.backgroundColor = "#99ccff";
+                    plancell.title = "";
+                }
+                if ((i-22)%3 == 0) plancell.style.borderBottom = "0.4em solid white";
+                else plancell.style.borderBottom = "none";
+
+                // cwv
+                cwvcell = flw.addCell(3, i-21);
+                cwv = new Date(res[3][i]);
+                if (isNaN(cwv.getTime())) {
+                    cwvcell.innerHTML = "";
+                    cwvcell.style.backgroundColor = "var(--theme-color-bg)";
+                }
+                else {
+                    cwvcell.innerHTML = (cwv.getUTCMonth()+1) + "/" + cwv.getUTCDate() + "/" + cwv.getUTCFullYear();
+                    cwvcell.style.textAlign = "center";
+                    cwvcell.style.backgroundColor = "#99ccff";
+                    cwvcell.title = res[4][i];
+                }
+                if ((i-22)%3 == 0) cwvcell.style.borderBottom = "0.4em solid white";
+                else cwvcell.style.borderBottom = "none";
+
+                // assess gap cwv vs target and color code accordingly
+                delta = Math.floor((Date.UTC(cwv.getUTCFullYear(), cwv.getUTCMonth(), cwv.getUTCDate())-Date.UTC(plan.getUTCFullYear(), plan.getUTCMonth(), plan.getUTCDate()))/(1000 * 60 * 60 * 24));
+                if (delta > 2) cwvcell.style.backgroundColor = "#ff9999";
+                if ((delta>0) && (delta<=2)) cwvcell.style.backgroundColor = "#ffff99";
+                if (delta<=0) cwvcell.style.backgroundColor = "#99ff99";
+
+            }
+        }).getProductSchedule(scname);
+
+    }
+</script>

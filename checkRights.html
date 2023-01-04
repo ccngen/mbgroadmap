@@ -1,0 +1,58 @@
+<script>
+    function checkRights() {
+        if (((Urights >> 0) & 1) != 1) return false;
+        //$("menu-itm2").classList.add("menu-dis"); // to be removed when available
+
+        // Schedule, Launch Plan
+        if (((Urights >> 1) & 1) != 1) {
+            $("menu-itm12").classList.add("menu-dis");
+            $("menu-itm13").classList.add("menu-dis");
+        }
+
+        // Design
+        if (((Urights >> 2) & 1) != 1) {
+            $("menu-itm15").classList.add("menu-dis");
+        }
+
+        // Specs
+        if (((Urights >> 3) & 1) != 1) {
+            $("menu-itm11").classList.add("menu-dis");
+        }
+
+        // Business Case
+        if (((Urights >> 4) & 1) != 1) {
+            $("menu-itm14").classList.add("menu-dis");
+        }
+
+        // TMC (and status)
+        if (((Urights >> 5) & 1) != 1) {
+            $("menu-itm10").classList.add("menu-dis");
+            $("menu-itm3").classList.add("menu-dis");
+            keySOk = false;
+        }
+
+        // TMC Edit
+        if (((Urights >> 6) & 1) != 1) {
+            $("menu-itm17").classList.add("menu-dis");
+        }
+
+        // TMC Export, Delete Product
+        if (((Urights >> 7) & 1) != 1) {
+            //$("menu-itm2").classList.add("menu-dis");
+            //$("menu-itm18").classList.add("menu-dis");
+            $("menuItemUserContorle").remove();
+        }
+
+        // Create Project Edit Project
+        if (((Urights >> 8) & 1) != 1) {
+            $("menu-itm1").classList.add("menu-dis");
+            $("menu-itm18").classList.add("menu-dis");
+            $("menu-itm19").classList.add("menu-dis");
+        }
+
+        // Sell-in
+        if ((Urights & 0b00001100) != 0b00001100) $("menu-itm16").classList.add("menu-dis");
+
+        return true;
+    }
+</script>

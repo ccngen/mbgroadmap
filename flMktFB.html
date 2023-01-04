@@ -1,0 +1,42 @@
+<style>
+</style>
+
+<script>
+    function flMktFB(rpp) {
+        // if this window is already opened, send a click to the header of it to make it come forward
+        if ($("Market Feedback " + rpp)) {
+            $("Market Feedback " + rpp).header.dispatchEvent(new Event('click'));
+            return;
+        }
+
+        // get product data
+        $("spinner").style.display = "inline"; // start spinner
+        google.script.run.withSuccessHandler(function (ret, rpp) {
+            $("spinner").style.display = "none"; // stop spinner
+            if (!ret) return;
+            if (ret=="") return;
+
+            // create window
+            let fdata = {
+                _root: document.body,
+                _title: "Market Feedback " + rpp,
+                _blocking: false,
+                _scaled: false,
+                _headercolor: "var(--theme-color-system)",
+                _height: 20,
+                _width: 20,
+                _licon: null,
+            };
+            let flw = makeFLW(fdata);
+            flw.addEventListener("flWindowClosed", function(e) {
+                this.remove();
+            });
+            flw.body.style.fontSize = "1.5em";
+            flw.body.style.boxSizing = "border-box";
+            flw.body.style.padding = "0.5em";
+            flw.body.innerHTML = ret.replace(/\u000A/ig,"<br>");
+
+        }).withUserObject(rpp).getMktFeedback(rpp);
+    }
+</script>
+

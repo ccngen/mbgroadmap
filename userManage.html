@@ -1,0 +1,408 @@
+<style>
+    .user-dialog {
+        display: none;
+        width: 100vw;
+        height: 100vh;
+        justify-content: center;
+        align-items: center;
+        font-size: 14px;
+    }
+
+    .user-dialog .user-manage {
+        width: 50vw;
+        min-height: 500px;
+        min-width: 800px;
+        max-width: 1000px;
+        margin: 0 auto;
+        border-radius: 10px;
+        background: #ffffff;
+        z-index: 999;
+    }
+
+    .user-dialog .user-manage-title {
+        display: flex;
+        justify-content: space-between;
+        padding: 5px 20px;
+        border-bottom: 1px solid #ddd;
+        background: #eee;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+    }
+
+    .user-manage-title-content {
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .user-manage-model-close {
+        font-size: 18px;
+        display: inline-block;
+        padding: 5px;
+        cursor: pointer;
+    }
+
+    .user-manage-model-close:hover {
+        color: rgb(255, 192, 0);
+    }
+
+    .user-manage-list-wrapper {
+        max-height: 350px;
+        overflow: auto;
+    }
+
+    .user-manage-list-wrapper table {
+        width: 100%;
+        text-align: center;
+        border-collapse: collapse;
+    }
+
+    .user-manage-content {
+        padding: 15px 15px;
+        padding-top: 0;
+    }
+    .user-dialog .add-user-button{
+        margin-bottom: 5px;
+    }
+    .user-dialog .add-user-button,
+    .add-user-button-wrapper-submit button {
+        padding: 5px 10px;
+        color: #fff;
+        background-color: #1890ff;
+        border-color: #1890ff;
+        cursor: pointer;
+        border-radius: 4px;
+    }
+
+    .add-user-button-wrapper {
+        text-align: right;
+        padding-right: 20px;
+    }
+
+    .user-manage-list-wrapper table td,
+    .user-manage-list-wrapper table th {
+        padding: 10px 8px;
+        border: none;
+    }
+
+    .user-manage-list-wrapper table td {
+        padding: 8px;
+    }
+
+    .user-manage-list-wrapper table td input[type=checkbox] {
+        transform: translateY(2px);
+    }
+
+    .user-manage-list-wrapper table thead {
+        border-bottom: 1px solid #e8e8e8;
+        color: rgba(0, 0, 0, .85);
+        font-weight: 500;
+        background: #fafafa;
+        transition: background .3s ease;
+    }
+
+    .user-manage-list-wrapper table tbody {
+        font-size: 14px;
+    }
+
+    .user-manage-list-wrapper table tbody {}
+
+    .user-manage-list-wrapper table tbody tr td:first-child {
+        max-width: 222px;
+        word-break: break-word;
+    }
+
+    .user-manage-list-wrapper table tbody tr td .user-manage-action {
+        color: #1890ff;
+        cursor: pointer;
+        padding: 0 3px;
+    }
+
+    .user-manage-list-wrapper table tbody tr td .user-manage-action.save {
+        color: red;
+    }
+
+    .user-manage-list-wrapper table tbody tr td label {
+        margin-right: 8px;
+        margin-bottom: 5px;
+        display: inline-block;
+    }
+
+    .add-user-required span::before {
+        content: '*';
+        color: red;
+        font-size: 16px;
+        position: relative;
+        top: 2px;
+        margin-right: 2px;
+    }
+
+    .add-input-wrapper div.email-name-input {
+        display: flex;
+    }
+
+    .add-input-wrapper div.email-name-input label {
+        flex-grow: 1;
+        display: flex;
+        align-items: center;
+        padding: 0 10px;
+    }
+
+    .add-input-wrapper div.email-name-input label span {
+        display: inline-block;
+        width: 80px;
+        text-align: right;
+        padding-right: 18px;
+        box-sizing: border-box;
+    }
+
+    .add-input-wrapper div.email-name-input label input {
+        height: 32px;
+        box-sizing: border-box;
+        flex-grow: 1;
+        border: 1px solid #999;
+        border-radius: 5px;
+        padding: 0 15px;
+    }
+
+    .add-input-wrapper .user-permission-wrapper {
+        display: flex;
+        align-items: center;
+    }
+
+    .add-input-wrapper .user-permission-wrapper span {
+        width: 85px;
+    }
+
+    .add-input-wrapper .user-permission-wrapper input[type=checkbox] {
+        position: relative;
+        top: 2px;
+        margin-right: 5px;
+    }
+
+    .add-input-wrapper .user-permission-wrapper label {
+        margin-right: 8px;
+    }
+
+    .add-user-button-wrapper-submit {
+        text-align: center;
+    }
+
+    .add-user-button-wrapper-submit button {
+        margin-right: 15px;
+    }
+
+    .user-manage .add-input-wrapper {
+        padding: 10px;
+        border: 1px solid #ddd;
+        background: #fafafa;
+        margin-bottom: 10px;
+        display: none;
+    }
+
+    .user-dialog .bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        background: rgba(255,255,255,0.2);
+        width: 100vw;
+        height: 100vh;
+        z-index: 777;
+    }
+    .user-dialog .loading{
+        color:  #1890ff;
+        text-align: center;
+    }
+    .user-manage-list-wrapper table tbody tr:nth-child(even) {
+        background: #fafafa;
+    }
+</style>
+
+<html>
+<div id="userManageDialog" class="user-dialog">
+    <div id="userManageBg" onclick="hideUserManage()" class="bg"></div>
+    <div class="user-manage">
+        <div class="user-manage-title">
+            <span class="user-manage-title-content">Manage Users</span>
+            <span class="user-manage-model-close" onclick="hideUserManage()">X</span>
+        </div>
+        <div class="user-manage-content">
+            <p class="add-user-button-wrapper"><button class="add-user-button" onclick="addUserShow()"> + New Users</button></p>
+            <div class="add-input-wrapper">
+                <div class="email-name-input">
+                    <label class="add-user-required">
+                        <span>Moto</span> <input id="addUserEmail" type="text">
+                    </label>
+                    <label class="add-user-required">
+                        <span>Username</span> <input id="addUserName" type="text">
+                    </label>
+                </div>
+                <div id="addUserPermission" class="user-permission-wrapper">
+                    <p>
+                        <label><input type="checkbox">Overview</label>
+                        <label><input type="checkbox">View Schedules</label>
+                        <label><input type="checkbox">View ID</label>
+                        <label><input type="checkbox">View Specs</label>
+                        <label><input type="checkbox">View Business Case</label>
+                        <label><input type="checkbox">View TMC</label>
+                        <label><input type="checkbox">Edit TMC</label>
+                        <label><input type="checkbox">Manage Users</label>
+                        <label><input type="checkbox">Manage Projects</label>
+                    </p>
+                </div>
+                <div class="add-user-button-wrapper-submit">
+                    <button onclick="addNewUserToSheet(this)">Confirm</button>
+                    <button onclick="addUserHide()">Cancel</button>
+                </div>
+            </div>
+            <div class="user-manage-list-wrapper">
+                <div class="loading">Loading...</div>
+                <table border="0">
+                    <thead>
+                    <tr>
+                        <th>Moto</th>
+                        <th>Username</th>
+                        <th>Rights</th>
+                        <th>Edit/Remove </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+</html>
+
+<script>
+    function renderUserItem (email, data) {
+        const permissionStr = data[1].replace('0b', '')
+        return `
+              <td>${email}</td>
+              <td>${data[0]}</td>
+              <td style="text-align: left;">
+                <label><input type="checkbox" ${permissionStr[8] == 1 && 'checked'} disabled>Overview</label>
+                <label><input type="checkbox" ${permissionStr[7] == 1 && 'checked'} disabled>View Schedules</label>
+                <label><input type="checkbox" ${permissionStr[6] == 1 && 'checked'} disabled>View ID</label>
+                <label><input type="checkbox" ${permissionStr[5] == 1 && 'checked'} disabled>View Specs</label> <br>
+                <label><input type="checkbox" ${permissionStr[4] == 1 && 'checked'} disabled>View Business Case</label>
+                <label><input type="checkbox" ${permissionStr[3] == 1 && 'checked'} disabled>View TMC</label>
+                <label><input type="checkbox" ${permissionStr[2] == 1 && 'checked'} disabled>Edit TMC</label>
+                <label><input type="checkbox" ${permissionStr[1] == 1 && 'checked'} disabled>Manage Users</label>
+                <label><input type="checkbox" ${permissionStr[0] == 1 && 'checked'} disabled>Manage Projects</label>
+              <td>
+                <span class="user-manage-action" style="margin-bottom: 5px;" onclick="deleteConfirm('${email}')">Remove</span> <br>
+                <span class="user-manage-action" onclick="editUserPermission('${email}')">Edit</span>
+              </td>
+            `
+    }
+
+    function renderUserManageList () {
+        document.querySelector('.loading').style.display = 'block'
+        google.script.run.withSuccessHandler(function (res) {
+            const htmls = []
+            Object.entries(res).forEach(function ([key, value]) {
+                htmls.push(`<tr>${renderUserItem(key, value)}</tr>`)
+            })
+            document.querySelector('.user-manage-list-wrapper table tbody').innerHTML = htmls.join('')
+            document.querySelector('.loading').style.display = 'none'
+        }).getUserList()
+    }
+    function showUserManage() {
+        if (document.querySelector('#userManageDialog')) {
+            renderUserManageList()
+            document.querySelector('#userManageDialog').style.display = 'flex'
+        }
+    }
+    function hideUserManage() {
+        if (document.querySelector('#userManageDialog')) {
+            document.querySelector('#userManageDialog').style.display = 'none'
+        }
+    }
+    function addUserShow () {
+        document.querySelector('#userManageDialog .add-input-wrapper').style.display = 'block'
+    }
+    function addUserHide () {
+        document.querySelector('#userManageDialog .add-input-wrapper').style.display = 'none'
+    }
+    function editUserPermission (email) {
+        const edit = event.target
+        const parent = edit.parentElement.parentElement
+        if (edit.classList.contains('save')) {
+            const permissionStr = getPermissionStr(parent.querySelectorAll('input[type=checkbox]'));
+            console.log(permissionStr, 'xxx')
+            google.script.run.withSuccessHandler(function (res) {
+                if (res.code) {
+                    edit.textContent = 'Edit'
+                    // 获取所有的 然后生成一个8位二进制
+                    edit.classList.remove('save')
+                    parent.querySelectorAll('input[type=checkbox]').forEach(el => el.disabled = true)
+                    window.alert(res.message)
+                } else {
+                    window.alert(res.message)
+                }
+            }).updateUserPermission(email, permissionStr)
+        } else {
+            edit.textContent = 'Save'
+            edit.classList.add('save')
+            parent.querySelectorAll('input[type=checkbox]').forEach(el => el.removeAttribute('disabled'))
+        }
+    }
+
+    function deleteConfirm(email) {
+        const flag = window.confirm(`Confirm remove ${email}？`)
+        const row = event.target
+        const parent = row.parentElement.parentElement
+        if (flag) {
+            google.script.run.withSuccessHandler(function (res) {
+                if(res.code) {
+                    parent.remove()
+                }
+                window.alert(res.message)
+            }).deleteUser(email)
+        }
+    }
+
+    function getPermissionStr (nodeList) {
+        let str = ''
+        nodeList.forEach(item => str = (item.checked ? '1' : '0') + str)
+        return str
+    }
+
+    function addNewUserToSheet(e) {
+        const event = e
+        const lock = 'submit'
+        if (event.classList.contains(lock)) {
+            return;
+        }
+        event.classList.add(lock)
+        const addUserEmail = document.querySelector('#addUserEmail')
+        const addUserName = document.querySelector('#addUserName')
+        const addUserPermissionList = document.querySelectorAll('#addUserPermission [type=checkbox]')
+        if (addUserEmail.value.length === 0 || addUserName.value.length === 0) {
+            window.alert('Email and name required')
+            event.classList.remove(lock)
+        } else {
+            google.script.run.withSuccessHandler(function (res) {
+                if(res.code) {
+                    const html = renderUserItem(addUserEmail.value, [addUserName.value, getPermissionStr(addUserPermissionList)])
+                    const parent = document.querySelector('.user-manage-list-wrapper table tbody')
+                    parent.insertBefore(document.createElement('tr'), parent.querySelector('tr'))
+                    parent.querySelector('tr').innerHTML = html
+                    addUserEmail.value = ''
+                    addUserName.value = ''
+                    addUserPermissionList.forEach(el => {
+                        el.checked = false
+                    })
+                    window.alert('Added Successfully')
+                } else {
+                    window.alert(res.message)
+                }
+                event.classList.remove(lock)
+            }).addNewUser1(addUserEmail.value, addUserName.value, getPermissionStr(addUserPermissionList))
+        }
+    }
+</script>

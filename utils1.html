@@ -1,0 +1,39 @@
+<script>
+    // returns the 1st line index of key in arg table
+    function myvLookUp(arg, key) {
+        return arg.findIndex(x => myEqual(x[0], key));
+    }
+
+    // case insensitive compare, any type
+    function myEqual(a, b) {
+        return typeof a == 'string' && typeof b == 'string'
+            ? a.localeCompare(b, undefined, { sensitivity: 'base' }) == 0
+            : a == b;
+    }
+
+    // extract column col of Array
+    Array.prototype.column = function (col) {
+        return this.map(x => x[col]);
+    }
+
+    Array.prototype.getRange = function (x1, y1, x2, y2) {
+        hcut = this.slice(y1, y2-1);
+        vcut = hcut.map(row => row.slice(x1, x2-1));
+        return vcut;
+    }
+
+    // count how many times item in 1d array
+    function myCount(arr, item) {
+        return arr.filter(x => myEqual(x, item)).length;
+    }
+
+    // sum of items inside a 1d array
+    function mySum(arr) {
+        const numb = x => isNaN(parseFloat(x)) ? 0 : parseFloat(x);
+        res = arr.reduce((a, b) => numb(a) + numb(b), 0);
+        return isNaN(res) ? 0 : res;
+    }
+
+</script>
+
+

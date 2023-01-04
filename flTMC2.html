@@ -1,0 +1,136 @@
+<style>
+    .fltmc-c1 {
+        text-align: left;
+        margin: 0.05em 0;
+        padding-left: 0.5em;
+        font-size: 1em;
+    }
+    .fltmc-c1b {
+        text-align: right;
+        font-style: italic;
+        margin: 0.05em 0;
+        font-size: 1em;
+    }
+    .fltmc-c2 {
+        text-align: right;
+        margin: 0.05em 0;
+        font-size: 1em;
+    }
+    .fltmc-c3 {
+        text-align: left;
+        margin: 0.05em 0;
+        padding-left: 0.5em;
+        font-size: 1em;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+    }
+    .fltmc-l01,
+    .fltmc-l02,
+    .fltmc-l16,
+    .fltmc-l17,
+    .fltmc-l18,
+    .fltmc-l19,
+    .fltmc-l20,
+    .fltmc-l21,
+    .fltmc-l22,
+    .fltmc-l23,
+    .fltmc-l24,
+    .fltmc-l25,
+    .fltmc-l26
+    {
+        background-color: var(--theme-color-table);
+    }
+    .fltmc-l03 {
+        background-color: white;
+    }
+    .fltmc-l27 {
+        background-color: white;
+        font-weight: bold;
+    }
+    .fltmc-cell-hover {
+        background-color: var(--theme-color-accent);
+        color: white;
+    }
+</style>
+
+<script>
+    function flTMCdetails(org) {
+        pname = org.pname;
+
+        // if this window is already opened, send a click to the header of it to make it come forward
+        if ($(pname + " TMC")) {
+            $(pname + " TMC").header.dispatchEvent(new Event('click'));
+            return;
+        }
+
+        // get product data
+        $("spinner").style.display = "inline"; // start spinner
+        google.script.run.withSuccessHandler(ret => {
+            $("spinner").style.display = "none"; // stop spinner
+            if (ret == null) return;
+            res = JSON.parse(ret.prod);
+
+            // create window
+            let fdata = {
+                _root: document.body,
+                _title: pname + " TMC",
+                _blocking: false,
+                _scaled: true,
+                _headercolor: "var(--theme-color-system)",
+                _height: 38.4,
+                _width: 15,
+                _vrows: 27,
+                _cols: 8,
+                _licon: null,
+                _fontRatio: 0.6
+            };
+            let flw = flGrid(fdata);
+            flw.classList.add("TMCflw");
+            flw.grid.style.backgroundColor = "white";
+            flw.addEventListener("flWindowClosed", function(e) {
+                this.remove();
+            });
+            flw.addTMCCell = function(_class, _value, _x1, _y1, _x2 = _x1+1, _y2 = _y1+1) {
+                let tmp = this.addCell(_x1, _y1, _x2, _y2);
+                tmp.line = ("0"+_y1).slice(-2);
+                tmp.classList.add("fltmc-l" + tmp.line);
+                tmp.classList.add(_class);
+                tmp.innerHTML = _value;
+                tmp.onmouseover = tmp.onmouseout = function() {
+                    let query = 'div[class*="fltmc-l' + this.line + '"]';
+                    let elems = document.querySelectorAll(query);
+                    for (el of elems) el.classList.toggle("fltmc-cell-hover");
+                };
+                return tmp;
+            }
+
+            // adding labels
+            for ([i,lb] of labels.entries()) {
+                let cell = flw.addTMCCell("fltmc-l" + (i+1), lb, 1, i+1, 3, i+1);
+                if (i>=2 && i<=14) cell.classList.add("fltmc-c1b");
+                else cell.classList.add("fltmc-c1");
+            }
+
+            // adding data in
+            bu = 0;
+            total = 0;
+            let nondmv = flw.addTMCCell("fltmc-c2", parseFloat(res[_nondm]).toFixed(2), 3, 1);
+            flw.addTMCCell("fltmc-c3", "", 4, 1, 9, 1);
+            for (i=2; i<26; i++) {
+                if (i<15) bu += parseFloat(res[_nondm + 2 * i - 2]);
+                else total += parseFloat(res[_nondm + 2 * i - 2]);
+                flw.addTMCCell("fltmc-c2", parseFloat(res[_nondm + 2 * i - 2]).toFixed(2), 3, i+1);
+                flw.addTMCCell("fltmc-c3", res[_nondm + 2 * i - 3], 4, i+1, 9, i+1);
+            }
+            total += bu + parseFloat(nondmv.innerHTML);
+
+            // adding totals
+            flw.addTMCCell("fltmc-c2", bu.toFixed(2), 3, 2);
+            flw.addTMCCell("fltmc-c3", "", 4, 2, 9, 2);
+            flw.addTMCCell("fltmc-c2", total.toFixed(2), 3, 27);
+            flw.addTMCCell("fltmc-c3", "", 4, 27, 9, 27);
+        }).getProduct(pname);
+    }
+</script>
+

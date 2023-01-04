@@ -1,0 +1,155 @@
+<style>
+    .fledprj-label {
+        box-sizing: border-box;
+        margin: 0.3em 0.5em;
+        text-align: left;
+    }
+    .fledprj-input {
+        box-sizing: border-box;
+        flex-direction: row;
+        background-color: white;
+        text-align: left;
+        padding-left: 0.3em;
+        margin: 0.3em 0.5em;
+        resize: none;
+    }
+    .fledprj-submit {
+        box-sizing: border-box;
+        background-color: var(--theme-color-fg2);
+        text-align: center;
+        color: white;
+        cursor: pointer;
+        margin: 0.3em 0.5em;
+        transition-duration: 0.4s;
+    }
+    .fledprj-submit:hover {
+        background-color: var(--theme-color-system);
+    }
+</style>
+
+<script>
+    function flEditPrj(org) {
+        createLabel = function(_base, _x1, _y1, _lbl) {
+            let tmp = _base.addCell(_x1, _y1);
+            tmp.classList.add("fladd-label");
+            tmp.innerHTML = _lbl;
+            return tmp;
+        }
+
+        createDropDown = function(_base, _options, _x1, _y1, _x2 = _x1+1, _y2 = _y1+1) {
+            var select = $$$(_base.grid, "select", "flg-cell");
+            select.style.gridRow = _y1 + " / " + (_y1+1);
+            select.style.gridColumn = _x1 + " / " + (_x1+2);
+            select.classList.add("fladd-input");
+            for (opt of _options) {
+                option = document.createElement("option");
+                option.value = option.text = opt;
+                select.add(option);
+            }
+            return select;
+        }
+
+        createInput = function(_base, _type, _x1, _y1) {
+            let input = $$$(_base.grid, "input", "flg-cell");
+            input.style.gridRow = _y1 + " / " + (_y1+1);
+            input.style.gridColumn = _x1 + " / " + (_x1+2);
+            input.type = _type;
+            input.classList.add("fladd-input");
+            input.title = "";
+            return input;
+        }
+
+        // save pname and cell position
+        olpname = org.pname;
+        olCurX = org.x;
+        olCurY = org.y;
+
+        // outline cell
+        org.style.outline = "5px solid rgba(255, 0, 0, 1)";
+
+        // load projects data
+        $("spinner").style.display = "inline"; // start spinner
+        google.script.run.withSuccessHandler(ret => {
+
+            $("spinner").style.display = "none"; // stop spinner
+
+            // check if data are loaded
+            if (!ret) return;
+            prj_data = JSON.parse(ret.prod);
+            console.log(prj_data, 'prj_data')
+            // create window
+            let fdata = {
+                _root: document.body,
+                _title: olpname + " Edit",
+                _blocking: true,
+                _scaled: true,
+                _headercolor: "var(--theme-color-system)",
+                _height: 25,
+                _width: 18,
+                _vrows: 9,
+                _cols: 3,
+                _licon: null,
+                _fontRatio: 0.4
+            };
+            let flw = flGrid(fdata);
+            flw.org = org;
+            flw.addEventListener("flWindowClosed", function(e) {
+                this.org.style.outline = "";
+                this.remove();
+            });
+            flw.grid.style.backgroundColor = "var(--theme-color-bg)";
+
+            // labels
+            for ([i,lb] of ["Project Name", "Family", "RPP", "OK2Ship", "Dev", "Network", "Commercial Name", "Default Color"].entries()) createLabel(flw, 1, i+1).innerHTML = lb;
+
+            // fields
+            prj_ok2s = new Date(prj_data[6]);
+            let f_pname = createInput(flw, "text", 2, 1); f_pname.value = prj_data[0];
+            //let f_geo = createDropDown(flw, ["ROW", "NA", "JP"], 2, 2); f_geo.value = prj_data[2];
+            let f_cat = createDropDown(flw, ["E", "G", "Premium", "Razr"], 2, 2); f_cat.value = prj_data[1];
+            //let f_rpp = createInput(flw, "number", 2, 3); f_rpp.value = prj_data[5];
+            let f_rpp = createDropDown(flw, pricetgs[geoView][0], 2, 3); f_rpp.value = prj_data[5];
+            let f_ok2s = createInput(flw, "date", 2, 4); f_ok2s.value = prj_ok2s.getUTCFullYear() + "-" + (prj_ok2s.getUTCMonth()+1).toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false}) + "-" + prj_ok2s.getUTCDate().toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false});
+            let f_dev = createDropDown(flw, ["", "OT", "TN", "HQ", "WT", "LC", "IH"], 2, 5); f_dev.value = prj_data[7];
+            let f_cname = createInput(flw, "text", 2, 7); f_cname.value = prj_data[8];
+            let f_net = createDropDown(flw, ["", "4G", "5G"], 2, 6); f_net.value = prj_data[_network];
+            let f_col = createDropDown(flw, defColors, 2, 8); f_col.value = prj_data[3];
+
+            // submit button
+            var subm = flw.addCell(1, 9, 4, 9);
+            subm.classList.add("fladd-submit");
+            subm.innerHTML = "Save";
+            subm.olpname = olpname;
+            subm.onclick = function(e) {
+                // control fields are valid
+                a_olpname = this.olpname;
+                a_pname = f_pname.value;
+                a_cname = f_cname.value;
+                a_geo = geoView; //f_geo.value;
+                a_col = f_col.value;
+                a_cat = f_cat.value;
+                a_rpp = f_rpp.value;
+                a_ok2s = f_ok2s.value;
+                a_dev = f_dev.value;
+                a_net = f_net.value;
+                if (a_pname=="" || a_cat=="" || a_geo=="" || a_rpp=="" || a_ok2s=="") {
+                    msgBox("Error", 8, 17, 4, "All fields are required");
+                    return;
+                }
+                // send to server
+                this.classList.add("spin-cursor");
+                google.script.run.withSuccessHandler(ret2 => {
+                    this.classList.remove("spin-cursor");
+                    if (!ret2) {
+                        msgBox("Error", 8, 17, 4, "Project already exists or name is invalid.");
+                        return;
+                    }
+                    this.parentNode.root.remove();
+                    doUpdate();
+                }).updateProductDetails(a_olpname, a_pname, a_cat, a_geo, a_col, "", a_rpp, a_ok2s, a_dev, a_net, a_cname);
+            };
+
+        }).getProduct(olpname);
+    }
+</script>
+

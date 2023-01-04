@@ -1,0 +1,91 @@
+<script>
+    function flBC(org) {
+        pname = org.pname;
+        bcurl = org.bcurl;
+        bcname = org.bcname;
+
+        let fdata = {
+            _root: document.body,
+            _title: pname + " Business Case",
+            _blocking: false,
+            _scaled: true,
+            _headercolor: "var(--theme-color-system)",
+            _height: 30,
+            _width: 22,
+            _vrows: 12,
+            _cols: 6,
+            _licon: "&#x25A6;",
+            _fontRatio: 0.4
+        };
+        const lines = ["NA", "Europe", "MEA", "LAS", "Brazil", "India", "CAP", "ANZ", "Japan", "PRC", "Total"];
+        const heads = ["", "CA (ku)", "R&D ($M)", "GP", "PCON ($M)", "ROI"];
+
+        // check if any bc name
+        if (bcname == "") {
+            msgBox("Warning", 8, 17, 4, "<br>Business Case Not Available.");
+            return;
+        }
+
+        // if this window is already opened, send a click to the header of it to make it come forward
+        if ($(pname + " Business Case")) {
+            $(pname + " Business Case").header.dispatchEvent(new Event('click'));
+            return;
+        }
+
+        // get product data
+        $("spinner").style.display = "inline"; // start spinner
+        google.script.run.withSuccessHandler(ret => {
+            $("spinner").style.display = "none"; // stop spinner
+            if (ret == null) {
+                msgBox("Warning", 8, 17, 4, "<br>Business Case Not Available.");
+                return;
+            }
+
+            // create window
+            let flw = flGrid(fdata);
+            flw.grid.style.margin = "0.5em 0.5em";
+            flw.grid.style.width = "calc(100% - 1em)";
+            flw.grid.style.height = "calc(100% - 1em)";
+            flw.bcurl = bcurl;
+            flw.addEventListener("flWindowClosed", function(e) {
+                this.remove();
+            });
+            flw.addEventListener("flWindowLeftIcon", function(e) {if (this.bcurl != "") window.open(this.bcurl, '_blank');});
+            flw.grid.parentNode.style.backgroundColor = "white";
+
+            // create labels
+            for ([i, itm] of lines.entries()) {
+                let tmp = flw.addCell(1, i+2);
+                tmp.innerHTML = itm;
+                tmp.style.backgroundColor = "#d1e0e0";
+                tmp.style.border = "0.05em solid white";
+                if (itm == "Total") tmp.style.fontWeight = "bold";
+            }
+            for ([j, itm] of heads.entries()) {
+                let tmp = flw.addCell(j+1, 1);
+                tmp.innerHTML = itm;
+                tmp.style.textAlign = "center";
+                tmp.style.border = "0.05em solid white";
+            }
+
+            // add data
+            for (i=1; i<=5; i++) {
+                for (j=1; j<=11; j++) {
+                    cnt = flw.addCell(i+1, j+1);
+                    if (i==1) cnt.innerHTML = (ret[i*13 + j] == "" || ret[i*13 + j] == 0) ? "" : (ret[i*13 + j] / 1000).toFixed(1);
+                    if (i==2) cnt.innerHTML = (ret[i*13 + j] == "" || ret[i*13 + j] == 0) ? "" : (ret[i*13 + j] / 1000000).toFixed(1);
+                    if (i==3) cnt.innerHTML = (ret[(i+3)*13 + j - 2] == "" || ret[(i+3)*13 + j - 2] == 0) ? "" : (ret[(i+3)*13 + j - 2] * 100).toFixed(2) + "%";
+                    if (i==4) cnt.innerHTML = (ret[i*13 + j] == "" || ret[i*13 + j] == 0) ? "" : (ret[i*13 + j] / 1000000).toFixed(1);
+                    if (i==5) cnt.innerHTML = (ret[i*13 + j - 1] == "" || ret[i*13 + j - 1] == 0) ? "" : (ret[i*13 + j - 1]).toFixed(1);
+                    cnt.style.backgroundColor = "#e5e5e5";
+                    cnt.style.textAlign = "right";
+                    cnt.style.paddingRight = "0.6em";
+                    if (j==11) cnt.style.fontWeight = "bold";
+                    cnt.style.border = "0.05em solid white";
+                }
+            }
+
+        }).getProductBC(bcname);
+
+    }
+</script>

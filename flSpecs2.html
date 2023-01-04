@@ -1,0 +1,299 @@
+<style>
+    .flspecs-c1 {
+        text-align: left;
+        padding-left: 0.5em;
+        color: black;
+        background-color: var(--theme-color-table);
+    }
+    .flspecs-c2 {
+        text-align: right;
+        font-style: italic;
+        padding-right: 0.5em;
+        color: #666;
+        background-color: var(--theme-color-table);
+    }
+    .flspecs-c3 {
+        text-align: left;
+        background-color: #eee;
+        padding-left: 0.5em;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+    }
+    .flspecs-cell-hover {
+        background-color: var(--theme-color-accent);
+        color: white;
+    }
+</style>
+
+<script>
+
+    function flSpecs(org) {
+        const specsData = [
+            {
+                label: 'Network',
+                children: [
+                    { label: 'Network', row: 'CN',},
+                    { label: 'RF', row: 'AI',}
+                ]
+            },
+            {
+                label: 'Launch',
+                children: [
+                    { label: 'OK2Ship', row: 'G'}
+                ]
+            },
+            {
+                label: 'Body',
+                children: [
+                    { label: 'Dimension', row: ['CO', 'CP', 'CQ'], unit: 'mm'},
+                    { label: 'Bezel', row: 'CR', unit: 'mm'},
+                    { label: 'Head', row: 'CS', unit: 'mm'},
+                    { label: 'Chin', row: 'CT', unit: 'mm'},
+                    { label: 'Weight', row: 'CU', unit: 'g'},
+                    { label: 'CMF', row: 'AG'},
+                ]
+            },
+            { label: 'Display', row: 'BO'},
+            { label: 'Platform', row: 'BG'},
+            { label: 'Memory', row: 'BI'},
+            {
+                label: 'Main Camera',
+                children: [
+                    { label: 'Cam #1', row: 'BQ'},
+                    { label: 'Cam #2', row: 'BS',},
+                    { label: 'Cam #3', row: 'BU',},
+                    { label: 'Cam #4', row: 'BW',},
+
+                ]
+            },
+            { label: 'Selfie Camera', row: 'BY'},
+            { label: 'Sound', row: 'AQ'},
+            {
+                label: 'Comms',
+                children: [
+                    { label: 'WLAN', row: 'AM'},
+                    { label: 'NFC', row: 'AK',},
+                    { label: 'DP', row: 'AO',},
+                ]
+            },
+            {
+                label: 'Biometrics',
+                children: [
+                    { label: 'FPS', row: 'CA',},
+                ]
+            },
+            { label: 'Sensors', row: 'BC'},
+            {
+                label: 'Power',
+                children: [
+                    { label: 'Battery', row: 'BM',},
+                    { label: 'Charging', row: 'AS',},
+                    { label: 'Wireless', row: 'AU',},
+                ]
+            },
+        ]
+        let totalRow = 0
+        specsData.forEach(item => {
+            totalRow += item.children ? item.children.length : 1
+        })
+        pname = org.pname;
+
+        // if this window is already opened, send a click to the header of it to make it come forward
+        if ($(pname + " Specs")) {
+            $(pname + " Specs").header.dispatchEvent(new Event('click'));
+            return;
+        }
+
+        // get product data
+        $("spinner").style.display = "inline"; // start spinner
+        google.script.run.withSuccessHandler(ret => {
+            $("spinner").style.display = "none"; // stop spinner
+            if (ret == null) return;
+            res = JSON.parse(ret.prod);
+
+            // create window
+            let fdata = {
+                _root: document.body,
+                _title: pname + " Specs",
+                _blocking: false,
+                _scaled: true,
+                _headercolor: "var(--theme-color-system)",
+                _height: 60,
+                _width: 25,
+                _vrows: totalRow,
+                _cols: 6,
+                _licon: null,
+                _fontRatio: 0.5
+            };
+            let flw = flGrid(fdata);
+            flw.grid.style.backgroundColor = "white";
+            flw.addEventListener("flWindowClosed", function(e) {
+                this.remove();
+            });
+            flw.addCell2 = function(colstyle, rowstyle, value, x1, y1, x2 = x1+1, y2 = y1+1, border = false) {
+                let tmp = this.addCell(x1, y1, x2, y2);
+                tmp.line = ("0"+rowstyle).slice(-2);
+                tmp.classList.add("flspecs-c" + colstyle);
+                tmp.classList.add("flspecs-l" + tmp.line);
+                if (border) tmp.style.borderBottom = "2px solid white";
+                tmp.innerHTML = value;
+                tmp.onmouseover = tmp.onmouseout = function() {
+                    let query = 'div[class*="flspecs-l' + this.line + '"]';
+                    let elems = document.querySelectorAll(query);
+                    for (el of elems) el.classList.toggle("flspecs-cell-hover");
+                };
+                return tmp;
+            };
+            // 因为第一列 会出现跨多行的情况
+            let line = 1
+            specsData.forEach((item, index) => {
+                let len = item.children ? item.children.length : 1
+                let width = item.children ? 1 : 2
+                flw.addCell2(1, index + 1, item.label, 1, line, 1+width, line+len, true);
+
+                if(item.children) {
+                    item.children.forEach((item1, index1) => {
+                        const border = item.children.length === index1 + 1
+                        flw.addCell2(2, index + 1, item1.label, 2, line + index1, 2 + 1, line + index1 + 1,border);
+                        const value = typeof item1.row === 'string' ? res[getSheetIndex(item1.row)] : item1.row.map(row1 => res[getSheetIndex(row1)] || 0).join(' x ')
+                        flw.addCell2(3, index + 1, value + ` ${item1.unit && value ? item1.unit : ''}`, 3, line + index1, 7, line + index1 + 1, border);
+                    })
+                } else {
+                    const value = res[getSheetIndex(item.row)]
+                    flw.addCell2(3, index + 1, value + ` ${item.unit && value ? item.unit : ''}`, 3, line, 7, line+len, true);
+                }
+                line += len
+            })
+
+        }).getProduct(pname);
+    }
+</script>
+
+<!-- <style>
+  .flspecs-c1 {
+    text-align: left;
+    padding-left: 0.5em;
+    color: black;
+    background-color: var(--theme-color-table);
+  }
+  .flspecs-c2 {
+    text-align: right;
+    font-style: italic;
+    padding-right: 0.5em;
+    color: #666;
+    background-color: var(--theme-color-table);
+  }
+  .flspecs-c3 {
+    text-align: left;
+    background-color: #eee;
+    padding-left: 0.5em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .flspecs-cell-hover {
+    background-color: var(--theme-color-accent);
+    color: white;
+  }
+</style>
+
+<script>
+  function flSpecs(org) {
+    pname = org.pname;
+    const labels = ["Chipset", "Memory", "Display", "Cameras", "CMF", "RF", "NFC", "Wifi", "Power", "Audio", "IP", "Sensors"];
+    const slab1 = ["Cam#1", "Cam#2", "Cam#3", "Cam#4", "F.Cam"];
+    const slab2 = ["System", "Charger", "Battery", "Wiresless"];
+    const linenb = [1, 2, 3, 4, 4, 4, 4, 4, 5, 6, 7, 8, 9, 9, 9, 9, 10, 11, 12];
+
+    // if this window is already opened, send a click to the header of it to make it come forward
+    if ($(pname + " Specs")) {
+      $(pname + " Specs").header.dispatchEvent(new Event('click'));
+      return;
+    }
+
+    // get product data
+    $("spinner").style.display = "inline"; // start spinner
+    google.script.run.withSuccessHandler(ret => {
+      $("spinner").style.display = "none"; // stop spinner
+      if (ret == null) return;
+      res = JSON.parse(ret.prod);
+
+      // create window
+      let fdata = {
+          _root: document.body,
+          _title: pname + " Specs",
+          _blocking: false,
+          _scaled: true,
+          _headercolor: "var(--theme-color-system)",
+          _height: 38.4,
+          _width: 16,
+          _vrows: 19,
+          _cols: 6,
+          _licon: null,
+          _fontRatio: 0.5
+      };
+      let flw = flGrid(fdata);
+      flw.grid.style.backgroundColor = "white";
+      flw.addEventListener("flWindowClosed", function(e) {
+        this.remove();
+      });
+      flw.addCell2 = function(colstyle, rowstyle, value, x1, y1, x2 = x1+1, y2 = y1+1) {
+        let tmp = this.addCell(x1, y1, x2, y2);
+        tmp.line = ("0"+rowstyle).slice(-2);
+        tmp.classList.add("flspecs-c" + colstyle);
+        tmp.classList.add("flspecs-l" + tmp.line);
+        if ([2, 3, 4, 9, 10, 11, 12, 13, 17, 18, 19].includes(y2)) tmp.style.borderBottom = "2px solid white";
+        tmp.innerHTML = value;
+        tmp.onmouseover = tmp.onmouseout = function() {
+          let query = 'div[class*="flspecs-l' + this.line + '"]';
+          let elems = document.querySelectorAll(query);
+          for (el of elems) el.classList.toggle("flspecs-cell-hover");
+        };
+        return tmp;
+      };
+
+      // main labels
+      let line = 1;
+      let len = 0;
+      for ([i,lb] of labels.entries()) {
+        len = 1;
+        wdth = 2;
+        if (lb == "Cameras") {len = 5; wdth = 1;}
+        if (lb == "Power") {len = 4; wdth = 1;}
+        flw.addCell2(1, i+1, lb, 1, line, 1+wdth, line+len);
+        line += len;
+      }
+      // camera labels
+      for ([i, lb] of slab1.entries()) flw.addCell2(2, 4, lb, 2, 4+i);
+      // power labels
+      for ([i, lb] of slab2.entries()) flw.addCell2(2, 9, lb, 2, 13+i);
+
+      // adding data
+      let item = "";
+      for (i=0; i<19; i++) {
+        if (i==0) item = res[_chipset];
+        if (i==1) item = res[_chipset+2];
+        if (i==2) item = res[_display];
+        if (i==3) item = res[_display+2];
+        if (i==4) item = res[_display+4];
+        if (i==5) item = res[_display+6];
+        if (i==6) item = res[_display+8];
+        if (i==7) item = res[_display+10];
+        if (i==8) item = res[_nondm+1];
+        if (i==9) item = res[_nondm+3];
+        if (i==10) item = res[_nondm+5];
+        if (i==11) item = res[_nondm+7];
+        if (i==12) item = res[_nondm+13];
+        if (i==13) item = res[_chipset+4];
+        if (i==14) item = res[_chipset+6];
+        if (i==15) item = res[_nondm+15];
+        if (i==16) item = res[_nondm+11];
+        if (i==17) item = res[_nondm+17];
+        if (i==18) item = res[_nondm+23];
+        flw.addCell2(3, linenb[i], item, 3, i+1, 7, i+2);
+      }
+    }).getProduct(pname);
+  }
+</script> -->
+

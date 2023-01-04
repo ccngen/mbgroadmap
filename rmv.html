@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base target="_top">
+</head>
+
+<?!= include('globals'); ?>
+<?!= include('utils1'); ?>
+<?!= include('utils2'); ?>
+<?!= include('userManage'); ?>
+<?!= include('menu'); ?>
+<?!= include('interactions'); ?>
+<?!= include('checkRights'); ?>
+<?!= include('flAdd2'); ?>
+<?!= include('flEditPrj2'); ?>
+<?!= include('flEditSpecs2'); ?>
+<?!= include('flDesign2'); ?>
+<?!= include('flBC2'); ?>
+<?!= include('flLaunch2'); ?>
+<?!= include('flSched2'); ?>
+<?!= include('flSpecs2'); ?>
+<?!= include('flTMC2'); ?>
+<?!= include('flMktFB'); ?>
+
+<style>
+    *:focus {
+        outline: none;
+    }
+    body {
+    //font-family: Helvetica, Arial;
+        font-family: "Century Gothic", "Candara";
+        user-select: none;
+        font-size: 0.55vw;
+        background-color: white;
+        overflow: hidden;
+        --theme-color-bg: #f0f0f0;
+        --theme-color-fg: #999;
+        --theme-color-bg2: #f3f3f3;
+        --theme-color-fg2: #666;
+        --theme-color1-1: Crimson;
+        --theme-color1-2: #ffb3b3;
+        --theme-color2-1: #45818e;
+        --theme-color2-2: #75b0bd;
+        --theme-color3-1: DarkGreen;
+        --theme-color3-2: #6699cc;
+        --theme-color4-1: #999999;
+        --theme-color4-2: #bfbfbf;
+        --theme-color-accent: red;
+        --theme-color-table: #cbd9e6;
+        --theme-color-system: #45818e;
+    }
+    body::-webkit-scrollbar {
+        display: none;
+    }
+    .spin-cursor {
+        cursor: progress;
+    }
+    .master-invisible {
+        position: fixed;
+        display: none;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: transparent;
+        z-index: 1000;
+    }
+    .spinner {
+        border: 8px solid #008080;
+        border-top: 8px solid #00cccc;
+        border-radius: 50%;
+        position: relative;
+        top: calc(35.5vh - 1.5vw);
+        left: calc(50vw - 1.5vw);
+        width: 3vw;
+        height: 3vw;
+        animation: spin 2s linear infinite;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    .master-grid {
+        position: fixed;
+        left: 0;
+        top: 0;
+        box-sizing: border-box;
+        display: grid;
+        width: 100%;
+        height: 100%;
+        background-color: #001428;
+        color: #e0e0e0;
+        overflow-y: auto;
+        font-size: 2em;
+    }
+    .master-grid::-webkit-scrollbar {
+        display: none;
+    }
+    .master-grid-cnt {
+        justify-items: center;
+        align-items: center;
+        pointer-events: none; /* pass-through mouse events unless some divs on auto (master-cell-prd) */
+    }
+    .master-cell-hdr {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        color: #e0e0e0;
+        text-align: center;
+        font-size: 100%;
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+    .master-cell-ttl {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        color: #e0e0e0;
+        text-align: center;
+        font-size: 100%;
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+    .master-cell-prd {
+        position: relative;
+        display: flex;
+        width: 75%;
+        height: 75%;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        box-sizing: border-box;
+        color: white;
+        text-align: center;
+        box-shadow: 3px 3px 10px rgba(0, 0, 0, 1);
+        cursor: pointer;
+        pointer-events: auto;
+    }
+    .master-cell-prd-txt {
+        width: 100%;
+        overflow: hidden;
+        white-space: nowrap;
+        font-size: 60%;
+    }
+    .master-cell-prd-ico {
+        position: absolute;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        box-sizing: border-box;
+        left: -0.625em;
+        top: -0.625em;
+        text-align: center;
+        border-radius: 50%;
+        background-color: #001428;
+        border: 4px solid;
+        width: 2.5em;
+        height: 2.5em;
+        font-size: 50%;
+        box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);
+    }
+    .master-bubble {
+        position: fixed;
+        display: none;
+        width: 30vw;
+        height: 38vh;
+        overflow-y: auto;
+        background-color: rgba(255, 255, 255, 0.9);
+        z-index: 100;
+        box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);
+        padding: 0.5em;
+        color: black;
+        border-radius: 1em;
+        font-size: 125%;
+    }
+    .master-bubble::-webkit-scrollbar {
+        display: none;
+    }
+    .master-bubble-grid0 {
+        display: grid;
+        width: 100%;
+        height: 95%;
+        box-sizing: border-box;
+        grid-template-columns: 35% 15% 65%;
+        grid-template-rows: repeat(14, 7%);
+    }
+    .master-bubble-grid1 {
+        display: grid;
+        width: 100%;
+        box-sizing: border-box;
+        grid-template-columns: 22% 78%;
+        grid-auto-rows: minmax(2em, auto);
+    }
+    .master-bubble-cell {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        box-sizing: border-box;
+        border: none;
+        text-align: left;
+    }
+    .master-bubble-cell2 {
+        display: inline;
+        box-sizing: border-box;
+        border: none;
+        text-align: left;
+    }
+    .master-light {
+        color: #999;
+        font-style: italic;
+    }
+    .master-pic {
+        width: 92%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .master-empty {
+    }
+    .master-empty:hover {
+        background-color: #00264d;
+    }
+</style>
+
+<script>
+    function getTMCTotal(data) {
+        const startIndex = getSheetIndex(TMCFileds[0])
+        const endIndex = getSheetIndex(TMCFileds[1])
+        let total = data[startIndex]
+        for(let i = 1; i <= ((endIndex- startIndex) / 2); i++) {
+            total += data[startIndex + i*2] || 0
+        }
+        return total;
+    }
+
+    function load() {
+        // get rights and version
+        google.script.run.withSuccessHandler(function (ret) {
+            version = "MBG Roadmap (v." + ret.number + ")";
+            versionNb = ret.number;
+            whatsNew = ret.whatsnew;
+            Urights = ret.rights;
+            if (!checkRights()) return;
+            // Disable right click
+            document.addEventListener('contextmenu', event => event.preventDefault());
+            // Load data
+            doUpdate();
+            // Keypress management
+            keyPrss();
+        }).getVersion();
+    }
+
+    function doUpdate() {
+        $("spinner").style.display = "block"; // start spinner
+        google.script.run.withSuccessHandler(start).getData();
+    }
+
+    function start(ret) {
+        // render roadmap
+        data = JSON.parse(ret);
+        data.shift();
+        renderRM();
+        // stop spinner
+        $("spinner").style.display = "none";
+        // give focus to matrix
+        $("master-grid").tabIndex = "-1";
+        $("master-grid").focus();
+    }
+
+    function renderRM() {
+        let endDate = startDate + nbQuarters*3 - 1;
+        let nbRPPs;
+
+        const addCell = function(base, type, style, x1, y1, x2=x1, y2=y1) {
+            let cell = $$$(base, type, "master-bubble-cell");
+            if (style!="") cell.classList.add(style);
+            cell.style.gridColumn = x1 + " / " + (x2+1);
+            cell.style.gridRow = y1 + " / " + (y2+1);
+            return cell;
+        }
+        const addCell2 = function(base, type, style, x1, y1, x2=x1, y2=y1) {
+            let cell = $$$(base, type, "master-bubble-cell2");
+            if (style!="") cell.classList.add(style);
+            cell.style.gridColumn = x1 + " / " + (x2+1);
+            cell.style.gridRow = y1 + " / " + (y2+1);
+            return cell;
+        }
+
+        // re-init grid
+        $("master-grid").innerHTML = "";
+        $("master-grid2").innerHTML = "";
+
+        // resizing the grid to the # of quarters and # of rpps
+        $("master-grid").style.gridTemplateColumns = "5vw repeat(" + (3*nbQuarters) + ", calc((100% - 5vw) / " + (3*nbQuarters) + "))";
+        nbRPPs = pricetgs[geoView][0].length;
+        $("master-grid").style.gridTemplateRows = "3vh 3vh repeat(" + nbRPPs + ", calc((100% - 6vh) / " + nbRPPs + "))";
+
+        // quarters
+        for (i=0; i<nbQuarters; i++) {
+            let tmp = $$$("master-grid", "div", "master-cell-hdr");
+            tmp.innerHTML = quarters[((startDate+3*i) % 12)] + "-" + (19 + Math.floor((startDate+3*i) / 12));
+            tmp.style.gridRow = 1 + " / " + 2;
+            tmp.style.gridColumn = (3*i+2) + " / " + (3*i+5);
+            tmp.style.fontWeight = "bold";
+        }
+
+        // months
+        for (i=0; i<nbQuarters*3; i++) {
+            let tmp = $$$("master-grid", "div", "master-cell-hdr");
+            tmp.innerHTML = months[((startDate+i) % 12)];
+            tmp.style.gridRow = 2 + " / " + 3;
+            tmp.style.gridColumn = (i+2) + " / " + (i+3);
+            if ((i%3 == 2) && (i<nbQuarters*3-1)) tmp.style.borderRight = "0.2px solid";
+        }
+
+        // rpps
+        for (i=0; i<nbRPPs; i++) {
+            let tmp = $$$("master-grid", "div", "master-cell-ttl");
+            tmp.innerHTML = curSymb[geoView] + pricetgs[geoView][0][i];
+            tmp.style.gridRow = (nbRPPs-i+2) + " / " + (nbRPPs-i+3);
+            tmp.style.gridColumn = 1 + " / " + 2;
+            tmp.title = pricetgs[geoView][1][i];
+            if (rppSep[geoView].includes(pricetgs[geoView][0][i])) tmp.style.borderTop = "0.2px solid";
+            tmp.style.cursor = "pointer";
+            tmp.onclick = function(ev) {
+                flMktFB(this.innerHTML);
+            };
+        }
+
+        // geo
+        let tmp = $$$("master-grid", "div", "master-cell-ttl");
+        tmp.innerHTML = geoView;
+        tmp.style.gridRow = 1 + " / " + 3;
+        tmp.style.gridColumn = 1 + " / " + 2;
+        tmp.style.color = "#ffc000";
+        tmp.style.backgroundColor = "transparent";
+
+        // grid lines
+        for (i=0; i<nbQuarters*3; i++) {
+            for (j=0; j<nbRPPs; j++) {
+                // create empty cells everywhere
+                let tmp = $$$("master-grid", "div", "master-empty");
+                tmp.x = (i+2);
+                tmp.y = (nbRPPs-j+2);
+
+                // prevent highlight on mouse over if there is a product box in there
+                tmp.onmouseover = function() {
+                    if ($("master-prod-" + this.x + "-" + this.y)) {
+                        this.style.backgroundColor = "transparent";
+                    }
+                };
+
+                // manage contextual menu on click only if there is no product box
+                tmp.onclick = function(ev) {
+                    if ($("master-prod-" + this.x + "-" + this.y)) return;
+                    this.style.backgroundColor = "#00264d"; // freeze highlight
+                    $("menu-bg").style.display = "inline";
+                    $("menu-bg").callingCell = this;
+                    $("ctx-menu1").style.display = "flex";
+                    $("ctx-menu2").style.display = "none";
+                    if (ev.clientX + $("ctx-menu1").offsetWidth <= window.innerWidth)
+                        $("ctx-menu1").style.left = ev.clientX + "px";
+                    else
+                        $("ctx-menu1").style.left = (ev.clientX - $("ctx-menu1").offsetWidth) + "px";
+                    if (ev.clientY + $("ctx-menu1").offsetHeight <= window.innerHeight)
+                        $("ctx-menu1").style.top = ev.clientY + "px";
+                    else
+                        $("ctx-menu1").style.top = (ev.clientY - $("ctx-menu1").offsetHeight) + "px";
+                };
+
+                // draw grid lines
+                if (rppSep[geoView].includes(pricetgs[geoView][0][j])) tmp.style.borderTop = "0.2px solid";
+                if ((i%3 == 2) && (i<nbQuarters*3-1)) tmp.style.borderRight = "0.2px solid";
+                tmp.style.gridRow = (nbRPPs-j+2) + " / " + (nbRPPs-j+3);
+                tmp.style.gridColumn = (i+2) + " / " + (i+3);
+            }
+        }
+
+        // create the grid content at same place
+        const gridContent = $("master-grid2");
+        gridContent.style.gridTemplateColumns = "5vw repeat(" + (3*nbQuarters) + ", calc((100% - 5vw) / " + (3*nbQuarters) + "))";
+        gridContent.style.gridTemplateRows = "3vh 3vh repeat(" + nbRPPs + ", calc((100% - 6vh) / " + nbRPPs + "))";
+        gridContent.style.backgroundColor = "transparent";
+
+        // display products
+        for ([i,prd] of data.entries()) {
+            // filter out non-relevant ones
+            if (prd[_geo] != geoView) continue;
+            if (!pricetgs[geoView][0].includes(String(prd[5]))) continue; // if RPP is not in the RPP list
+            let month = (new Date(prd[_ok2s])).getUTCMonth();
+            let year = (new Date(prd[_ok2s])).getUTCFullYear() - 2019;
+            let date = year*12 + month;
+            if ((date<startDate) || (date>endDate)) continue;
+
+            // positioning and color
+            let y = nbRPPs - pricetgs[geoView][0].indexOf(String(prd[5])) + 2;
+            let x = date - startDate + 2;
+            let milest = prd[_milest];
+            if (milest == 16) colorLevel = 4;
+            if ((milest >=5) && (milest < 16)) colorLevel = 3;
+            if ((milest >=0) && (milest < 5)) colorLevel = 2;
+            if ((milest == -1) || (milest == "")) colorLevel = 1;
+            let tmp = $$$(gridContent, "div", "master-cell-prd", "master-prod-" + x + "-" + y);
+            if (colorLevel>1) tmp.style.backgroundColor = "var(--theme-color" + colorLevel + "-1)";
+            else tmp.style.backgroundColor = prd[_defColor];
+            tmp.style.gridRow = y + " / " + (y+1);
+            tmp.style.gridColumn = x + " / " + (x+1);
+
+            // add product data to the product box
+            tmp.pname = prd[_name];
+            tmp.cname = prd[_cname];
+            tmp.x = x;
+            tmp.y = y;
+            tmp.dev = prd[_dev];
+            tmp.Launch = getDate(prd[_ok2s]);
+            tmp.cmf = prd[_cmf];
+            tmp.family = prd[_cat];
+            tmp.rf = prd[91];
+            tmp.chipset = prd[_chipset];
+            tmp.display = prd[_display];
+            tmp.cam1 = prd[_cam1];
+            tmp.cam2 = prd[_cam2];
+            tmp.cam3 = prd[_cam3];
+            tmp.cam4 = prd[_cam4];
+            tmp.selfie = prd[_cam4+2];
+            tmp.battery = prd[_display-2];
+            tmp.charging = prd[_chipset-14];
+            if ((detLevel == 0) || (detLevel == 2)) {
+                google.script.run.withSuccessHandler(function(ret, thisobj) {
+                    if (ret != "") {
+                        thisobj.picbytes = "data:image/png;base64," + ret;
+                    }
+                    else thisobj.picbytes = "";
+                }).withUserObject(tmp).findThumbnail2(tmp.pname);
+            }
+            tmp.deckurl = prd[_deckurl];
+            tmp.bcurl = prd[_bcurl];
+            tmp.bcname = prd[_bcname];
+            tmp.scname = prd[_scname];
+            tmp.severity = prd[_severity];
+            tmp.comments = prd[_comments];
+            tmp.status = prd[_status];
+            tmp.cwvok2s = prd[90];
+            tmp.productData = prd;
+
+            // contextual menu
+            tmp.onclick = function(ev) {
+                $("menu-bg").style.display = "inline";
+                $("menu-bg").callingCell = this;
+                $("ctx-menu2").style.display = "flex";
+                $("ctx-menu1").style.display = "none";
+                if (ev.clientX + $("ctx-menu2").offsetWidth <= window.innerWidth)
+                    $("ctx-menu2").style.left = ev.clientX + "px";
+                else
+                    $("ctx-menu2").style.left = (ev.clientX - $("ctx-menu2").offsetWidth) + "px";
+                if (ev.clientY + $("ctx-menu2").offsetHeight <= window.innerHeight)
+                    $("ctx-menu2").style.top = ev.clientY + "px";
+                else
+                    $("ctx-menu2").style.top = (ev.clientY - $("ctx-menu2").offsetHeight) + "px";
+            };
+
+            // contextual bubble
+            tmp.onmouseenter = function(ev) {
+                $("master-data").x = this.x;
+                $("master-data").y = this.y;
+                $("master-bubble").style.display = "block";
+                $("master-bubble").innerHTML = "";
+                if ((detLevel == 0) || (detLevel == 2)) {
+                    let grd = $$$($("master-bubble"), "div", "master-bubble-grid0");
+                    addCell(grd, "div", "master-light", 2, 1).innerHTML = "Launch: ";
+                    addCell(grd, "div", "", 3, 1).innerHTML = this.Launch;
+                    addCell(grd, "div", "master-light", 2, 2).innerHTML = "Family: ";
+                    addCell(grd, "div", "", 3, 2).innerHTML = this.family;
+                    addCell(grd, "div", "master-light", 2, 3).innerHTML = "Design: ";
+                    addCell(grd, "div", "", 3, 3).innerHTML = this.cmf;
+                    addCell(grd, "div", "master-light", 2, 4).innerHTML = "Chipset: ";
+                    addCell(grd, "div", "", 3, 4).innerHTML = this.chipset;
+                    addCell(grd, "div", "master-light", 2, 5).innerHTML = "Display: ";
+                    addCell(grd, "div", "", 3, 5).innerHTML = this.display.split(" ", 4).join(" ") + " " + this.display.split(" ", 6)[5];
+                    addCell(grd, "div", "master-light", 2, 6).innerHTML = "R. Cam#1: ";
+                    addCell(grd, "div", "", 3, 6).innerHTML = this.cam1;
+                    addCell(grd, "div", "master-light", 2, 7).innerHTML = "Cam#2: ";
+                    addCell(grd, "div", "", 3, 7).innerHTML = this.cam2;
+                    addCell(grd, "div", "master-light", 2, 8).innerHTML = "Cam#3: ";
+                    addCell(grd, "div", "", 3, 8).innerHTML = this.cam3;
+                    addCell(grd, "div", "master-light", 2, 9).innerHTML = "Cam#4: ";
+                    addCell(grd, "div", "", 3, 9).innerHTML = this.cam4;
+                    addCell(grd, "div", "master-light", 2, 10).innerHTML = "F. Cam #1: ";
+                    addCell(grd, "div", "", 3, 10).innerHTML = this.selfie;
+                    addCell(grd, "div", "master-light", 2, 11).innerHTML = "Audio: ";
+                    addCell(grd, "div", "", 3, 11).innerHTML = this.productData[mouseInterFileds['Audio']];
+                    addCell(grd, "div", "master-light", 2, 12).innerHTML = "Battery: ";
+                    addCell(grd, "div", "", 3, 12).innerHTML = this.battery;
+                    addCell(grd, "div", "master-light", 2, 13).innerHTML = "Charger: ";
+                    addCell(grd, "div", "", 3, 13).innerHTML = this.productData[mouseInterFileds['Charger']];
+                    addCell(grd, "div", "master-light", 2, 14).innerHTML = "FPS: ";
+                    addCell(grd, "div", "", 3, 14).innerHTML = this.productData[mouseInterFileds['FPS']];
+                    addCell(grd, "div", "master-light", 2, 15).innerHTML = "TMC: ";
+                    addCell(grd, "div", "", 3, 15).innerHTML = getTMCTotal(this.productData).toFixed(2);
+                    let pic = addCell(grd, "img", "master-pic", 1, 1, 1, 10);
+                    /* addCell(grd, "div", "master-light", 1, 1).innerHTML = "Dev: ";
+                    addCell(grd, "div", "", 2, 1).innerHTML = this.dev;
+                    addCell(grd, "div", "master-light", 1, 2).innerHTML = "Family: ";
+                    addCell(grd, "div", "", 2, 2).innerHTML = this.family;
+                    addCell(grd, "div", "master-light", 1, 3).innerHTML = "Chipset: ";
+                    addCell(grd, "div", "", 2, 3).innerHTML = this.chipset;
+                    addCell(grd, "div", "master-light", 1, 4).innerHTML = "Display: ";
+                    addCell(grd, "div", "", 2, 4).innerHTML = this.display.split(" ", 4).join(" ") + " " + this.display.split(" ", 6)[5];
+                    addCell(grd, "div", "master-light", 1, 5).innerHTML = "Camera#1: ";
+                    addCell(grd, "div", "", 2, 5).innerHTML = this.cam1;
+                    addCell(grd, "div", "master-light", 1, 6).innerHTML = "Camera#2: ";
+                    addCell(grd, "div", "", 2, 6).innerHTML = this.cam2;
+                    addCell(grd, "div", "master-light", 1, 7).innerHTML = "Camera#3: ";
+                    addCell(grd, "div", "", 2, 7).innerHTML = this.cam3;
+                    addCell(grd, "div", "master-light", 1, 8).innerHTML = "Camera#4: ";
+                    addCell(grd, "div", "", 2, 8).innerHTML = this.cam4;
+                    addCell(grd, "div", "master-light", 1, 9).innerHTML = "Selfie: ";
+                    addCell(grd, "div", "", 2, 9).innerHTML = this.selfie;
+                    addCell(grd, "div", "master-light", 1, 10).innerHTML = "Battery: ";
+                    addCell(grd, "div", "", 2, 10).innerHTML = this.battery;
+                    addCell(grd, "div", "master-light", 1, 11).innerHTML = "Charging: ";
+                    addCell(grd, "div", "", 2, 11).innerHTML = this.charging;
+                    let pic = addCell(grd, "img", "master-pic", 3, 1, 3, 6); */
+                    pic.src = this.picbytes;
+                    if (this.picbytes!="") pic.style.display = "block";
+                    else pic.style.display = "none";
+                }
+                if (detLevel == 1) {
+                    let grd = $$$($("master-bubble"), "div", "master-bubble-grid1");
+                    addCell2(grd, "div", "master-light", 1, 1).innerHTML = "<mark>CWV OK2S:</mark>";
+                    if (!isNaN(new Date(tmp.cwvok2s))) {
+                        addCell2(grd, "div", "", 2, 1).innerHTML = ((new Date(tmp.cwvok2s)).getUTCMonth()+1) + "/" + ((new Date(tmp.cwvok2s)).getUTCDate()) + "/" + ((new Date(tmp.cwvok2s)).getUTCFullYear());
+                    }
+                    addCell2(grd, "div", "master-light", 1, 2).innerHTML = "<mark>ACTIONS:</mark>";
+                    addCell2(grd, "div", "", 2, 2).innerHTML = tmp.comments.replace(/\u000A/ig,"<br>");
+                    addCell2(grd, "div", "master-light", 1, 3).innerHTML = "<mark>STATUS:</mark>";
+                    addCell2(grd, "div", "", 2, 3).innerHTML = tmp.status.replace(/\u000A/ig,"<br>");
+                    $("master-bubble").style.overflowY = "auto";
+                    tmp.onwheel = function(e) {$("master-bubble").scrollBy(0, e.deltaY)};
+                }
+                const gap = 20;
+                if (ev.clientX + gap + $("master-bubble").offsetWidth <= window.innerWidth)
+                    $("master-bubble").style.left = (ev.clientX + gap) + "px";
+                else
+                    $("master-bubble").style.left = (ev.clientX - gap - $("master-bubble").offsetWidth) + "px";
+                if (ev.clientY + gap + $("master-bubble").offsetHeight <= window.innerHeight)
+                    $("master-bubble").style.top = (ev.clientY + gap) + "px";
+                else
+                    $("master-bubble").style.top = (ev.clientY - gap - $("master-bubble").offsetHeight) + "px";
+            }
+            tmp.onmousemove = function(ev) {
+                const gap = 20;
+                if (ev.clientX + gap + $("master-bubble").offsetWidth <= window.innerWidth)
+                    $("master-bubble").style.left = (ev.clientX + gap) + "px";
+                else
+                    $("master-bubble").style.left = (ev.clientX - gap - $("master-bubble").offsetWidth) + "px";
+                if (ev.clientY + gap + $("master-bubble").offsetHeight <= window.innerHeight)
+                    $("master-bubble").style.top = (ev.clientY + gap) + "px";
+                else
+                    $("master-bubble").style.top = (ev.clientY - gap - $("master-bubble").offsetHeight) + "px";
+            };
+            tmp.onmouseleave = function() {
+                $("master-bubble").style.display = "none";
+            };
+
+            // product box content
+            let tmp1 = $$$(tmp, "div", "master-cell-prd-txt");
+            if (nbQuarters>4) {
+                tmp1.style.transform = "scaleX(" + (4/nbQuarters) + ")"; // adjust font to box width
+                tmp1.style.width = 100*nbQuarters/4 + "%"; // adjust font to box width
+            }
+            if (detLevel == 0) {
+                tmp1.innerHTML = tmp.pname + "<br><a style='font-size: 80%; font-style: italic'>" + tmp.cname + "</a>";
+            }
+            if (detLevel == 1) {
+                tmp1.innerHTML = tmp.pname + "<br><a style='font-size: 80%; font-style: italic'>" + tmp.dev + "</a>";
+            }
+            if (detLevel == 2) {
+                tmp1.innerHTML = tmp.pname + "<br><a style='font-size: 80%; font-style: italic'>" + tmp.chipset + "</a>";
+            }
+
+            // product box icon
+            //if (detLevel == 0) {
+            //  if (tmp.rf == "5G") {
+            //    let tmp2 = $$$(tmp, "div", "master-cell-prd-ico");
+            //    tmp2.innerHTML = "5G";
+            //    if (colorLevel>1) tmp2.style.borderColor = "var(--theme-color" + colorLevel + "-1)";
+            //    else tmp2.style.borderColor = prd[_defColor];
+            //  }
+            //}
+
+            if(prd[_network] !== '') {
+                let tmp2 = $$$(tmp, "div", "master-cell-prd-ico");
+                tmp2.innerHTML = prd[_network];
+                if (colorLevel>1) tmp2.style.borderColor = "var(--theme-color" + colorLevel + "-1)";
+                else tmp2.style.borderColor = prd[_defColor];
+            }
+
+            if (detLevel == 1) {
+                let tmp2 = $$$(tmp, "div", "master-cell-prd-ico");
+                tmp2.style.backgroundColor = tmp.severity;
+                tmp2.style.borderColor = tmp.severity;
+            }
+            if (detLevel == 2) {
+                if (tmp.dev == "IH") {
+                    let tmp2 = $$$(tmp, "div", "master-cell-prd-ico");
+                    tmp2.innerHTML = "IH";
+                    if (colorLevel>1) tmp2.style.borderColor = "var(--theme-color" + colorLevel + "-1)";
+                    else tmp2.style.borderColor = prd[_defColor];
+                }
+            }
+        }
+    }
+
+    function TMC2Sheets() {
+        var tmcData;
+        var tmcTitle;
+        var i , j, oldI;
+        // get all the opened TMC windows
+        var elems = document.getElementsByClassName("TMCflw");
+        // if no TMC window opened get out
+        if (elems.length == 0) return;
+        // for each of them store all the data
+        tmcData = [];
+        i = 0;
+        for (el of elems) {
+            tmcTitle = el.id;
+            tmcTitle = tmcTitle.substring(0, tmcTitle.length-4);
+            tmcData[i] = [tmcTitle, "", ""];
+            i++;
+            tmcData[i] = [];
+            j = 0;
+            for (cel of el.grid.children) {
+                tmcData[i][j] = cel.textContent;
+                oldI = i;
+                i = Math.floor((j + 1) / 3) + i;
+                j = (j + 1) % 3;
+                if (i > oldI) tmcData[i] = [];
+            }
+        }
+        console.log(tmcData);
+        /*tmcData.pop();
+        // send to the server to create the spreadsheet and return the ID to open
+        google.script.run.withSuccessHandler(function (ret) {
+          if (ret != "") window.open('https://docs.google.com/spreadsheets/d/' + ret, '_blank');
+        }).tmcSSexp(tmcData);*/
+    }
+
+</script>
+
+<body onload="load()">
+<div class="" id="master-data"></div>
+<div class="master-invisible" id="spinner">
+    <div class="spinner"></div>
+</div>
+<div class="master-bubble" id="master-bubble"></div>
+<div class="master-grid" id="master-grid"></div>
+<div class="master-grid master-grid-cnt" id="master-grid2"></div>
+</body>
+
+</html>

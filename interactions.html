@@ -1,0 +1,160 @@
+<script>
+    function keyPrss() {
+        document.onkeydown = function (e) {
+            e = e || window.event;
+            //if (e.code == "KeyU") {doUpdate(); return;}
+            //if (e.code == "KeyR") geoView = "ROW";
+            //if (e.code == "KeyN") geoView = "NA";
+            //if (e.code == "KeyJ") geoView = "JP";
+            //if ((e.code == "KeyS") && (keySOk)) detLevel = (detLevel + 1) % 3;
+            if (e.key == "!") nbQuarters++;
+            if (e.key == "@") nbQuarters--;
+            if (e.key == ">") startDate = startDate + 3;
+            if (e.key == "<") startDate = startDate - 3;
+            renderRM();
+        };
+    }
+
+    function menuClick(org, ev) {
+        let callingCell = org.parentNode.parentNode.callingCell;
+        switch (org.id) {
+            // Create a product
+            case "menu-itm1":
+                flAdd(callingCell);
+                break;
+            // Export TMCs to Sheets
+            case "menu-itm2":
+                TMC2Sheets();
+                break;
+            // Toggle view
+            case "menu-itm3":
+                detLevel = (detLevel + 1) % 3;
+                renderRM();
+                break;
+            // ROW roadmap
+            case "menu-itm4":
+                geoView = "ROW";
+                renderRM();
+                break;
+            // NA roadmap
+            case "menu-itm5":
+                geoView = "NA";
+                renderRM();
+                break;
+            // JP roadmap
+            case "menu-itm6":
+                geoView = "JP";
+                renderRM();
+                break;
+            // Samsung roadmap
+            case "menu-itm95":
+                geoView = "Samsung";
+                renderRM();
+                break;
+            // Xiaomi roadmap
+            case "menu-itm90":
+                geoView = "Xiaomi";
+                renderRM();
+                break;
+            // Oppo roadmap
+            case "menu-itm91":
+                geoView = "Oppo";
+                renderRM();
+                break;
+            // Vivo roadmap
+            case "menu-itm92":
+                geoView = "Vivo";
+                renderRM();
+                break;
+            // Realme roadmap
+            case "menu-itm93":
+                geoView = "Realme";
+                renderRM();
+                break;
+            // Honor roadmap
+            case "menu-itm94":
+                geoView = "Honor";
+                renderRM();
+                break;
+            // Update
+            case "menu-itm7":
+                doUpdate();
+                break;
+            // About
+            case "menu-itm8":
+                let aboutTxt = "<b>What's new in v." + versionNb + ":</b><br>";
+                aboutTxt += whatsNew + "<br><br>";
+                aboutTxt += "<b>Help:</b><br>";
+                aboutTxt += "- Left click on empty cell for global functions<br>";
+                aboutTxt += "- Left click on product cell for product related functions<br>";
+                aboutTxt += "- '!'/'@' to see more/less quarters<br>";
+                aboutTxt += "- '<'/'>' to change the starting quarter<br>";
+                aboutTxt += "- Please remember to use 'Shift-' with the buttons<br><br>"
+                aboutTxt += "<b>Colour code:</b><br>";
+                aboutTxt += "- Gray: OK2S<br>";
+                aboutTxt += "- Green: Post-POR<br>";
+                aboutTxt += "- Red: Concept<br>";
+                aboutTxt += "- Orange: Post-Concept<br><br>";
+                msgBox(version, 18, 19, 15, aboutTxt);
+                break;
+            // TMC
+            case "menu-itm10":
+                flTMCdetails(callingCell);
+                break;
+            // Specs
+            case "menu-itm11":
+                flSpecs(callingCell);
+                break;
+            // Schedule
+            case "menu-itm12":
+                flSched(callingCell);
+                break;
+            // Launch Plan
+            case "menu-itm13":
+                flLaunch(callingCell);
+                break;
+            // Business Case
+            case "menu-itm14":
+                flBC(callingCell);
+                break;
+            // Design
+            case "menu-itm15":
+                flDesign(callingCell);
+                break;
+            // Product Deck
+            case "menu-itm16":
+                // retrieve link to the product deck
+                if (callingCell.deckurl != "") window.open(callingCell.deckurl, '_blank');
+                else msgBox("Warning", 8, 17, 4, "<br>" + callingCell.pname + " Product Deck Not Available.");
+                break;
+            // Edit Specs
+            case "menu-itm17":
+                flEditSpecs(callingCell);
+                break;
+            // Delete Project
+            case "menu-itm18":
+                callingCell.style.outline = "5px solid rgba(255, 0, 0, 1)";
+                var mb = msgBox("Warning", 8, 17, 4, "Please confirm you want to delete " + callingCell.pname + ".", "Confirm");
+                mb.pname = callingCell.pname;
+                mb.org = callingCell;
+                mb.addEventListener("msgBoxOkClicked", function() {
+                    this.okb.style.cursor = "progress";
+                    google.script.run.withSuccessHandler(ret => {
+                        this.okb.style.cursor = "";
+                        this.remove();
+                        doUpdate();
+                    }).deleteProduct(this.pname);
+                });
+                // close / cancel to clear matrix highlight
+                mb.addEventListener("flWindowClosed", function(e) {
+                    this.org.style.outline = "";
+                });
+                // proceed
+                break;
+            // Edit Project
+            case "menu-itm19":
+                flEditPrj(callingCell);
+                break;
+        }
+    }
+</script>

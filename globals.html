@@ -1,0 +1,118 @@
+<script>
+    // columns in Plist
+    const _name = 0;
+    const _cat = 1;
+    const _geo = 2;
+    const _defColor = 3;
+    const _ok2s = 6;
+    const _dev = 7;
+    const _cname = 8;
+    const _bcname = 11;
+    const _bcurl = 12;
+    const _scname = 13;
+    const _deckurl = 14;
+    const _nondm = 31;
+    const _chipset = 58;
+    const _display = 66;
+    const _cam1 = 68;
+    const _cam2 = 70;
+    const _cam3 = 72;
+    const _cam4 = 74;
+    const _comments = 80;
+    const _milest = 87;
+    const _status = 88;
+    const _severity = 89;
+    const _network = 91;
+    const _cmf = 32;
+
+    const mouseInterFileds = {
+        Design: getSheetIndex('AG'),
+        F_Cam: getSheetIndex('BY'),
+        Audio: getSheetIndex('AQ'),
+        Battery : getSheetIndex('BM'),
+        Charger : getSheetIndex('BK'),
+        FPS : getSheetIndex('CA'),
+    }
+    const TMCFileds = ['AF', 'CB']
+
+    var curSymb = {ROW: "€", NA: "$", JP: "¥", Samsung: "€", Xiaomi: "€", Oppo: "€", Vivo: "€", Realme: "€", Honor: "€"};
+    var pricetgs = {
+        ROW:  [["89", "99","129","149","179","199","249","299","349","399","499","599","699","799", "899", "999", "999+"],
+            ["TMC Target $60-63", "TMC target $62-67","TMC target $79-83","TMC target $88-94","TMC target $105-113","TMC target $114-124","TMC target $139-153","TMC target $164-181","TMC target $192-211","TMC target $221-238","TMC target $218-261","TMC target $262-315","TMC target $307-368","TMC target $351-$421","TMC target $372-465", "TMC Target $414-518"]],
+        NA:   [["99","149","179","199","249","299","399","449","499", "599", "699","799","899","999","999+"],
+            ["TMC target $60-61","TMC target $85-87","TMC target $99-102","TMC target $105-108","TMC target $130-133","TMC target $156-160","TMC target $208-213","TMC target $234-240","TMC target $260-267","TMC target $288-295","TMC target $336-344","TMC target $384-394","TMC target $432-443","TMC target $480-492"]],
+        JP:   [["16800","21800","23800","29800","34800","39800","49800","59800","64800","69800","79800","89800","99800","119800+"],
+            ["TMC target $64-66", "TMC target $81-84", "TMC target $88-91","TMC target $108-111","TMC target $126-130","TMC target $143-146","TMC target $177-181","TMC target $213-217","TMC target $231-235","TMC target $249-254","TMC target $285-290","TMC target $321-326","TMC target $357-363","TMC target $429-435"]],
+        Samsung: [["89", "99","129","149","179","199","249","299","349","399","499","599","699","799", "899", "999", "999+"],
+            ["TMC Target $60-63", "TMC target $62-67","TMC target $79-83","TMC target $88-94","TMC target $105-113","TMC target $114-124","TMC target $139-153","TMC target $164-181","TMC target $192-211","TMC target $221-238","TMC target $218-261","TMC target $262-315","TMC target $307-368","TMC target $351-$421","TMC target $372-465", "TMC Target $414-518"]],
+        Xiaomi:  [["89", "99","129","149","179","199","249","299","349","399","499","599","699","799", "899", "999", "999+"],
+            ["TMC Target $60-63", "TMC target $62-67","TMC target $79-83","TMC target $88-94","TMC target $105-113","TMC target $114-124","TMC target $139-153","TMC target $164-181","TMC target $192-211","TMC target $221-238","TMC target $218-261","TMC target $262-315","TMC target $307-368","TMC target $351-$421","TMC target $372-465", "TMC Target $414-518"]],
+        Oppo:  [["89", "99","129","149","179","199","249","299","349","399","499","599","699","799", "899", "999", "999+"],
+            ["TMC Target $60-63", "TMC target $62-67","TMC target $79-83","TMC target $88-94","TMC target $105-113","TMC target $114-124","TMC target $139-153","TMC target $164-181","TMC target $192-211","TMC target $221-238","TMC target $218-261","TMC target $262-315","TMC target $307-368","TMC target $351-$421","TMC target $372-465", "TMC Target $414-518"]],
+        Vivo:  [["89", "99","129","149","179","199","249","299","349","399","499","599","699","799", "899", "999", "999+"],
+            ["TMC Target $60-63", "TMC target $62-67","TMC target $79-83","TMC target $88-94","TMC target $105-113","TMC target $114-124","TMC target $139-153","TMC target $164-181","TMC target $192-211","TMC target $221-238","TMC target $218-261","TMC target $262-315","TMC target $307-368","TMC target $351-$421","TMC target $372-465", "TMC Target $414-518"]],
+        Realme:  [["89", "99","129","149","179","199","249","299","349","399","499","599","699","799", "899", "999", "999+"],
+            ["TMC Target $60-63", "TMC target $62-67","TMC target $79-83","TMC target $88-94","TMC target $105-113","TMC target $114-124","TMC target $139-153","TMC target $164-181","TMC target $192-211","TMC target $221-238","TMC target $218-261","TMC target $262-315","TMC target $307-368","TMC target $351-$421","TMC target $372-465", "TMC Target $414-518"]],
+        Honor:  [["89", "99","129","149","179","199","249","299","349","399","499","599","699","799", "899", "999", "999+"],
+            ["TMC Target $60-63", "TMC target $62-67","TMC target $79-83","TMC target $88-94","TMC target $105-113","TMC target $114-124","TMC target $139-153","TMC target $164-181","TMC target $192-211","TMC target $221-238","TMC target $218-261","TMC target $262-315","TMC target $307-368","TMC target $351-$421","TMC target $372-465", "TMC Target $414-518"]]
+    };
+    const labels = ["Non-DM","Base Unit","ME/CMF","RF","NFC","WIFI","DP","Audio","Charging","WLC","IP","Pkg","Acc","Sensors","RoBU","Chipset","Memory","Charger","Battery","Display","Cam#1","Cam#2","Cam#3","Cam#4","F. Cam","FPS","Total"];
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const quarters = ["CQ1", "CQ1", "CQ1", "CQ2", "CQ2", "CQ2", "CQ3", "CQ3", "CQ3", "CQ4", "CQ4", "CQ4"];
+    const rppSep = {
+        "ROW": ["999+", "349", "99"],
+        "NA": ["999+", "399", "149"],
+        "JP": ["21800","49800"],
+        "Samsung": ["999+", "349", "99"],
+        "Xiaomi": ["999+", "349", "99"],
+        "Oppo": ["999+", "349", "99"],
+        "Vivo": ["999+", "349", "99"],
+        "Realme": ["999+", "349", "99"],
+        "Honor": ["999+", "349", "99"]
+    };
+
+    const defColors = ["BlueViolet", "Crimson", "Coral", "DeepPink", "DarkGreen"];
+
+    const appendLablesIndex = ['CO', 'CU']; // 新增specs字段索引位置 start end
+    const appendLables = ["X (mm)", "Y (mm)", "Z (mm)", "Bezel (mm)", "Head (mm)", "Chin (mm)", "Weight (g)"];
+
+    var data = [];
+    var scope_data = [];
+    var t0, t1;
+    var detLevel = 0;
+    var geoView = "ROW";
+    var mask = 0b111111; // mask for detailed view
+    var curX, curY;
+
+    var nbQuarters = 4; // number of quarters to view by default
+    let stdat = new Date();
+    let cwquart = quarters[stdat.getUTCMonth()];  // current quarter
+    let qidx = cwquart.slice(-1);                 // current quarter number
+    let yrdelta = stdat.getUTCFullYear() - 2019;  // current year delta vs 2019
+    let startDate = yrdelta*12 + 3*(qidx-1);      // number of months after Jan 2019
+
+    let version;
+    let versionNb;
+    let whatsNew;
+    let Urights;
+    let keySOk = true;
+
+    function getSheetIndex(str) {
+        if(str.length === 1) {
+            return (str.charCodeAt() - 65)
+        }
+        const arr = str.split('')
+        // 因为数组从零开始 所以最后减一
+        return (arr[0].charCodeAt() - 64) * 26 + (arr[1].charCodeAt() - 64) - 1
+    }
+
+    function getDate(date) {
+        try{
+            if(!date) return '';
+            const time = new Date(date)
+            return `${time.getFullYear()}-${time.getMonth() + 1}`
+        }catch(e) {
+            return ''
+        }
+    }
+</script>
