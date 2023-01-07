@@ -161,7 +161,7 @@
         position: fixed;
         display: none;
         width: 30vw;
-        height: 38vh;
+        height: 40vh;
         overflow-y: auto;
         background-color: rgba(255, 255, 255, 0.9);
         z-index: 100;
@@ -492,8 +492,10 @@
                     addCell(grd, "div", "", 3, 13).innerHTML = this.productData[mouseInterFileds['Charger']];
                     addCell(grd, "div", "master-light", 2, 14).innerHTML = "FPS: ";
                     addCell(grd, "div", "", 3, 14).innerHTML = this.productData[mouseInterFileds['FPS']];
-                    addCell(grd, "div", "master-light", 2, 15).innerHTML = "TMC: ";
-                    addCell(grd, "div", "", 3, 15).innerHTML = getTMCTotal(this.productData).toFixed(2);
+                    addCell(grd, "div", "master-light", 2, 15).innerHTML = "Android: ";
+                    addCell(grd, "div", "", 3, 15).innerHTML = this.productData[mouseInterFileds['Android']];
+                    addCell(grd, "div", "master-light", 2, 16).innerHTML = "TMC: ";
+                    addCell(grd, "div", "", 3, 16).innerHTML = getTMCTotal(this.productData).toFixed(2);
                     let pic = addCell(grd, "img", "master-pic", 1, 1, 1, 10);
                     /* addCell(grd, "div", "master-light", 1, 1).innerHTML = "Dev: ";
                     addCell(grd, "div", "", 2, 1).innerHTML = this.dev;

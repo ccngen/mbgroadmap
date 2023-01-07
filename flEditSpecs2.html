@@ -85,6 +85,18 @@
     .fleddat-matrix-1 .fleddat-c1.fleddat-cell input{
         width: 100%;
     }
+    .fleddat-matrix-1.adnroid .fleddat-cell{
+        width: 97%;
+        justify-content: flex-start;
+    }
+    .fleddat-matrix-1.adnroid .fleddat-c1.fleddat-cell input{
+        flex-grow: 1;
+    }
+    .fleddat-matrix-1.adnroid .fleddat-c1.fleddat-cell span{
+        width: 10%;
+        min-width: 58px;
+        text-align: left;
+    }
 </style>
 
 <script>
@@ -225,6 +237,7 @@
             };
             flw = makeFLW(fdata);
             flw.grid1 = $$$(flw.body, "div", "fleddat-matrix-1");
+            flw.grid2 = $$$(flw.body, "div", "fleddat-matrix-1 android");
             flw.grid = $$$(flw.body, "div", "fleddat-matrix");
             flw.grid.pname = pname;
             flw.style.overflowY = "scroll";
@@ -238,6 +251,11 @@
                 label.innerHTML = lb;
                 const specsInput = createEmptyInput(lbel, 1, i);
             }
+            // add Android 20230107
+            const androidLabelEl = createLabel(flw.grid2, 0, appendLables.length);
+            const androidLabel = $$$(androidLabelEl, "span", "", "");
+            androidLabel.innerHTML = 'Android';
+            createEmptyInput(androidLabelEl, 1, appendLables.length);
 
             // labels & fields
             for ([i,lb] of labels.entries()) {
@@ -305,7 +323,8 @@
                 const startIndex = getSheetIndex(appendLablesIndex[0])
                 cellOtherAt(1, i).value = prj_data[startIndex + i]
             }
-
+            // android val
+            cellOtherAt(1, appendLables.length).value = prj_data[getSheetIndex(androidIndex)]
             // calculations
             cellAt(1,1).readOnly = true;
             cellAt(1,26).readOnly = true;
@@ -344,7 +363,7 @@
                 for ([i,lb] of appendLables.entries()) {
                     otherArr.push(cellOtherAt(1, i).value)
                 }
-
+                otherArr.push(cellOtherAt(1, appendLables.length).value)
                 // send to server
                 this.classList.add("spin-cursor");
                 google.script.run.withSuccessHandler(ret2 => {

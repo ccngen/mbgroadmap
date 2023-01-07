@@ -106,48 +106,9 @@ function getProduct(pname) {
     ret.note = note;
     return ret;
 }
-/*
-function saveProductSpecs(pname, arr, cmt, otherArr) { // arr=data from AF to CD, cmt=notes from AF to CD
-  // check if product already exists
-  plist = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(Plist);
-  var rng = plist.getRange(1,1,plist.getLastRow(),plist.getLastColumn());
-  data = rng.getValues();
-  idx = data.findIndex(el => el[_PNAME]==pname);
-  if (idx==-1) return false;
-  const originalData = data[idx];
 
-  // if exists, update specs
-  idx++; // so that it refers to range numbers
-  plist.getRange(_SPCS_start + idx + ":" + _SPCS_stop + idx).setValues([JSON.parse(arr)]);
-  plist.getRange(appendSpecsLablesIndex[0] + idx + ":" + appendSpecsLablesIndex[1] + idx).setValues([JSON.parse(otherArr)]);
-  plist.getRange(_SPCS_start + idx + ":" + _SPCS_stop + idx).setNotes([JSON.parse(cmt)]);
-  //syncUpdateSameSpecsData(data, originalData, JSON.parse(arr));
-  return true;
-}
-*/
-
-/*function saveProductSpecs(pname, arr, cmt) { // arr=data from AF to CD, cmt=notes from AF to CD
-  // check if product already exists
-  plist = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(Plist);
-  var rng = plist.getRange(1,1,plist.getLastRow(),plist.getLastColumn());
-  data = rng.getValues();
-  idx = data.findIndex(el => el[_PNAME]==pname);
-  //  这里可以找到这次要更新产品的数据，但还未刷新数据
-  if (idx==-1) return false;
-  const originalData = data[idx]
-  // if exists, update specs
-  idx++; // so that it refers to range numbers
-  plist.getRange(_SPCS_start + idx + ":" + _SPCS_stop + idx).setValues([JSON.parse(arr)]);
-  // plist.getRange(_SPCS_start + idx + ":" + _SPCS_stop + idx).setValues([arr]);
-  plist.getRange(_SPCS_start + idx + ":" + _SPCS_stop + idx).setNotes([JSON.parse(cmt)]);
-  // plist.getRange(_SPCS_start + idx + ":" + _SPCS_stop + idx).setNotes([cmt]);
-  syncUpdateSameSpecsData(data, originalData, JSON.parse(arr))
-  // syncUpdateSameSpecsData(data, originalData, arr)
-  return true;
-}*/
-
-function saveProductSpecs(pname, arr, cmt) { // arr=data from AF to CD, cmt=notes from AF to CD
-                                             // check if product already exists
+function saveProductSpecs(pname, arr, cmt, otherArr) { // arr=data from AF to CD, cmt=notes from AF to CD otherArr is width - Android
+    // check if product already exists
     plist = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(Plist);
     var rng = plist.getRange(1,1,plist.getLastRow(),plist.getLastColumn());
     data = rng.getValues();
@@ -161,6 +122,7 @@ function saveProductSpecs(pname, arr, cmt) { // arr=data from AF to CD, cmt=note
     // plist.getRange(_SPCS_start + idx + ":" + _SPCS_stop + idx).setValues([arr]);
     plist.getRange(_SPCS_start + idx + ":" + _SPCS_stop + idx).setNotes([JSON.parse(cmt)]);
     // plist.getRange(_SPCS_start + idx + ":" + _SPCS_stop + idx).setNotes([cmt]);
+    plist.getRange(appendSpecsLabelsIndex[0] + idx + ":" + appendSpecsLabelsIndex[1] + idx).setValues([JSON.parse(otherArr)]);
     syncUpdateSameSpecsData(data, originalData, JSON.parse(arr))
     // syncUpdateSameSpecsData(data, originalData, arr)
     return true;
