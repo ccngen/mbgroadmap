@@ -245,17 +245,17 @@
                 this.remove();
             });
 
-            for ([i,lb] of appendLables.entries()) {
+            for ([i,lb] of appendLabels.entries()) {
                 lbel = createLabel(flw.grid1, 0, i);
                 const label = $$$(lbel, "span", "", "");
                 label.innerHTML = lb;
                 const specsInput = createEmptyInput(lbel, 1, i);
             }
             // add Android 20230107
-            const androidLabelEl = createLabel(flw.grid2, 0, appendLables.length);
+            const androidLabelEl = createLabel(flw.grid2, 0, appendLabels.length);
             const androidLabel = $$$(androidLabelEl, "span", "", "");
             androidLabel.innerHTML = 'Android';
-            createEmptyInput(androidLabelEl, 1, appendLables.length);
+            createEmptyInput(androidLabelEl, 1, appendLabels.length);
 
             // labels & fields
             for ([i,lb] of labels.entries()) {
@@ -319,12 +319,12 @@
             if (!disp[5]) $(pname + "-fleddat-disp-rate").value=""; else $(pname + "-fleddat-disp-rate").value = disp[5];
             if (!disp[6]) $(pname + "-fleddat-disp-shape").value=""; else $(pname + "-fleddat-disp-shape").value = disp[6]; */
 
-            for ([i,lb] of appendLables.entries()) {
-                const startIndex = getSheetIndex(appendLablesIndex[0])
+            for ([i,lb] of appendLabels.entries()) {
+                const startIndex = getSheetIndex(appendLabelsIndex[0])
                 cellOtherAt(1, i).value = prj_data[startIndex + i]
             }
             // android val
-            cellOtherAt(1, appendLables.length).value = prj_data[getSheetIndex(androidIndex)]
+            cellOtherAt(1, appendLabels.length).value = prj_data[getSheetIndex(androidIndex)]
             // calculations
             cellAt(1,1).readOnly = true;
             cellAt(1,26).readOnly = true;
@@ -360,10 +360,10 @@
                 cmt.push("");
 
                 const otherArr = []
-                for ([i,lb] of appendLables.entries()) {
+                for ([i,lb] of appendLabels.entries()) {
                     otherArr.push(cellOtherAt(1, i).value)
                 }
-                otherArr.push(cellOtherAt(1, appendLables.length).value)
+                otherArr.push(cellOtherAt(1, appendLabels.length).value)
                 // send to server
                 this.classList.add("spin-cursor");
                 google.script.run.withSuccessHandler(ret2 => {
