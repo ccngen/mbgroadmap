@@ -347,7 +347,6 @@ function getActionItems(pname) {
     const AItemsSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(AItems);
     const rng = AItemsSheet.getRange(1,1,AItemsSheet.getLastRow(),AItemsSheet.getLastColumn());
     const list = rng.getValues();
-    pname = 'Bangkok5G_23'
 
     let filterList = list.filter(item => item[1] === pname)
     // 通过时间排序
