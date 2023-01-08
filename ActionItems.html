@@ -1,0 +1,318 @@
+<style>
+    .action-item-content{
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        height: 94%;
+    }
+    .action-item-content .AItems-btn-wrapper{
+        padding-bottom: 15px;
+    }
+    .action-item-content .AItems-btn-wrapper button{
+        margin-right: 15px;
+    }
+    .action-item-content .AItems-table tr th:last-child,
+    .action-item-content:not(.view) .AItems-table tr td:last-child{
+        display: none;
+    }
+    .AItems-table.showDelete tr th:last-child,
+    .action-item-content .AItems-table.showDelete tr td:last-child{
+        display: table-cell !important;
+    }
+    .AItems-table select option{
+        color: #333;
+    }
+    .AItems-table select.On-going, .AItems-table td.On-going{
+        color: yellow;
+    }
+    .AItems-table select.Closed, .AItems-table td.Closed{
+        color: green;
+    }
+    .AItems-table select.Delay, .AItems-table td.Delay{
+        color: red;
+    }
+    .action-item-content button.Save.loading::after{
+        content: '';
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border: 3px solid #ddd;
+        border-radius: 50%;
+        border-top: 3px solid orange;
+        box-sizing: border-box;
+        vertical-align: middle;
+        margin-left: 5px;
+        animation: loading 2s linear infinite;
+    }
+    .action-item-content.view .AItems-btn-wrapper{
+        display: none;
+    }
+    /* table style */
+    .AItems-table-wrapper{
+        height: 97%;
+        overflow-y: auto;
+    }
+    .AItems-table{
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .AItems-table textarea,
+    .AItems-table input[type="date"],
+    .AItems-table select{
+        width: 97%;
+    }
+    .AItems-table td,
+    .AItems-table th {
+        padding: 10px 8px;
+        border: 1px solid #333;
+        text-align: left;
+        padding: 5px 10px;
+        font-size: 0.9rem;
+    }
+
+    .AItems-table .title-tr {
+        color: rgba(0, 0, 0, .85);
+        font-weight: bolder;
+        background: #b3aeae;
+        font-size: 0.8rem;
+        transition: background .3s ease;
+        text-align: left;
+    }
+    .AItems-table tbody{
+        max-height: 400px;
+        overflow-y: auto;
+        width: 100%;
+    }
+
+    .AItems-table tbody tr:nth-child(odd) {
+        background: #fafafa;
+    }
+    .AItems-table  .delete-add-record{
+        position: relative;
+        top: -2px;
+        font-size: 15px;
+        margin-left: 5px;
+    }
+    .AItems-table  .delete-add-record:hover{
+        color: orange;
+        cursor: pointer;
+    }
+    @keyframes loading {
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+
+<script>
+    // type: view or edit
+    function openActionItems(pname, type = 'Edit') {
+        const _options = [
+            { label: 'On-going', color: 'yellow' },
+            { label: 'Closed', color: 'green' },
+            { label: 'Delay', color: 'red' },
+        ]
+
+        const createBtn = (base, text) => {
+            const addBtn = $$$(base, "button", text);
+            addBtn.innerHTML = text
+            return addBtn
+        }
+
+        const createTableTh = (base) => {
+            const thList = ['Date', 'Action Points', 'Status', 'Select']
+            const tableHead = $$$(base, "thead");
+            const trEl = $$$(tableHead, "tr", 'title-tr');
+            thList.forEach(text => {
+                const thEl = $$$(trEl, "th");
+                thEl.innerHTML = text
+            })
+        }
+
+        const createViewTr = (base, data = {}) => {
+            const trEl = $$$(base, "tr");
+            const keyList = ['date', 'actionPoints', 'status']
+            keyList.forEach((key) => {
+                const tdEl = $$$(trEl, "td");
+                let value = data[key] || ''
+                tdEl.innerHTML = value
+                tdEl.classList.add(value)
+            })
+        }
+
+        const createEditTr = (base, data = {}) => {
+            const trEl = $$$(base, "tr");
+            const keyList = ['date', 'actionPoints', 'status', 'select']
+            const id = data['id']
+            trEl.setAttribute('data-id', id)
+            data.isAdd && trEl.classList.add('isAdd')
+            keyList.forEach((key) => {
+                const tdEl = $$$(trEl, "td");
+                let value = data[key] || ''
+                if(key === 'date') {
+                    const nowDate = new Date()
+                    value = data[key] !== undefined ? value : `${nowDate.getFullYear()}-${nowDate.getMonth() + 1}-${nowDate.getDate()}`
+                    const dateInput = $$$(tdEl, "input")
+                    dateInput.type = 'date'
+                    dateInput.value = value
+                }
+                if(key === 'actionPoints') {
+                    const text = $$$(tdEl, "textarea", "action-points-text");
+                    text.value = value
+                }
+                if(key === 'status') {
+                    const select = $$$(tdEl, "select", "status-select");
+                    for (const opt of _options) {
+                        option = document.createElement("option");
+                        option.value = opt.label
+                        option.text = opt.label;
+                        select.add(option);
+                    }
+                    select.value = value || _options[0].label
+                    select.classList.add(value || _options[0].label)
+                    select.addEventListener('change', () => {
+                        select.setAttribute('class', 'status-select ' + select.value)
+                    })
+                }
+                if(key === 'select') {
+                    const checkBox = $$$(tdEl, "input")
+                    tdEl.style.textAlign = 'center'
+                    checkBox.type = 'checkbox'
+                    if(data.isAdd) {
+                        const span = $$$(tdEl, "span", 'delete-add-record')
+                        span.innerHTML = 'X'
+                        checkBox.setAttribute('disabled', true)
+                        span.addEventListener('click', () => {
+                            trEl.remove()
+                        })
+                    }
+                }
+            })
+            return trEl
+        }
+        // 获取单行tr的提交参数
+        const getSubmitForm = (trEl) => {
+            const data = []
+            data[0] = trEl.getAttribute('data-id')
+            data[1] = pname
+            data[2] = trEl.querySelector('input[type="date"]').value
+            data[3] = trEl.querySelector('textarea').value
+            data[4] = trEl.querySelector('select').value
+            return {
+                data,
+                checked: trEl.querySelector('input[type="checkbox"]').checked
+            }
+        }
+
+        const createId = () => {
+            const date = new Date()
+            return `${date.getFullYear()}${date.getMonth() + 1}${date.getDate()}${date.getHours()}${date.getMinutes()}${date.getSeconds()}`
+        }
+
+        google.script.run.withSuccessHandler(list => {
+            list = JSON.parse(list)
+            let fdata = {
+                _root: document.body,
+                _title: pname + " AItems " + type,
+                _blocking: false,
+                _scaled: true,
+                _headercolor: "var(--theme-color-system)",
+                _height: 50,
+                _width: 40,
+                _vrows: 10,
+                _cols: 6,
+                _licon: null,
+                _fontRatio: 0.5
+            };
+            type = type.toLocaleLowerCase()
+            flw = makeFLW(fdata);
+            flw.layout = $$$(flw.body, "div", "action-item-content " + type);
+            flw.style.overflowY = "scroll";
+            flw.addEventListener("flWindowClosed", function(e) {
+                this.remove();
+            });
+            // add button
+            const btnDiv = $$$(flw.layout, "div", "AItems-btn-wrapper");
+
+            const tableDiv = $$$(flw.layout, "div", "AItems-table-wrapper");
+            const tableEl = $$$(tableDiv, "table", "AItems-table");
+
+            createTableTh(tableEl)
+            const tableBody = $$$(tableEl, "tbody");
+            list.forEach(item => {
+                if(type === 'edit') {
+                    createEditTr(tableBody, item)
+                } else {
+                    createViewTr(tableBody, item)
+                }
+            })
+
+            if(type === 'edit') {
+                const addBtn = createBtn(btnDiv, 'Add')
+                const deleteBtn = createBtn(btnDiv, 'Delete')
+                const saveBtn = createBtn(btnDiv, 'Save')
+
+                addBtn.addEventListener('click', () => {
+                    const trEl = createEditTr(tableBody, {
+                        id: createId(),
+                        isAdd: true
+                    })
+
+                    tableBody.insertBefore(trEl, tableBody.querySelector('tr:not(.title-tr)'))
+                })
+
+                deleteBtn.addEventListener('click', () => {
+                    if(tableEl.classList.contains('showDelete')) {
+                        tableEl.classList.remove('showDelete')
+                    } else {
+                        tableEl.classList.add('showDelete')
+                    }
+                })
+
+                saveBtn.addEventListener('click', (e) => {
+                    // 新增数据
+                    const addData = Array.from(tableEl.querySelectorAll('tr.isAdd')).map((trEl) => getSubmitForm(trEl).data)
+                    // 已存参数
+                    const saveData = Array.from(tableEl.querySelectorAll('tr:not(.isAdd,.title-tr)')).map((trEl) => getSubmitForm(trEl))
+
+                    const deleteIdArr = []
+                    if(tableEl.classList.contains('showDelete')) {
+                        saveData.forEach(item => {
+                            if(item.checked) {
+                                deleteIdArr.push(item['data'][0])
+                            }
+                        })
+                    }
+                    // console.log(1, deleteIdArr)
+                    // console.log(2, addData)
+                    // console.log(3, saveData.filter(item => !item.checked).map(item => item.data))
+
+                    const btnEl = e.target
+                    btnEl.classList.add('loading')
+                    google.script.run.withSuccessHandler(() => {
+                        const msg = msgBox("Tip", 8, 17, 4, "更新成功");
+                        tableEl.querySelectorAll('tr.isAdd').forEach(el => {
+                            el.classList.remove('isAdd')
+                            el.querySelector('.delete-add-record').remove()
+                            el.querySelector('[type="checkbox"]').removeAttribute('disabled')
+                        })
+                        deleteIdArr.forEach(id => {
+                            tableEl.querySelector(`tr[data-id="${id}"]`).remove()
+                        })
+                        btnEl.classList.remove('loading')
+                        setTimeout(() => {
+                            msg.remove()
+                        }, 1000)
+                    }).saveActionItemsEdit(pname, JSON.stringify(deleteIdArr), JSON.stringify(addData), JSON.stringify(saveData.filter(item => !item.checked).map(item => item.data)))
+
+                })
+
+            }
+
+        }).getActionItems(pname);
+    }
+</script>

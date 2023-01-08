@@ -206,10 +206,13 @@ function numberToStr(num) {
     return `${numberToStr(numTimes)}${numberToStr(num - numTimes * 26)}`
 }
 
-function getTime(timestr) {
+//  获取日期字符串
+function getTimeStr(timestr) {
     if (!timestr) return 0
     const time = new Date(timestr)
-    return new Date(`${time.getFullYear()}-${time.getMonth() + 1}`)
+    const month = time.getMonth() + 1 < 10 ? '0'+(time.getMonth() + 1) : time.getMonth() + 1
+    const day = time.getDate() < 10 ? '0'+time.getDate() : time.getDate()
+    return `${time.getFullYear()}-${month}-${day}`
 }
 
 

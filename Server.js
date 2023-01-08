@@ -343,5 +343,58 @@ function updateCompsSheet() {
     })
 }
 
+function getActionItems(pname) {
+    const AItemsSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(AItems);
+    const rng = AItemsSheet.getRange(1,1,AItemsSheet.getLastRow(),AItemsSheet.getLastColumn());
+    const list = rng.getValues();
+    pname = 'Bangkok5G_23'
+
+    let filterList = list.filter(item => item[1] === pname)
+    // 通过时间排序
+    filterList = filterList.sort((a, b) => {
+        const time1 = a[2] ? new Date(a[2]).getTime() : 0
+        const time2 = b[2] ? new Date(b[2]).getTime() : 0
+        return time2 - time1
+    })
+
+    return JSON.stringify(filterList.map(item => {
+        const date = item[2] ? getTimeStr(item[2]) : ''
+        return {
+            id: item[0],
+            date: date,
+            actionPoints: item[3],
+            status: item[4],
+        }
+    }))
+}
+
+function saveActionItemsEdit(pname, deleteIdArr = '[]', addArr = '[]', savedArr = '[]') {
+    deleteIdArr = JSON.parse(deleteIdArr)
+    addArr = JSON.parse(addArr)
+    savedArr = JSON.parse(savedArr)
+
+    const AItemsSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(AItems);
+    const rng = AItemsSheet.getRange(1,1,AItemsSheet.getLastRow(),AItemsSheet.getLastColumn());
+    const list = rng.getValues();
+
+    deleteIdArr.forEach(id => {
+        const index = list.findIndex(item => item[0] == id && item[1] === pname)
+        if(index > 0) {
+            AItemsSheet.deleteRow(index + 1)
+        }
+    })
+
+    addArr.forEach(item => {
+        AItemsSheet.appendRow(item)
+    })
+
+    savedArr.forEach(item => {
+        let index = list.findIndex(item1 => item1[0] === item[0] && item1[1] === item[1])
+        if(index > 0) {
+            index++
+            AItemsSheet.getRange('A' + index + ":" + 'E' + index).setValues([item]);
+        }
+    })
+}
 
 
