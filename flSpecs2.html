@@ -40,7 +40,7 @@
             {
                 label: 'Launch',
                 children: [
-                    { label: 'OK2Ship', row: 'G'}
+                    { label: 'OK2Ship', row: 'G', type: 'date'}
                 ]
             },
             {
@@ -157,11 +157,13 @@
                     item.children.forEach((item1, index1) => {
                         const border = item.children.length === index1 + 1
                         flw.addCell2(2, index + 1, item1.label, 2, line + index1, 2 + 1, line + index1 + 1,border);
-                        const value = typeof item1.row === 'string' ? res[getSheetIndex(item1.row)] : item1.row.map(row1 => res[getSheetIndex(row1)] || 0).join(' x ')
+                        let value = typeof item1.row === 'string' ? res[getSheetIndex(item1.row)] : item1.row.map(row1 => res[getSheetIndex(row1)] || 0).join(' x ')
+                        value = item1.type === 'date' && value ? getDate(value) : value
                         flw.addCell2(3, index + 1, value + ` ${item1.unit && value ? item1.unit : ''}`, 3, line + index1, 7, line + index1 + 1, border);
                     })
                 } else {
-                    const value = res[getSheetIndex(item.row)]
+                    let value = res[getSheetIndex(item.row)]
+                    value = item.type === 'date' && value ? getDate(value) : value
                     flw.addCell2(3, index + 1, value + ` ${item.unit && value ? item.unit : ''}`, 3, line, 7, line+len, true);
                 }
                 line += len
