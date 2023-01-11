@@ -180,8 +180,8 @@
         width: 100%;
         height: 95%;
         box-sizing: border-box;
-        grid-template-columns: 35% 15% 65%;
-        grid-template-rows: repeat(14, 7%);
+        grid-template-columns: 35% 15% 50%;
+        grid-template-rows: repeat(17, 6%);
     }
     .master-bubble-grid1 {
         display: grid;
@@ -465,62 +465,30 @@
                 $("master-bubble").innerHTML = "";
                 if ((detLevel == 0) || (detLevel == 2)) {
                     let grd = $$$($("master-bubble"), "div", "master-bubble-grid0");
-                    addCell(grd, "div", "master-light", 2, 1).innerHTML = "Launch: ";
-                    addCell(grd, "div", "", 3, 1).innerHTML = this.Launch;
-                    addCell(grd, "div", "master-light", 2, 2).innerHTML = "Family: ";
-                    addCell(grd, "div", "", 3, 2).innerHTML = this.family;
-                    addCell(grd, "div", "master-light", 2, 3).innerHTML = "Design: ";
-                    addCell(grd, "div", "", 3, 3).innerHTML = this.cmf;
-                    addCell(grd, "div", "master-light", 2, 4).innerHTML = "Chipset: ";
-                    addCell(grd, "div", "", 3, 4).innerHTML = this.chipset;
-                    addCell(grd, "div", "master-light", 2, 5).innerHTML = "Display: ";
-                    addCell(grd, "div", "", 3, 5).innerHTML = this.display.split(" ", 4).join(" ") + " " + this.display.split(" ", 6)[5];
-                    addCell(grd, "div", "master-light", 2, 6).innerHTML = "R. Cam#1: ";
-                    addCell(grd, "div", "", 3, 6).innerHTML = this.cam1;
-                    addCell(grd, "div", "master-light", 2, 7).innerHTML = "Cam#2: ";
-                    addCell(grd, "div", "", 3, 7).innerHTML = this.cam2;
-                    addCell(grd, "div", "master-light", 2, 8).innerHTML = "Cam#3: ";
-                    addCell(grd, "div", "", 3, 8).innerHTML = this.cam3;
-                    addCell(grd, "div", "master-light", 2, 9).innerHTML = "Cam#4: ";
-                    addCell(grd, "div", "", 3, 9).innerHTML = this.cam4;
-                    addCell(grd, "div", "master-light", 2, 10).innerHTML = "F. Cam #1: ";
-                    addCell(grd, "div", "", 3, 10).innerHTML = this.selfie;
-                    addCell(grd, "div", "master-light", 2, 11).innerHTML = "Audio: ";
-                    addCell(grd, "div", "", 3, 11).innerHTML = this.productData[mouseInterFileds['Audio']];
-                    addCell(grd, "div", "master-light", 2, 12).innerHTML = "Battery: ";
-                    addCell(grd, "div", "", 3, 12).innerHTML = this.battery;
-                    addCell(grd, "div", "master-light", 2, 13).innerHTML = "Charger: ";
-                    addCell(grd, "div", "", 3, 13).innerHTML = this.productData[mouseInterFileds['Charger']];
-                    addCell(grd, "div", "master-light", 2, 14).innerHTML = "FPS: ";
-                    addCell(grd, "div", "", 3, 14).innerHTML = this.productData[mouseInterFileds['FPS']];
-                    addCell(grd, "div", "master-light", 2, 15).innerHTML = "Android: ";
-                    addCell(grd, "div", "", 3, 15).innerHTML = this.productData[mouseInterFileds['Android']];
-                    addCell(grd, "div", "master-light", 2, 16).innerHTML = "TMC: ";
-                    addCell(grd, "div", "", 3, 16).innerHTML = getTMCTotal(this.productData).toFixed(2);
+                    const mouseTopData = [
+                        { label: 'Launch', value: this.Launch },
+                        { label: 'Family', value: this.family },
+                        { label: 'Design', value: this.cmf },
+                        { label: 'Chipset', value: this.chipset },
+                        { label: 'Display', value: this.display.split(" ", 4).join(" ") + " " + this.display.split(" ", 6)[5] },
+                        { label: 'R. Cam#1', value: this.cam1 },
+                        { label: 'Cam#2', value: this.cam2 },
+                        { label: 'Cam#3', value: this.cam3 },
+                        { label: 'Cam#4', value: this.cam4 },
+                        { label: 'F. Cam #1', value: this.selfie },
+                        { label: 'Audio', value: this.productData[mouseInterFileds['Audio']] },
+                        { label: 'Battery', value: this.battery },
+                        { label: 'Charger', value: this.productData[mouseInterFileds['Charger']] },
+                        { label: 'FPS', value: this.productData[mouseInterFileds['FPS']] },
+                        { label: 'Memory', value: this.productData[mouseInterFileds['Memory']] },
+                        { label: 'Android', value: this.productData[mouseInterFileds['Android']] },
+                        { label: 'TMC', value: getTMCTotal(this.productData).toFixed(2) },
+                    ]
+                    mouseTopData.forEach((item, index) => {
+                        addCell(grd, "div", "master-light", 2, index + 1).innerHTML = item.label + ": ";
+                        addCell(grd, "div", "", 3, index + 1).innerHTML = item.value;
+                    })
                     let pic = addCell(grd, "img", "master-pic", 1, 1, 1, 10);
-                    /* addCell(grd, "div", "master-light", 1, 1).innerHTML = "Dev: ";
-                    addCell(grd, "div", "", 2, 1).innerHTML = this.dev;
-                    addCell(grd, "div", "master-light", 1, 2).innerHTML = "Family: ";
-                    addCell(grd, "div", "", 2, 2).innerHTML = this.family;
-                    addCell(grd, "div", "master-light", 1, 3).innerHTML = "Chipset: ";
-                    addCell(grd, "div", "", 2, 3).innerHTML = this.chipset;
-                    addCell(grd, "div", "master-light", 1, 4).innerHTML = "Display: ";
-                    addCell(grd, "div", "", 2, 4).innerHTML = this.display.split(" ", 4).join(" ") + " " + this.display.split(" ", 6)[5];
-                    addCell(grd, "div", "master-light", 1, 5).innerHTML = "Camera#1: ";
-                    addCell(grd, "div", "", 2, 5).innerHTML = this.cam1;
-                    addCell(grd, "div", "master-light", 1, 6).innerHTML = "Camera#2: ";
-                    addCell(grd, "div", "", 2, 6).innerHTML = this.cam2;
-                    addCell(grd, "div", "master-light", 1, 7).innerHTML = "Camera#3: ";
-                    addCell(grd, "div", "", 2, 7).innerHTML = this.cam3;
-                    addCell(grd, "div", "master-light", 1, 8).innerHTML = "Camera#4: ";
-                    addCell(grd, "div", "", 2, 8).innerHTML = this.cam4;
-                    addCell(grd, "div", "master-light", 1, 9).innerHTML = "Selfie: ";
-                    addCell(grd, "div", "", 2, 9).innerHTML = this.selfie;
-                    addCell(grd, "div", "master-light", 1, 10).innerHTML = "Battery: ";
-                    addCell(grd, "div", "", 2, 10).innerHTML = this.battery;
-                    addCell(grd, "div", "master-light", 1, 11).innerHTML = "Charging: ";
-                    addCell(grd, "div", "", 2, 11).innerHTML = this.charging;
-                    let pic = addCell(grd, "img", "master-pic", 3, 1, 3, 6); */
                     pic.src = this.picbytes;
                     if (this.picbytes!="") pic.style.display = "block";
                     else pic.style.display = "none";
