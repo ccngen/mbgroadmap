@@ -123,47 +123,7 @@ function saveProductSpecs(pname, arr, cmt, otherArr) { // arr=data from AF to CD
     plist.getRange(_SPCS_start + idx + ":" + _SPCS_stop + idx).setNotes([JSON.parse(cmt)]);
     // plist.getRange(_SPCS_start + idx + ":" + _SPCS_stop + idx).setNotes([cmt]);
     plist.getRange(appendSpecsLabelsIndex[0] + idx + ":" + appendSpecsLabelsIndex[1] + idx).setValues([JSON.parse(otherArr)]);
-    syncUpdateSameSpecsData(data, originalData, JSON.parse(arr))
-    // syncUpdateSameSpecsData(data, originalData, arr)
     return true;
-}
-
-function syncUpdateSameSpecsData(plistData, originalData, arr) {
-    const sheetFiledList = plistData[0]
-    const dataFiledList = JSON.parse(JSON.stringify(plistData[0])).splice(getSheetIndex(_SPCS_start), arr.length) // 提交数据arr对应的列字段列表
-    // 1. 对整个产品列表进行循环
-    plistData.forEach((productItem, rowIndex) => {
-        // 2. 对需要进行刷新的字段列表进行循环， 对每一个产品的对应字段的描述进行对比， 如果一样则setValue
-        editSpecsSyncUpdateList.forEach((filed, compIndex) => {
-            const filedSheetIndex = sheetFiledList.indexOf(filed) // 在sheet的位置
-            const filedDataIndex = dataFiledList.indexOf(filed) // 在提交数据的位置
-            if (productItem[filedSheetIndex] === originalData[filedSheetIndex] && productItem[filedSheetIndex]) {
-                //const col = numberToStr(filedSheetIndex + 1)
-                //const col1 = numberToStr(filedSheetIndex + 2)
-                const col = filed === 'FCam' ? 'BY' : numberToStr(filedSheetIndex + 1)
-                const col1 = filed === 'FCam' ? 'BZ' : numberToStr(filedSheetIndex + 2)
-                plist.getRange(col+(rowIndex + 1)).setValue(arr[filedDataIndex]);
-                plist.getRange(col1+(rowIndex + 1)).setValue(arr[filedDataIndex + 1]);
-            }
-        })
-    })
-
-    editSpecsSyncUpdateList.forEach((filed) => {
-        const filedSheetIndex = sheetFiledList.indexOf(filed) // 在sheet的位置
-        const filedDataIndex = dataFiledList.indexOf(filed) // 在提交数据的位置
-        syncCompsSheetData(filed, originalData[filedSheetIndex], [filed, arr[filedDataIndex], arr[filedDataIndex + 1]])
-    })
-}
-
-function syncCompsSheetData(componentName, originalSpecs, newData) {
-    const compsSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(Comps);
-    const rng = compsSheet.getRange(1,1,compsSheet.getLastRow(),compsSheet.getLastColumn());
-    const compsData = rng.getValues();
-    const rowIndex = compsData.findIndex(comp => comp[0] === componentName && comp[1] === originalSpecs)
-
-    if(rowIndex > -1) {
-        compsSheet.getRange('A'+(rowIndex + 1) + ':' + 'C'+(rowIndex + 1)).setValues([newData])
-    }
 }
 
 function setProductNetWork(pname, Network) {
@@ -318,28 +278,89 @@ function getCompsData() {
     return JSON.stringify(data)
 }
 
-function updateCompsSheet() {
-    const pList = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(Plist);
-    const compsSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(Comps);
-    const rng = pList.getDataRange();
-    const data = rng.getValues();
+// 获取表数据
 
-    const [fieldList, ...products] = data
-    const existsMap = {} // 存储已保存的描述，防止重复添加
+function getDataBySheetName(sheetName) {
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
+    const rng = sheet.getRange(1,1,sheet.getLastRow(),sheet.getLastColumn());
+    return {
+        sheet,
+        rng,
+        data: rng.getValues()
+    }
+}
+// 获取components表的数据
+function getComponentsData() {
+    const comList = getDataBySheetName(Comps).data.slice(1)
+    const productList = getDataBySheetName(Plist).data
+    const filedArr = productList[0]
+    const componentNameArr =  Array.from(new Set(comList.map(com => com[0])))
 
-    editSpecsSyncUpdateList.forEach(item => {
-        const index = fieldList.indexOf(item)
-        existsMap[item] = []
-        if(index > -1) {
-            products.forEach(product => {
-                const specs = product[index]
-                const cost = product[index+1]
-                if(!existsMap[item].includes(specs)) {
-                    compsSheet.appendRow([item, specs, cost])
-                    existsMap[item].push(specs)
-                }
-            })
+    const data = {}
+    comList.forEach(com => {
+        const obj = { specs: com[1], value: com[2], products: [] }
+        if(data[com[0]]) {
+            return data[com[0]][com[1]] = obj
         }
+        data[com[0]] = { [com[1]]: obj }
+    })
+    // 为了减少循环次数，循环产品列表，去匹配每个产品的specs描述对得上不
+    productList.forEach(product => {
+        componentNameArr.forEach(filed => {
+            const comData = data[filed]
+            const filedIndex = filedArr.indexOf(filed)
+            if (comData[product[filedIndex]]) {
+                comData[product[filedIndex]].products.push(product[0])
+            }
+        })
+    })
+    //  转化数据格式
+    Object.entries(data).forEach(([key, value]) => {
+        data[key] = Object.values(value)
+    })
+    return JSON.stringify(data)
+}
+
+function saveComponentsAndSync(deleteArr = '[]', addArr = '[]', savedArr = '[]') {
+    deleteArr = JSON.parse(deleteArr)
+    addArr = JSON.parse(addArr)
+    savedArr = JSON.parse(savedArr)
+    const plistObj = getDataBySheetName(Plist)
+    const compsObj = getDataBySheetName(Comps)
+    const comList = compsObj.data.slice(1)
+    const productList = plistObj.data
+    const filedArr = productList[0]
+
+    deleteArr.forEach(comp => {
+        const { val } = comp
+        let compIndex = comList.findIndex(item => item[0] == val[0] && comp.id === item[1] + '||' + item[2])
+        if(compIndex > -1) {
+            compsObj.sheet.deleteRow(compIndex + 2)
+        }
+    })
+
+    savedArr.forEach(comp => {
+        const { val, products } = comp
+        const filedIndex = filedArr.indexOf(val[0])
+        products.forEach(p => {
+            const rowIndex = productList.findIndex(item => item[0] === p)
+            if(rowIndex > 0) {
+                const col = val[0] === 'FCam' ? 'BY' : numberToStr(filedIndex + 1)
+                const col1 = val[0] === 'FCam' ? 'BZ' : numberToStr(filedIndex + 2)
+                plistObj.sheet.getRange(col+(rowIndex + 1)).setValue(val[1]);
+                plistObj.sheet.getRange(col1+(rowIndex + 1)).setValue(val[2]);
+            }
+        })
+
+        let compIndex = comList.findIndex(item => item[0] == val[0] && comp.id === item[1] + '||' + item[2])
+        if(compIndex > -1) {
+            compIndex += 2
+            compsObj.sheet.getRange('A' + compIndex + ":" + 'C' + compIndex).setValues([val]);
+        }
+    })
+
+    addArr.forEach(item => {
+        compsObj.sheet.appendRow(item.val)
     })
 }
 
