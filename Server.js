@@ -362,6 +362,10 @@ function saveComponentsAndSync(deleteArr = '[]', addArr = '[]', savedArr = '[]')
     addArr.forEach(item => {
         compsObj.sheet.appendRow(item.val)
     })
+    if(addArr.length > 0) {
+        var rng = compsObj.sheet.getRange(2, 1, compsObj.sheet.getLastRow()-1, compsObj.sheet.getLastColumn());
+        rng.sort([{column: 1, ascending: true}]);
+    }
 }
 
 function getActionItems(pname) {
