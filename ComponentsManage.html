@@ -253,7 +253,7 @@
                 // 新增数据
                 const addData = Array.from(tableBody.querySelectorAll('tr.isAdd')).map((trEl) => getSubmitForm(trEl).data)
                 // 已存参数
-                const saveData = Array.from(tableBody.querySelectorAll('tr:not(.isAdd,.title-tr)')).map((trEl) => getSubmitForm(trEl))
+                let saveData = Array.from(tableBody.querySelectorAll('tr:not(.isAdd,.title-tr)')).map((trEl) => getSubmitForm(trEl))
 
                 const deleteArr = []
 
@@ -262,7 +262,21 @@
                         deleteArr.push(item['data'])
                     }
                 })
+                saveData = saveData.filter(item => !item.checked).map(item => item.data)
 
+                let checkFlag = true
+                addData.forEach(item => {
+                    const { val } = item
+                    const list = saveData.filter(item => !item.checked).map(item => item.data)
+                    if(list.find(comps => comps.val[1] === val[1])) {
+                        checkFlag = false
+                    }
+                })
+
+                const saveDataSpecs = Array.from(new Set(saveData.map(item => item.val[1])))
+                if(!checkFlag || saveDataSpecs.length !== saveData.length) {
+                    return msgBox("Tip", 8, 17, 4, "不能有重复的specs");
+                }
 
                 console.log(addData, 'addData')
                 console.log(saveData, 'saveData')
