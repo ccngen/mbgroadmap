@@ -268,11 +268,9 @@ function getCompsData() {
     const data = {}
     if (compsData.length > 0) {
         compsData.forEach(comp => {
-            const [ componentName, specs] = comp
-            if(editSpecsSyncUpdateList.includes(componentName) && specs) {
-                data[componentName] = data[componentName] || []
-                data[componentName].push(comp)
-            }
+            const componentName = comp[0]
+            data[componentName] = data[componentName] || []
+            data[componentName].push(comp)
         })
     }
     return JSON.stringify(data)
