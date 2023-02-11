@@ -122,7 +122,7 @@
         }
 
         const createTableTh = (base) => {
-            const thList = ['Specs', 'Value', 'Products', 'Select']
+          const thList = ['Specs', 'Cost', 'Target', 'Products', 'Select']
             const tableHead = $$$(base, "thead");
             const trEl = $$$(tableHead, "tr", 'title-tr');
             thList.forEach(text => {
@@ -133,19 +133,15 @@
 
         const createEditTr = (base, data = {}) => {
             const trEl = $$$(base, "tr");
-            const keyList = ['specs', 'value', 'products', 'select']
+            const keyList = ['specs', 'value', 'target','products', 'select']
             trEl.setAttribute('data-id', createId(data))
             data.isAdd && trEl.classList.add('isAdd')
             keyList.forEach((key) => {
                 const tdEl = $$$(trEl, "td");
                 let value = data[key] || ''
-                if(key === 'specs') {
-                    const text = $$$(tdEl, "input", "specs-text");
-                    text.value = value
-                }
-                if(key === 'value') {
-                    const text = $$$(tdEl, "input", "value-text");
-                    text.value = value
+                if(key === 'value' || key === 'target' || key === 'specs') {
+                  const text = $$$(tdEl, "input", `${key}-text`);
+                  text.value = value
                 }
 
                 if(key === 'products') {
@@ -177,8 +173,10 @@
                 products: trEl.querySelector('.products-td').innerHTML.split(',').map(p => p.trim()).filter(p => p)
             }
             data.val[0] = document.querySelector('.component-select').value
-            data.val[1] = trEl.querySelector('.specs-text').value
-            data.val[2] = trEl.querySelector('.value-text').value
+            const textList = ['specs', 'value', 'target']
+            textList.forEach((key, index) => {
+              data.val[index+1] = trEl.querySelector(`.${key}-text`).value
+            })
             return {
                 data,
                 checked: trEl.querySelector('input[type="checkbox"]').checked,
