@@ -107,7 +107,7 @@ function getProduct(pname) {
     return ret;
 }
 
-function saveProductSpecs(pname, arr, cmt, otherArr) { // arr=data from AF to CD, cmt=notes from AF to CD otherArr is width - Android
+function saveProductSpecs(pname, arr, cmt, androidVal) { // arr=data from AF to CD, cmt=notes from AF to CD otherArr is width - Android
     // check if product already exists
     plist = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(Plist);
     var rng = plist.getRange(1,1,plist.getLastRow(),plist.getLastColumn());
@@ -122,7 +122,7 @@ function saveProductSpecs(pname, arr, cmt, otherArr) { // arr=data from AF to CD
     // plist.getRange(_SPCS_start + idx + ":" + _SPCS_stop + idx).setValues([arr]);
     plist.getRange(_SPCS_start + idx + ":" + _SPCS_stop + idx).setNotes([JSON.parse(cmt)]);
     // plist.getRange(_SPCS_start + idx + ":" + _SPCS_stop + idx).setNotes([cmt]);
-    plist.getRange(appendSpecsLabelsIndex[0] + idx + ":" + appendSpecsLabelsIndex[1] + idx).setValues([JSON.parse(otherArr)]);
+    plist.getRange(appendSpecsLabelsIndex[1] + idx).setValue(androidVal);
     return true;
 }
 
@@ -419,4 +419,16 @@ function saveActionItemsEdit(pname, deleteIdArr = '[]', addArr = '[]', savedArr 
     })
 }
 
-
+function saveProductDimension(pname , list) {
+    const saveIndex = ['CO', 'CU']
+    plist = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(Plist);
+    var rng = plist.getRange(1,1,plist.getLastRow(),plist.getLastColumn());
+    data = rng.getValues();
+    idx = data.findIndex(el => el[_PNAME]==pname);
+    //  这里可以找到这次要更新产品的数据，但还未刷新数据
+    if (idx==-1) return false;
+    // if exists, update specs
+    idx++; // so that it refers to range numbers
+    plist.getRange(saveIndex[0] + idx + ":" + saveIndex[1] + idx).setValues([JSON.parse(list)]);
+    return true;
+}

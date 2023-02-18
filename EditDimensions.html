@@ -1,0 +1,138 @@
+<style>
+  .edit-dimensions-content{
+    padding: 10px;
+  }
+  .edit-dimensions-content .dimension-line{
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+  }
+  .edit-dimensions-content .dimension-line-label{
+    display: inline-block;
+    width: 80px;
+    flex-shrink: 0;
+  }
+  .edit-dimensions-content .dimension-line-input{
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    padding: 0 7px;
+    height: 24px;
+    line-height: 24px;
+    flex-grow: 1;
+  }
+  .edit-dimensions-content .btnWrapper{
+    text-align: center;
+  }
+  .edit-dimensions-content .btnWrapper button{
+    width: 120px;
+    height: 25px;
+    background: #ddd;
+    border-radius: 6px;
+    border: 1px solid #aaa;
+    margin-top: 5px;
+  }
+  .edit-dimensions-content .btnWrapper button:hover{
+    cursor: pointer;
+    background: #ccc;
+  }
+  button.loading::after{
+    content: '';
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 3px solid #ddd;
+    border-radius: 50%;
+    border-top: 3px solid orange;
+    box-sizing: border-box;
+    vertical-align: middle;
+    margin-left: 5px;
+    animation: loading 2s linear infinite;
+  }
+  @keyframes loading {
+    from {
+      transform: rotate(0deg);
+    }
+
+    to {
+      transform: rotate(360deg);
+    }
+  }
+</style>
+
+<script>
+  function editDimensions(product) {
+    const createLine = (container, label, value) => {
+      const divEl = $$$(container, "div", "dimension-line");
+      const labelEl = $$$(divEl, "label", "dimension-line-label");
+      labelEl.innerHTML = label
+      const input = $$$(divEl, "input", "dimension-line-input");
+      input.setAttribute('type', 'text')
+      input.value = value
+    }
+
+    const createButton = (options) => {
+      const { parent, className = '', onClick, content } = options
+      const btn = $$$(parent, "button", className);
+      btn.innerHTML = content
+      parent.addEventListener('click', (e) => {typeof onClick === 'function' && onClick(e)})
+      return btn
+    }
+
+    // create window
+    let fdata = {
+      _root: document.body,
+      _title: `Edit Dimensions  (${product.pname})`,
+      _blocking: true,
+      _scaled: true,
+      _headercolor: "var(--theme-color-system)",
+      _height: 28,
+      _width: 25,
+      _vrows: 7,
+      _cols: 3,
+      _licon: null,
+      _fontRatio: 0.4
+    };
+    let flw = makeFLW(fdata);
+    flw.product = product;
+    flw.layout = $$$(flw.body, "div", "edit-dimensions-content");
+    flw.addEventListener("flWindowClosed", function(e) {
+      this.remove();
+    });
+
+    google.script.run.withSuccessHandler(ret => {
+      // labels
+      const prj_data = JSON.parse(ret.prod);
+      const dataStartIndex = getSheetIndex(dimensionsLabelsIndex[0])
+      dimensionsLabels.forEach((label, index) => {
+        createLine(flw.layout, label, prj_data[dataStartIndex + index])
+      })
+      const btnDiv = $$$(flw.layout, "div", 'btnWrapper');
+      const btn = createButton({
+        parent: btnDiv,
+        content: 'submit',
+        onClick(e) {
+          const inputEls = flw.layout.querySelectorAll('input')
+          const data = [...inputEls].map((el) => {
+            return el.value
+          })
+          e.target.classList.add('loading')
+          google.script.run.withSuccessHandler(ret => {
+            let msg;
+            if(ret) {
+              msg = msgBox("Tip", 8, 17, 4, "保存成功");
+            } else {
+              msg = msgBox("Tip", 8, 17, 4, "保存失败");
+            }
+            e.target.classList.remove('loading')
+            setTimeout(() => {
+              msg.remove()
+              flw.remove()
+            }, 1500)
+          }).saveProductDimension(product.pname, JSON.stringify(data))
+
+        }
+      })
+    }).getProduct(product.pname);
+
+  }
+</script>
