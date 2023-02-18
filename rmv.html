@@ -180,7 +180,7 @@
     .master-bubble-grid0 {
         display: grid;
         width: 100%;
-        height: 95%;
+        height: 98%;
         box-sizing: border-box;
         grid-template-columns: 35% 15% 50%;
         grid-template-rows: repeat(17, 6%);
@@ -481,6 +481,7 @@
                         { label: 'Audio', value: this.productData[mouseInterFileds['Audio']] },
                         { label: 'Battery', value: this.battery },
                         { label: 'Charger', value: this.productData[mouseInterFileds['Charger']] },
+                        { label: 'WLC', value: this.productData[mouseInterFileds['WLC']] },
                         { label: 'FPS', value: this.productData[mouseInterFileds['FPS']] },
                         { label: 'Memory', value: this.productData[mouseInterFileds['Memory']] },
                         { label: 'Android', value: this.productData[mouseInterFileds['Android']] },
@@ -490,6 +491,7 @@
                         addCell(grd, "div", "master-light", 2, index + 1).innerHTML = item.label + ": ";
                         addCell(grd, "div", "", 3, index + 1).innerHTML = item.value;
                     })
+                    grd.style = `grid-template-rows: repeat(${mouseTopData.length}, ${parseFloat(100 / mouseTopData.length)}%);`
                     let pic = addCell(grd, "img", "master-pic", 1, 1, 1, 10);
                     pic.src = this.picbytes;
                     if (this.picbytes!="") pic.style.display = "block";

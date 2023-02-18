@@ -296,7 +296,7 @@ function getComponentsData() {
 
     const data = {}
     comList.forEach(com => {
-        const obj = { specs: com[1], value: com[2], products: [] }
+        const obj = { specs: com[1], value: com[2], target: com[3], products: [] }
         if(data[com[0]]) {
             return data[com[0]][com[1]] = obj
         }
@@ -353,7 +353,7 @@ function saveComponentsAndSync(deleteArr = '[]', addArr = '[]', savedArr = '[]')
         let compIndex = comList.findIndex(item => item[0] == val[0] && comp.id === item[1] + '||' + item[2])
         if(compIndex > -1) {
             compIndex += 2
-            compsObj.sheet.getRange('A' + compIndex + ":" + 'C' + compIndex).setValues([val]);
+            compsObj.sheet.getRange('A' + compIndex + ":" + 'D' + compIndex).setValues([val]);
         }
     })
 
