@@ -35,10 +35,7 @@ const _STATUS_stop = "CM";
 const _LTF_range = "P2:W";
 const _NETWORK = "CN";
 const _CNAME = "I";
-
-const appendSpecsLabelsIndex = ['CO', 'CV']; // V-16-2023-1-16 Debug
-const appendLabels = ["X (mm)", "Y (mm)", "Z (mm)", "Bezel (mm)", "Head (mm)", "Chin (mm)", "Weight (g)"];
-const androidIndex = 'CV'
+const specsAppendIndex = ['CV', 'CX'] // Android,OD,Handbook
 
 var ws;
 var data;

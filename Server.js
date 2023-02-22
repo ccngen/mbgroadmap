@@ -107,7 +107,7 @@ function getProduct(pname) {
     return ret;
 }
 
-function saveProductSpecs(pname, arr, cmt, androidVal) { // arr=data from AF to CD, cmt=notes from AF to CD otherArr is width - Android
+function saveProductSpecs(pname, arr, cmt, appendArr) { // arr=data from AF to CD, cmt=notes from AF to CD otherArr is width - Android
     // check if product already exists
     plist = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(Plist);
     var rng = plist.getRange(1,1,plist.getLastRow(),plist.getLastColumn());
@@ -122,7 +122,7 @@ function saveProductSpecs(pname, arr, cmt, androidVal) { // arr=data from AF to 
     // plist.getRange(_SPCS_start + idx + ":" + _SPCS_stop + idx).setValues([arr]);
     plist.getRange(_SPCS_start + idx + ":" + _SPCS_stop + idx).setNotes([JSON.parse(cmt)]);
     // plist.getRange(_SPCS_start + idx + ":" + _SPCS_stop + idx).setNotes([cmt]);
-    plist.getRange(appendSpecsLabelsIndex[1] + idx).setValue(androidVal);
+    plist.getRange(specsAppendIndex[0] + idx + ":" + specsAppendIndex[1] + idx).setValues([JSON.parse(appendArr)]);
     return true;
 }
 

@@ -409,6 +409,8 @@
             // add product data to the product box
             tmp.pname = prd[_name];
             tmp.cname = prd[_cname];
+            tmp.od = prd[getSheetIndex('CW')];
+            tmp.handbook = prd[getSheetIndex('CX')];
             tmp.x = x;
             tmp.y = y;
             tmp.dev = prd[_dev];
@@ -622,6 +624,7 @@
 
 <body onload="load()">
 <div class="" id="master-data"></div>
+<img src="https://drive.google.com/file/d/13Rn4WnY1KZk4VMsmA2XRk7TA2VQqZ4ua/view"/>
 <div class="master-invisible" id="spinner">
     <div class="spinner"></div>
 </div>

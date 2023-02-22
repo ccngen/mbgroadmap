@@ -1,4 +1,12 @@
 <script>
+    function openNewPage(url = '') {
+        if(url.trim().indexOf('http') === 0) {
+            window.open(url)
+        } else {
+            alert('没有填写跳转链接，或者填写的格式不对')
+        }
+    }
+
     function keyPrss() {
         document.onkeydown = function (e) {
             e = e || window.event;
@@ -167,6 +175,12 @@
             // Action Items end
             case "menu-itm31":
                 openManageComponents();
+                break;
+            case "menu-itm41":
+                openNewPage(callingCell.od)
+                break;
+            case "menu-itm42":
+                openNewPage(callingCell.handbook)
                 break;
         }
     }

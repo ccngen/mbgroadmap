@@ -267,7 +267,18 @@
                     tmp.addEventListener("focusout", function(e) {this.style.height = "";});
                 }
             }
-            createInput(flw.grid, "textarea", 0, 27, 3, 27).style.height = "calc(var(--fleddat-cellH) * 3 - 0.5em)";
+            const labelsAfterStartIndex = labels.length
+            const textAreaIndex = labelsAfterStartIndex + specsNewLabel.length
+            specsNewLabel.forEach((item, i) => {
+                const { label, index } = item
+                const uiIndex = labelsAfterStartIndex + i
+                createLabel(flw.grid, 0, uiIndex).innerHTML = label;
+                createInput(flw.grid, "text", 1, uiIndex, 3);
+                cellAt(1, uiIndex).value = prj_data[getSheetIndex(index)]
+            })
+
+
+            createInput(flw.grid, "textarea", 0, textAreaIndex, 3, textAreaIndex).style.height = "calc(var(--fleddat-cellH) * 3 - 0.5em)";
 
             // fill in data
             cellAt(1, 0).value = toNum(prj_data[_nondm]).toFixed(2);
@@ -278,10 +289,9 @@
                 cellAt(2, i+2).value = prj_data[_nondm+1+2*i];
                 cellAt(3, i+2).value = prj_note[_nondm+1+2*i];
             }
-            cellAt(0, 27).value = prj_data[_comments];
 
-            // android val
-            cellOtherAt(1, 10).value = prj_data[getSheetIndex(androidIndex)]
+            cellAt(0, textAreaIndex).value = prj_data[_comments];
+
 
             // calculations
             cellAt(1,1).readOnly = true;
@@ -290,15 +300,16 @@
             reCalc(pname);
 
             // submit button
-            var subm = $$$(flw.grid, "div", "fleddat-cell fleddat-submit", pname + "-fleddat-cell-0-6").setAt(0, 28, 3, 28);
+            var subm = $$$(flw.grid, "div", "fleddat-cell fleddat-submit", pname + "-fleddat-cell-0-6").setAt(0, textAreaIndex + 1, 3, textAreaIndex + 1);
             subm.innerHTML = "Save Data";
 
             subm.onclick = function(e) {
-                arr = [];
-                cmt = [];
+                const arr = [];
+                const cmt = [];
+                const appendArr = []
                 arr.push($(this.parentNode.pname + "-fleddat-cell-1-0").value);
                 cmt.push($(this.parentNode.pname + "-fleddat-cell-3-0").value);
-                for (i=2; i<26; i++) {
+                for (i=2; i<labels.length - 1; i++) {
                     arr.push($(this.parentNode.pname + "-fleddat-cell-2-" + i).value);
                     cmt.push($(this.parentNode.pname + "-fleddat-cell-3-" + i).value);
                     arr.push($(this.parentNode.pname + "-fleddat-cell-1-" + i).value);
@@ -309,7 +320,11 @@
                 arr.push($(this.parentNode.pname + "-fleddat-cell-3-1").value);
                 cmt.push("");
 
-                const androidVal = cellOtherAt(1, 10).value
+                specsNewLabel.forEach((item, i) => {
+                    const uiIndex = labelsAfterStartIndex + i
+                    appendArr.push(cellAt(1, uiIndex).value)
+                })
+
                 // send to server
                 this.classList.add("spin-cursor");
                 google.script.run.withSuccessHandler(ret2 => {
@@ -320,7 +335,7 @@
                     }
                     this.parentNode.parentNode.root.remove();
                     doUpdate();
-                }).saveProductSpecs(pname, JSON.stringify(arr), JSON.stringify(cmt), androidVal);
+                }).saveProductSpecs(pname, JSON.stringify(arr), JSON.stringify(cmt), JSON.stringify(appendArr));
 
             };
         }).getProduct(pname);
