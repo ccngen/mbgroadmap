@@ -1,0 +1,241 @@
+<style>
+    .action-item-content{
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        height: 94%;
+    }
+    .action-item-content .AItems-btn-wrapper{
+        padding-bottom: 15px;
+    }
+    .action-item-content .AItems-btn-wrapper button{
+        margin-right: 15px;
+    }
+    .AItems-table.showDelete tr th:last-child,
+    .action-item-content .AItems-table.showDelete tr td:last-child{
+        display: table-cell !important;
+    }
+    .AItems-table select option{
+        color: #333;
+    }
+    .AItems-table select.On-going, .AItems-table td.On-going{
+        color: yellow;
+    }
+    .AItems-table select.Closed, .AItems-table td.Closed{
+        color: green;
+    }
+    .AItems-table select.Delay, .AItems-table td.Delay{
+        color: red;
+    }
+    .action-item-content button.Save.loading::after{
+        content: '';
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border: 3px solid #ddd;
+        border-radius: 50%;
+        border-top: 3px solid orange;
+        box-sizing: border-box;
+        vertical-align: middle;
+        margin-left: 5px;
+        animation: loading 2s linear infinite;
+    }
+    .action-item-content.view .AItems-btn-wrapper{
+        display: none;
+    }
+    /* table style */
+    .AItems-table-wrapper{
+        height: 97%;
+        overflow-y: auto;
+    }
+    .AItems-table{
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .AItems-table textarea,
+    .AItems-table input[type="date"],
+    .AItems-table select{
+        width: 97%;
+    }
+    .AItems-table td,
+    .AItems-table th {
+        padding: 10px 8px;
+        border: 1px solid #333;
+        text-align: left;
+        padding: 5px 10px;
+        font-size: 0.9rem;
+    }
+
+    .AItems-table .title-tr {
+        color: rgba(0, 0, 0, .85);
+        font-weight: bolder;
+        background: #b3aeae;
+        font-size: 0.8rem;
+        transition: background .3s ease;
+        text-align: left;
+    }
+    .AItems-table tbody{
+        max-height: 400px;
+        overflow-y: auto;
+        width: 100%;
+    }
+
+    .AItems-table tbody tr:nth-child(odd) {
+        background: #fafafa;
+    }
+    .AItems-table  .delete-add-record{
+        position: relative;
+        top: -2px;
+        font-size: 15px;
+        margin-left: 5px;
+    }
+    .AItems-table  .delete-add-record:hover{
+        color: orange;
+        cursor: pointer;
+    }
+    @keyframes loading {
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+
+<script>
+    // type: view or edit
+    function openMeeting() {
+        const createBtn = (base, text) => {
+            const addBtn = $$$(base, "button", text);
+            addBtn.innerHTML = text
+            return addBtn
+        }
+
+        const createViewTr = (base, data = {}) => {
+            const trEl = $$$(base, "tr");
+            const keyList = ['date', 'meeting']
+            keyList.forEach((key) => {
+                const tdEl = $$$(trEl, "td");
+                let value = data[key] || ''
+                tdEl.innerHTML = value
+            })
+        }
+
+        const createId = () => {
+            const date = new Date()
+            return `${date.getFullYear()}${date.getMonth() + 1}${date.getDate()}${date.getHours()}${date.getMinutes()}${date.getSeconds()}`
+        }
+
+        // 根据原始list生成展示的meeting
+        const createMeetingList = (list) => {
+            if(list instanceof Array) {
+                const obj = {}
+                list.forEach(item => {
+                    if(obj[item.meeting]) {
+                        obj[item.meeting].list.push(item)
+                    } else {
+                        obj[item.meeting] = {
+                            date: item.date,
+                            meeting: item.meeting,
+                            list: [item]
+                        }
+                    }
+                })
+                return Object.values(obj)
+            }
+            return []
+        }
+        google.script.run.withSuccessHandler(list => {
+            list = JSON.parse(list)
+            let fdata = {
+                _root: document.body,
+                _title: "Meeting Minutes",
+                _blocking: false,
+                _scaled: true,
+                _headercolor: "var(--theme-color-system)",
+                _height: 50,
+                _width: 40,
+                _vrows: 10,
+                _cols: 6,
+                _licon: null,
+                _fontRatio: 0.5
+            };
+            flw = makeFLW(fdata);
+            flw.layout = $$$(flw.body, "div", "action-item-content");
+            flw.style.overflowY = "scroll";
+            flw.addEventListener("flWindowClosed", function(e) {
+                this.remove();
+            });
+            // add button
+            const btnDiv = $$$(flw.layout, "div", "AItems-btn-wrapper");
+            const addBtn = createBtn(btnDiv, 'ADD')
+            const deleteBtn = createBtn(btnDiv, 'DELETE')
+            const viewBtn = createBtn(btnDiv, 'VIEW')
+
+            const tableDiv = $$$(flw.layout, "div", "AItems-table-wrapper");
+            const tableEl = $$$(tableDiv, "table", "AItems-table");
+
+            const meetingList = createMeetingList(list)
+            meetingList.forEach(item => {
+                createViewTr(tableEl, item)
+            })
+
+            addBtn.addEventListener('click', () => {
+                const trEl = createEditTr(tableEl, {
+                    id: createId(),
+                    isAdd: true
+                })
+
+                tableEl.insertBefore(trEl, tableEl.querySelector('tr:not(.title-tr)'))
+            })
+
+            deleteBtn.addEventListener('click', () => {
+                if(tableEl.classList.contains('showDelete')) {
+                    tableEl.classList.remove('showDelete')
+                } else {
+                    tableEl.classList.add('showDelete')
+                }
+            })
+
+            viewBtn.addEventListener('click', (e) => {
+                // 新增数据
+                const addData = Array.from(tableEl.querySelectorAll('tr.isAdd')).map((trEl) => getSubmitForm(trEl).data)
+                // 已存参数
+                const saveData = Array.from(tableEl.querySelectorAll('tr:not(.isAdd,.title-tr)')).map((trEl) => getSubmitForm(trEl))
+
+                const deleteIdArr = []
+                if(tableEl.classList.contains('showDelete')) {
+                    saveData.forEach(item => {
+                        if(item.checked) {
+                            deleteIdArr.push(item['data'][0])
+                        }
+                    })
+                }
+
+                const btnEl = e.target
+                btnEl.classList.add('loading')
+                google.script.run.withSuccessHandler(() => {
+                    const msg = msgBox("Tip", 8, 17, 4, "更新成功");
+                    tableEl.querySelectorAll('tr.isAdd').forEach(el => {
+                        el.classList.remove('isAdd')
+                        el.querySelector('.delete-add-record').remove()
+                        el.querySelector('[type="checkbox"]').removeAttribute('disabled')
+                    })
+                    deleteIdArr.forEach(id => {
+                        tableEl.querySelector(`tr[data-id="${id}"]`).remove()
+                    })
+                    btnEl.classList.remove('loading')
+                    setTimeout(() => {
+                        msg.remove()
+                    }, 1000)
+                }).saveActionItemsEdit(pname, JSON.stringify(deleteIdArr), JSON.stringify(addData), JSON.stringify(saveData.filter(item => !item.checked).map(item => item.data)))
+
+            })
+
+
+
+        }).getActionItems();
+    }
+</script>

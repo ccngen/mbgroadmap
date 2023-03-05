@@ -366,26 +366,26 @@ function saveComponentsAndSync(deleteArr = '[]', addArr = '[]', savedArr = '[]')
     }
 }
 
-function getActionItems(pname) {
+function getActionItems() {
     const AItemsSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(AItems);
     const rng = AItemsSheet.getRange(1,1,AItemsSheet.getLastRow(),AItemsSheet.getLastColumn());
-    const list = rng.getValues();
-
-    let filterList = list.filter(item => item[1] === pname)
+    let list = rng.getValues();
+    list.splice(0, 1)
     // 通过时间排序
-    filterList = filterList.sort((a, b) => {
+    const sortList = list.sort((a, b) => {
         const time1 = a[2] ? new Date(a[2]).getTime() : 0
         const time2 = b[2] ? new Date(b[2]).getTime() : 0
         return time2 - time1
     })
 
-    return JSON.stringify(filterList.map(item => {
+    return JSON.stringify(sortList.map(item => {
         const date = item[2] ? getTimeStr(item[2]) : ''
         return {
             id: item[0],
+            product: item[1],
+            meeting: item[3],
             date: date,
-            actionPoints: item[3],
-            status: item[4],
+            actionPoints: item[4],
         }
     }))
 }
