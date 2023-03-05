@@ -1,3 +1,42 @@
+<style>
+    button[type="primary"]{
+        height: 28px;
+        border-radius: 5px;
+        border: 1px solid #333;
+        padding: 0 20px;
+        background: #1890ff;
+        color: #fff;
+        border: 1px solid #1890ff;
+    }
+    button:hover{
+        cursor: pointer;
+    }
+    button[type="primary"]:hover{
+        background: #0983f3;
+    }
+    button.loading::after{
+        content: '';
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border: 3px solid #ddd;
+        border-radius: 50%;
+        border-top: 3px solid orange;
+        box-sizing: border-box;
+        vertical-align: middle;
+        margin-left: 5px;
+        animation: loading 2s linear infinite;
+    }
+    @keyframes loading {
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
+    }
+</style>
 <script>
     // columns in Plist
     const _name = 0;
@@ -123,5 +162,12 @@
         }catch(e) {
             return ''
         }
+    }
+
+    function message(text) {
+        const msg= msgBox("Tip", 8, 17, 4, text);
+        setTimeout(() => {
+            msg.remove()
+        }, 1500)
     }
 </script>

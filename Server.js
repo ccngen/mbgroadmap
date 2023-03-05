@@ -390,32 +390,34 @@ function getActionItems() {
     }))
 }
 
-function saveActionItemsEdit(pname, deleteIdArr = '[]', addArr = '[]', savedArr = '[]') {
-    deleteIdArr = JSON.parse(deleteIdArr)
+
+function addMeetingSubmit(addArr) {
     addArr = JSON.parse(addArr)
-    savedArr = JSON.parse(savedArr)
-
     const AItemsSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(AItems);
-    const rng = AItemsSheet.getRange(1,1,AItemsSheet.getLastRow(),AItemsSheet.getLastColumn());
-    const list = rng.getValues();
-
-    deleteIdArr.forEach(id => {
-        const index = list.findIndex(item => item[0] == id && item[1] === pname)
-        if(index > 0) {
-            AItemsSheet.deleteRow(index + 1)
-        }
-    })
-
+    const rng = AItemsSheet.getRange(2,1,AItemsSheet.getLastRow(),AItemsSheet.getLastColumn());
     addArr.forEach(item => {
         AItemsSheet.appendRow(item)
     })
+    rng.sort([{column: 4, ascending: true}])
+    return getActionItems()
+}
 
-    savedArr.forEach(item => {
-        let index = list.findIndex(item1 => item1[0] === item[0] && item1[1] === item[1])
-        if(index > 0) {
-            index++
-            AItemsSheet.getRange('A' + index + ":" + 'E' + index).setValues([item]);
-        }
+function deleteMeeting(deleteArr = '[{ "meeting": "测试111", "date": "2023-03-26" }]') {
+    deleteArr = JSON.parse(deleteArr)
+    const AItemsSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(AItems);
+    const rng = AItemsSheet.getRange(2,1,AItemsSheet.getLastRow(),AItemsSheet.getLastColumn());
+    const list = rng.getValues();
+    const indexList = [] // 记录下来，然后从最后一行开始往前删除, 避免删除前面的，会影响后面的索引
+    deleteArr.forEach((item) => {
+        list.forEach((sheetItem, index) => {
+            const date = sheetItem[2] ? getTimeStr(sheetItem[2]) : ''
+            if(date === item['date'] && sheetItem[3] === item['meeting']) {
+                indexList.push(index + 2)
+            }
+        })
+    })
+    indexList.sort((a, b) => b - a).forEach(index => {
+        AItemsSheet.deleteRow(index)
     })
 }
 

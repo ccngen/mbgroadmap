@@ -1,0 +1,232 @@
+<style>
+  .add-meeting-content{
+    padding: 15px;
+  }
+  .meeting-date-input{
+    display: flex;
+    align-items: center;
+    border-bottom: 1px dashed #ddd;
+    padding-bottom: 15px;
+  }
+  .meeting-date-input label:first-child{
+    width: 25%;
+    padding-right: 15px;
+    min-width: 170px;
+  }
+  .meeting-date-input label:last-child{
+    flex-grow: 1;
+  }
+  .meeting-date-input label{
+    display: flex;
+    align-items: center;
+  }
+  .meeting-date-input label span{
+    padding-right: 15px;
+    flex-shrink: 0;
+  }
+  .meeting-date-input label input{
+    height: 30px;
+    line-height: 30px;
+    box-sizing: border-box;
+    border-radius: 5px;
+    padding: 0 10px;
+    border: 1px solid #999;
+    flex-grow: 1;
+  }
+  .add-content-table{
+    display: flex;
+    margin: 15px 0;
+  }
+  .add-content-table table{
+    border-collapse: collapse;
+    flex-grow: 1;
+    margin-left: 15px;
+  }
+  .add-meeting-content.detail .add-content-table table{
+    margin-left: 0;
+  }
+  .add-meeting-content.detail .meeting-date-input{
+    font-size: 0.9rem;
+  }
+  .add-content-table table input{
+    padding: 5px 10px;
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 3px;
+    border: 1px solid;
+  }
+  .add-content-table table thead tr{
+    height: 30px;
+    background: #eee;
+  }
+  .add-content-table table thead tr th:first-child{
+    width: 40%;
+  }
+  .add-content-table table tbody tr td{
+    padding: 5px;
+  }
+  .add-content-table table td,
+  .add-content-table table th{
+    border: 1px solid #333333;
+  }
+  .add-content-table .meeting-add-icon{
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    font-size: 25px;
+    line-height: 18px;
+    border: 2px solid;
+    color: #1890ff;
+    font-weight: 600;
+    text-align: center;
+    box-sizing: border-box;
+    flex-shrink: 0;
+  }
+  .add-content-table .delete-line:hover,
+  .add-content-table .meeting-add-icon:hover{
+    color: #7e09f3;
+    cursor: pointer;
+  }
+  .button-wrapper {
+    text-align: center;
+  }
+  .add-meeting-content input.error{
+    border-color: red;
+  }
+  .delete-line{
+    color: #1890ff;
+    font-size: 18px;
+    display: block;
+    text-align: center;
+  }
+</style>
+
+<script>
+  function meetingAdd(saveCallback) {
+    let fdata = {
+      _root: document.body,
+      _title: "Meeting Minutes Add",
+      _blocking: false,
+      _scaled: true,
+      _headercolor: "var(--theme-color-system)",
+      _height: 40,
+      _width: 30,
+      _vrows: 10,
+      _cols: 6,
+      _licon: null,
+      _fontRatio: 0.5
+    };
+    flw = makeFLW(fdata);
+    flw.layout = $$$(flw.body, "div", "add-meeting-content");
+    flw.style.overflowY = "scroll";
+    flw.addEventListener("flWindowClosed", function(e) {
+      this.remove();
+    });
+
+    init()
+    function init() {
+      document.querySelector('.add-meeting-content').innerHTML = `
+                <div class="meeting-date-input">
+                    <label>
+                        <span>Date</span>
+                        <input type="date" id="addMeetingDate">
+                    </label>
+                    <label>
+                        <span>Meeting</span>
+                        <input type="text" id="addMeetingInput">
+                    </label>
+                </div>
+                <div class="add-content-table">
+                    <span class="meeting-add-icon" onclick="meetingFnObj.addMeetingItem()">+</span>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Action Items</th>
+                                <th>-</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><input type="text" class="product-input"></td>
+                                <td><input type="text" class="action-input"></td>
+                                <td><span class="delete-line" onclick="meetingFnObj.deleteLine()">x</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="button-wrapper">
+                    <button type="primary" onclick="meetingFnObj.save()">Save</button>
+                </div>`
+      window.meetingFnObj = {
+        addMeetingItem,
+        deleteLine,
+        save,
+      }
+    }
+
+
+    function addMeetingItem() {
+      const trEl = document.createElement('tr')
+      trEl.innerHTML = `<td><input type="text" class="product-input"></td>
+                      <td><input type="text" class="action-input"></td>
+                      <td><span class="delete-line" onclick="deleteLine()">x</span></td>`
+      document.querySelector('.add-content-table tbody').appendChild(trEl)
+    }
+
+    function deleteLine() {
+      const that = event.target
+      const parent = that.parentNode.parentNode
+      const table = document.querySelector('.add-content-table table tbody')
+      if (table.querySelectorAll('tr').length === 1) {
+        return message("至少存在一行。");
+      }
+      if (window.confirm('确定删除改行')) {
+        parent.remove()
+      }
+    }
+
+    const createId = () => {
+      const date = new Date()
+      return `${date.getFullYear()}${date.getMonth() + 1}${date.getDate()}${date.getHours()}${date.getMinutes()}${date.getSeconds()}`
+    }
+
+    function save() {
+      const btnEl = event.target
+      let emptyFlag = false
+      const allInput = document.querySelectorAll('.add-meeting-content input')
+      allInput.forEach(el => {
+        if (!el.value) {
+          el.classList.add('error')
+          emptyFlag = true
+        } else {
+          el.classList.remove('error')
+        }
+      })
+      if (emptyFlag) {
+        return message('有内容未填写')
+      }
+
+      const dateValue = document.querySelector('#addMeetingDate').value
+      const meetingValue = document.querySelector('#addMeetingInput').value
+
+      const table = document.querySelector('.add-content-table table tbody')
+      const list = []
+      table.querySelectorAll('tr').forEach((el, index) => {
+        if (el) {
+          list.push([createId() + `_${index}`, el.querySelector('.product-input').value, dateValue, meetingValue, el.querySelector('.action-input').value])
+        }
+      })
+      btnEl.classList.add('loading')
+      google.script.run.withSuccessHandler(ret => {
+        message("新增成功");
+        btnEl.classList.remove('loading')
+        typeof saveCallback === 'function' && saveCallback(ret)
+        flw.remove()
+      }).addMeetingSubmit(JSON.stringify(list))
+
+    }
+  }
+
+
+</script>

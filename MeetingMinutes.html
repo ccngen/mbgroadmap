@@ -7,9 +7,15 @@
     }
     .action-item-content .AItems-btn-wrapper{
         padding-bottom: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
     }
     .action-item-content .AItems-btn-wrapper button{
         margin-right: 15px;
+    }
+    .action-item-content .AItems-btn-wrapper .tip-span{
+        color: red;
     }
     .AItems-table.showDelete tr th:last-child,
     .action-item-content .AItems-table.showDelete tr td:last-child{
@@ -26,19 +32,6 @@
     }
     .AItems-table select.Delay, .AItems-table td.Delay{
         color: red;
-    }
-    .action-item-content button.Save.loading::after{
-        content: '';
-        display: inline-block;
-        width: 14px;
-        height: 14px;
-        border: 3px solid #ddd;
-        border-radius: 50%;
-        border-top: 3px solid orange;
-        box-sizing: border-box;
-        vertical-align: middle;
-        margin-left: 5px;
-        animation: loading 2s linear infinite;
     }
     .action-item-content.view .AItems-btn-wrapper{
         display: none;
@@ -60,12 +53,13 @@
     .AItems-table td,
     .AItems-table th {
         padding: 10px 8px;
-        border: 1px solid #333;
         text-align: left;
         padding: 5px 10px;
         font-size: 0.9rem;
     }
-
+    .AItems-table tr{
+        border-bottom: 1px dashed #333;
+    }
     .AItems-table .title-tr {
         color: rgba(0, 0, 0, .85);
         font-weight: bolder;
@@ -93,33 +87,53 @@
         color: orange;
         cursor: pointer;
     }
-    @keyframes loading {
-        from {
-            transform: rotate(0deg);
-        }
 
-        to {
-            transform: rotate(360deg);
-        }
+    .action-item-content .AItems-table tr td.date{
+        min-width: 100px;
+        width: 15%;
+    }
+    .AItems-table tr td:first-child{
+        display: none;
+    }
+    .AItems-table.show-delete tr td:first-child{
+        display: table-cell;
+        width: 20px;
+    }
+    .meeting-delete-btn{
+        padding-bottom: 15px;
+
+    }
+    .meeting-delete-btn button{
+        margin-right: 20px;
     }
 </style>
 
 <script>
     // type: view or edit
     function openMeeting() {
-        const createBtn = (base, text) => {
+        const meetingTrId = (data) => `${data.meeting}_${data.date}`
+
+        const createBtn = (base, text, attrs = {}) => {
             const addBtn = $$$(base, "button", text);
+            Object.entries(attrs).forEach(([attr, value]) => {
+                addBtn.setAttribute(attr, value)
+            })
             addBtn.innerHTML = text
             return addBtn
         }
 
         const createViewTr = (base, data = {}) => {
             const trEl = $$$(base, "tr");
-            const keyList = ['date', 'meeting']
+            trEl.setAttribute('data-id', meetingTrId(data))
+            const keyList = ['-', 'date', 'meeting']
             keyList.forEach((key) => {
-                const tdEl = $$$(trEl, "td");
+                const tdEl = $$$(trEl, "td", key);
                 let value = data[key] || ''
-                tdEl.innerHTML = value
+                tdEl.innerHTML = key === '-' ? `<input type="checkbox"/>` :value
+            })
+            trEl.addEventListener('dblclick', function() {
+                console.log(data, 'data')
+                viewMeetingDetail(data)
             })
         }
 
@@ -128,15 +142,72 @@
             return `${date.getFullYear()}${date.getMonth() + 1}${date.getDate()}${date.getHours()}${date.getMinutes()}${date.getSeconds()}`
         }
 
+        const viewMeetingDetail = (data) => {
+            //  样式使用MeetingAdd的
+            let fdata = {
+                _root: document.body,
+                _title: `Meeting Item Detail (${data.meeting})`,
+                _blocking: false,
+                _scaled: true,
+                _headercolor: "var(--theme-color-system)",
+                _height: 40,
+                _width: 35,
+                _vrows: 10,
+                _cols: 6,
+                _licon: null,
+                _fontRatio: 0.5
+            };
+            const flw = makeFLW(fdata);
+            flw.layout = $$$(flw.body, "div", "add-meeting-content detail");
+            flw.style.overflowY = "scroll";
+            flw.addEventListener("flWindowClosed", function(e) {
+                this.remove();
+            });
+            render()
+            function render() {
+                flw.layout.innerHTML = `
+                <div class="meeting-date-input">
+                    <label>
+                        <span>Date: </span>
+                        ${data.date}
+                    </label>
+                    <label>
+                        <span>Meeting: </span>
+                        ${data.meeting}
+                    </label>
+                </div>
+                <div class="add-content-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Action Items</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                          ${data.list.map(item => `<tr>
+                                <td>${item.product}</td>
+                                <td>${item.actionPoints}</td>
+                            </tr>`).join('')}
+
+                        </tbody>
+                    </table>
+                </div>`
+
+            }
+
+        }
+
         // 根据原始list生成展示的meeting
         const createMeetingList = (list) => {
             if(list instanceof Array) {
                 const obj = {}
                 list.forEach(item => {
-                    if(obj[item.meeting]) {
-                        obj[item.meeting].list.push(item)
+                    const key = meetingTrId(item)
+                    if(obj[key]) {
+                        obj[key].list.push(item)
                     } else {
-                        obj[item.meeting] = {
+                        obj[key] = {
                             date: item.date,
                             meeting: item.meeting,
                             list: [item]
@@ -147,6 +218,7 @@
             }
             return []
         }
+
         google.script.run.withSuccessHandler(list => {
             list = JSON.parse(list)
             let fdata = {
@@ -170,72 +242,77 @@
             });
             // add button
             const btnDiv = $$$(flw.layout, "div", "AItems-btn-wrapper");
-            const addBtn = createBtn(btnDiv, 'ADD')
-            const deleteBtn = createBtn(btnDiv, 'DELETE')
-            const viewBtn = createBtn(btnDiv, 'VIEW')
+            const btnContentDiv = $$$(btnDiv, "div");
+            const addBtn = createBtn(btnContentDiv, 'ADD', {type: 'primary'})
+            const deleteBtn = createBtn(btnContentDiv, 'DELETE', {type: 'primary'})
+            const tipSpan = $$$(btnDiv, "div", "tip-span");
+            tipSpan.innerHTML = 'Tip: 双击某一行，即可查看详情数据'
+
+            //  delete action btn
+            const deleteBtnDiv = $$$(flw.layout, "div", "meeting-delete-btn");
+            const submitDelBtn = createBtn(deleteBtnDiv, 'Submit Delete', {type: 'primary'})
+            const cancelDelBtn = createBtn(deleteBtnDiv, 'cancel', {type: 'primary'})
+            deleteBtnDiv.style.display = 'none'
 
             const tableDiv = $$$(flw.layout, "div", "AItems-table-wrapper");
             const tableEl = $$$(tableDiv, "table", "AItems-table");
 
-            const meetingList = createMeetingList(list)
+            let meetingList = createMeetingList(list)
             meetingList.forEach(item => {
                 createViewTr(tableEl, item)
             })
 
             addBtn.addEventListener('click', () => {
-                const trEl = createEditTr(tableEl, {
-                    id: createId(),
-                    isAdd: true
+                meetingAdd((list) => {
+                    list = JSON.parse(list)
+                    tableEl.innerHTML = ''
+                    meetingList = createMeetingList(list)
+                    meetingList.forEach(item => {
+                        createViewTr(tableEl, item)
+                    })
                 })
-
-                tableEl.insertBefore(trEl, tableEl.querySelector('tr:not(.title-tr)'))
             })
 
             deleteBtn.addEventListener('click', () => {
-                if(tableEl.classList.contains('showDelete')) {
-                    tableEl.classList.remove('showDelete')
-                } else {
-                    tableEl.classList.add('showDelete')
-                }
+                deleteBtnDiv.style.display = 'block'
+                btnDiv.style.display = 'none'
+                tableEl.classList.add('show-delete')
             })
 
-            viewBtn.addEventListener('click', (e) => {
-                // 新增数据
-                const addData = Array.from(tableEl.querySelectorAll('tr.isAdd')).map((trEl) => getSubmitForm(trEl).data)
-                // 已存参数
-                const saveData = Array.from(tableEl.querySelectorAll('tr:not(.isAdd,.title-tr)')).map((trEl) => getSubmitForm(trEl))
+            const cancelDelete = () => {
+                deleteBtnDiv.style.display = 'none'
+                btnDiv.style.display = 'flex'
+                tableEl.classList.remove('show-delete')
+                tableEl.querySelectorAll('input[type="checkbox"]').forEach(el => {
+                    el.checked = false
+                })
+            }
 
-                const deleteIdArr = []
-                if(tableEl.classList.contains('showDelete')) {
-                    saveData.forEach(item => {
-                        if(item.checked) {
-                            deleteIdArr.push(item['data'][0])
-                        }
-                    })
-                }
-
-                const btnEl = e.target
-                btnEl.classList.add('loading')
-                google.script.run.withSuccessHandler(() => {
-                    const msg = msgBox("Tip", 8, 17, 4, "更新成功");
-                    tableEl.querySelectorAll('tr.isAdd').forEach(el => {
-                        el.classList.remove('isAdd')
-                        el.querySelector('.delete-add-record').remove()
-                        el.querySelector('[type="checkbox"]').removeAttribute('disabled')
-                    })
-                    deleteIdArr.forEach(id => {
-                        tableEl.querySelector(`tr[data-id="${id}"]`).remove()
-                    })
-                    btnEl.classList.remove('loading')
-                    setTimeout(() => {
-                        msg.remove()
-                    }, 1000)
-                }).saveActionItemsEdit(pname, JSON.stringify(deleteIdArr), JSON.stringify(addData), JSON.stringify(saveData.filter(item => !item.checked).map(item => item.data)))
-
+            cancelDelBtn.addEventListener('click', () => {
+                cancelDelete()
             })
 
-
-
+            submitDelBtn.addEventListener('click', () => {
+                submitDelBtn.classList.add('loading')
+                const list = []
+                const trEl = []
+                tableEl.querySelectorAll('input[type="checkbox"]:checked').forEach(el => {
+                    const trParent = el.parentNode.parentNode
+                    trEl.push(trParent)
+                    const id = trParent.getAttribute('data-id')
+                    const itemData = meetingList.find(item => meetingTrId(item) === id)
+                    itemData && list.push({ meeting: itemData.meeting, date: itemData.date  })
+                })
+                if(trEl.length === 0) {
+                    return message('未选择要删除的记录')
+                }
+                google.script.run.withSuccessHandler(result => {
+                    message('删除成功')
+                    submitDelBtn.classList.remove('loading')
+                    trEl.forEach(el => el.remove())
+                    cancelDelete()
+                }).deleteMeeting(JSON.stringify(list))
+            })
         }).getActionItems();
     }
 </script>
