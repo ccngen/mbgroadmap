@@ -69,23 +69,49 @@
         <div class="menu-itm" id="menu-itm7" onclick="menuClick(this, event)">Update</div>
         <div class="menu-itm" id="menuItemUserContorle" onclick="showUserManage()">Manage Users</div>
         <div class="menu-itm" id="menu-itm31" onclick="menuClick(this, event)">Manage Components</div>
-        <div class="menu-itm" id="menu-itm32" onclick="menuClick(this, event)">Meeting Minutes 加了之后把这个文字去掉</div>
+        <div class="menu-itm" id="menu-itm32" onclick="menuClick(this, event)">Meeting Minutes</div>
         <div class="menu-itm" id="menu-itm8" onclick="menuClick(this, event)">About</div>
     </div>
     <div class="menu-wnd" id="ctx-menu2">
-        <div class="menu-itm" id="menu-itm10" onclick="menuClick(this, event)">TMC Details</div>
-        <div class="menu-itm" id="menu-itm11" onclick="menuClick(this, event)">Product Specs</div>
-        <div class="menu-itm" id="menu-itm12" onclick="menuClick(this, event)">Schedule</div>
-        <div class="menu-itm" id="menu-itm13" onclick="menuClick(this, event)">Launch Plan</div>
-        <div class="menu-itm" id="menu-itm14" onclick="menuClick(this, event)">Business Case</div>
-        <div class="menu-itm" id="menu-itm15" onclick="menuClick(this, event)">Design</div>
-        <div class="menu-itm" id="menu-itm41" onclick="menuClick(this, event)">OD</div>
-        <div class="menu-itm" id="menu-itm42" onclick="menuClick(this, event)">Handbook</div>
-        <div class="menu-itm" id="menu-itm16" onclick="menuClick(this, event)">Product Deck</div>
-        <div class="menu-itm" id="menu-itm17" onclick="menuClick(this, event)">Edit Specs</div>
-        <div class="menu-itm" id="menu-itm18" onclick="menuClick(this, event)">Delete Project</div>
-        <div class="menu-itm" id="menu-itm19" onclick="menuClick(this, event)">Edit Project</div>
-        <div class="menu-itm" id="menu-itm29" onclick="menuClick(this, event)">Edit Dimensions</div>
+        <div>
+            <div class="menu-itm submenu-visible"> Manage Project > </div>
+            <div class="submenu">
+                <div class="menu-itm" id="menu-itm19" onclick="menuClick(this, event)">Edit Project</div>
+                <div class="menu-itm" id="menu-itm18" onclick="menuClick(this, event)">Delete Project</div>
+            </div>
+        </div>
+        <div>
+            <div class="menu-itm submenu-visible"> TMC and Specs > </div>
+            <div class="submenu">
+                <div class="menu-itm" id="menu-itm10" onclick="menuClick(this, event)">View TMC</div>
+                <div class="menu-itm" id="menu-itm11" onclick="menuClick(this, event)">View Specs</div>
+                <div class="menu-itm" id="menu-itm17" onclick="menuClick(this, event)">Edit Specs</div>
+            </div>
+        </div>
+        <div>
+            <div class="menu-itm submenu-visible"> Dimensions > </div>
+            <div class="submenu">
+                <div class="menu-itm" id="menu-itm39" onclick="menuClick(this, event)">View Dimensions</div>
+                <div class="menu-itm" id="menu-itm29" onclick="menuClick(this, event)">Edit Dimensions</div>
+            </div>
+        </div>
+        <div>
+            <div class="menu-itm submenu-visible"> Product Info > </div>
+            <div class="submenu">
+                <div class="menu-itm" id="menu-itm14" onclick="menuClick(this, event)">Business Case</div>
+                <div class="menu-itm" id="menu-itm16" onclick="menuClick(this, event)">Product Deck</div>
+                <div class="menu-itm" id="menu-itm15" onclick="menuClick(this, event)">Design</div>
+                <div class="menu-itm" id="menu-itm41" onclick="menuClick(this, event)">OD</div>
+                <div class="menu-itm" id="menu-itm42" onclick="menuClick(this, event)">Handbook</div>
+            </div>
+        </div>
+        <div>
+            <div class="menu-itm submenu-visible"> Milestones > </div>
+            <div class="submenu">
+                <div class="menu-itm" id="menu-itm12" onclick="menuClick(this, event)">Schedule</div>
+                <div class="menu-itm" id="menu-itm13" onclick="menuClick(this, event)">Launch Plan</div>
+            </div>
+        </div>
     </div>
 </div>
 </html>
@@ -94,8 +120,26 @@
     document.querySelectorAll('.submenu-visible').forEach(el => {
         el.addEventListener('click', function(e) {
             e.stopPropagation()
+            const ctxMenu2 = $('ctx-menu2')
+            const id = ctxMenu2.getAttribute('data-id')
             const nextEl = e.target.nextElementSibling
             nextEl.style.display = nextEl.style.display === 'block' ? 'none' : 'block'
+
+
+            document.querySelectorAll('.submenu-visible').forEach(el1 => {
+                const nextEl1 = el1.nextElementSibling
+                if(nextEl1 !== nextEl) {
+                    nextEl1.style.display = 'none'
+                }
+            })
+
+            const ev = $(id).getBoundingClientRect()
+            const ctxRect = ctxMenu2.getBoundingClientRect()
+
+            if (ev.top + ctxRect.height <= window.innerHeight)
+                ctxMenu2.style.top = ev.top + "px";
+            else
+                ctxMenu2.style.top = (ev.top - ctxRect.height) + "px";
         })
     })
     function menuClickEvent(_this) {

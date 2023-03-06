@@ -451,6 +451,9 @@
                 $("menu-bg").style.display = "inline";
                 $("menu-bg").callingCell = this;
                 $("ctx-menu2").style.display = "flex";
+                if(ev.target.parentElement.id !== 'master-grid2') {
+                    $("ctx-menu2").setAttribute('data-id', ev.target.parentElement.id)
+                }
                 $("ctx-menu1").style.display = "none";
                 if (ev.clientX + $("ctx-menu2").offsetWidth <= window.innerWidth)
                     $("ctx-menu2").style.left = ev.clientX + "px";
