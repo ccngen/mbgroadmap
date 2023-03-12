@@ -24,7 +24,7 @@
     }
 
     function menuClick(org, ev) {
-        let callingCell = org.parentNode.parentNode.callingCell;
+        let callingCell = $('menu-bg').callingCell;
         switch (org.id) {
             // Create a product
             case "menu-itm1":
@@ -180,6 +180,10 @@
                 break;
             case "menu-itm42":
                 openNewPage(callingCell.handbook)
+                break;
+            case "menu-itm39":
+                viewDimensions(callingCell)
+                console.log(callingCell.picbytes, 'picbytes')
                 break;
         }
     }

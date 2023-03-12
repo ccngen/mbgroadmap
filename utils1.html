@@ -33,7 +33,24 @@
         res = arr.reduce((a, b) => numb(a) + numb(b), 0);
         return isNaN(res) ? 0 : res;
     }
+    /**
+     *  el 要操作的元素， 触发的class名，高亮样式名 activeClassName
+     **/
+    function mouseAtive(el, activeClass = 'active') {
+        el.addEventListener('mouseenter', function() {
+            const trigerClass = Array.from(this.classList).map(item => '.'+item).join('')
+            document.querySelectorAll(trigerClass).forEach((element) => {
+                element.classList.add(activeClass)
+            })
+        })
 
+        el.addEventListener('mouseleave', function() {
+            const trigerClass = Array.from(this.classList).map(item => '.'+item).join('')
+            document.querySelectorAll(trigerClass).forEach((element) => {
+                element.classList.remove(activeClass)
+            })
+        })
+    }
 </script>
 
 

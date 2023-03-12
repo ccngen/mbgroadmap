@@ -1,0 +1,93 @@
+<style>
+    .edit-dimensions-view-content{
+        padding: 10px;
+        display: flex;
+    }
+    .edit-dimensions-view-content .dimension-line{
+        display: flex;
+        align-items: center;
+        margin-bottom: 5px;
+        border-bottom: 1px dashed #ddd;
+    }
+    .edit-dimensions-view-content .dimension-line-label{
+        display: inline-block;
+        width: 80px;
+        flex-shrink: 0;
+        text-align: right;
+    }
+    .edit-dimensions-view-content .dimension-line-value{
+        padding: 0 7px;
+        height: 24px;
+        line-height: 24px;
+        flex-grow: 1;
+    }
+    .edit-dimensions-view-content .dimensions-image-wrapper{
+        width: 50%;
+        border: 1px solid #ddd;
+        margin-right: 15px;
+    }
+    .edit-dimensions-view-content .dimensions-image-wrapper img{
+        max-width: 100%;
+        max-height: 100%;
+    }
+    .edit-dimensions-view-content .dimensions-content{
+        flex-grow: 1;
+    }
+    .edit-dimensions-view-content .dimension-line.dimension-line-active{
+        background: red;
+        color: #fff;
+    }
+</style>
+
+<script>
+    function viewDimensions(product) {
+        const createLine = (container, label, value, index) => {
+            const divEl = $$$(container, "div", `dimension-line dimension-line-${index}`);
+            const labelEl = $$$(divEl, "label", "dimension-line-label");
+            labelEl.innerHTML = label
+            const valueLine = $$$(divEl, "span", "dimension-line-value");
+            valueLine.innerHTML = value
+            return divEl
+        }
+
+
+
+        google.script.run.withSuccessHandler(ret => {
+            // create window
+            let fdata = {
+                _root: document.body,
+                _title: `Edit Dimensions  (${product.pname})`,
+                _blocking: false,
+                _scaled: true,
+                _headercolor: "var(--theme-color-system)",
+                _height: 28,
+                _width: 30,
+                _vrows: 7,
+                _cols: 3,
+                _licon: null,
+                _fontRatio: 0.4
+            };
+            let flw = makeFLW(fdata);
+            flw.product = product;
+            flw.layout = $$$(flw.body, "div", "edit-dimensions-view-content");
+            flw.addEventListener("flWindowClosed", function(e) {
+                this.remove();
+            });
+
+            // labels
+            const prj_data = JSON.parse(ret.prod);
+            const dataStartIndex = getSheetIndex(dimensionsLabelsIndex[0])
+            const imageDiv = $$$(flw.layout, 'div', 'dimensions-image-wrapper')
+            const img = $$$(imageDiv, 'img')
+            img.src = product.picbytes
+            img.setAttribute('alt', product.pname)
+
+            const lineDiv = $$$(flw.layout, 'div', 'dimensions-content')
+            dimensionsLabels.forEach((label, index) => {
+                const divEl = createLine(lineDiv, label, prj_data[dataStartIndex + index], index)
+                mouseAtive(divEl, 'dimension-line-active')
+            })
+        }).getProduct(product.pname);
+
+    }
+</script>
