@@ -157,6 +157,7 @@
     */
     function makeFLW(dt) {
         let flw = $$$(dt._root, "div", "", dt._title);
+        flw.classList.add(dt.className)
         flw.mytitle = dt._title;
         flw.blocking = dt._blocking;
         flw.scaled = dt._scaled;

@@ -97,6 +97,9 @@
         min-width: 58px;
         text-align: left;
     }
+    .edit-specs-component .flw-body {
+        --flw-height: 78vh !important;
+    }
 </style>
 
 <script>
@@ -207,9 +210,10 @@
                 _scaled: false,
                 _headercolor: "var(--theme-color-system)",
                 //_height: 64,
-                _height: 67,
+                _height: 80,
                 _width: 45,
-                _licon: null
+                _licon: null,
+                className: 'edit-specs-component'
             };
             flw = makeFLW(fdata);
             flw.grid2 = $$$(flw.body, "div", "fleddat-matrix-1 android");
@@ -219,12 +223,6 @@
             flw.addEventListener("flWindowClosed", function(e) {
                 this.remove();
             });
-
-            // add Android 20230107
-            const androidLabelEl = createLabel(flw.grid2, 0, 10);
-            const androidLabel = $$$(androidLabelEl, "span", "", "");
-            androidLabel.innerHTML = 'Android';
-            createEmptyInput(androidLabelEl, 1, 10);
 
             // labels & fields
             for ([i,lb] of labels.entries()) {
