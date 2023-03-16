@@ -1,57 +1,38 @@
 <script>
     function checkRights() {
-        if (((Urights >> 0) & 1) != 1) return false;
-        //$("menu-itm2").classList.add("menu-dis"); // to be removed when available
+        const UrightList = Urights.split('').map(item => item & 1)
+        if(UrightList[0] !== 1) return false;// 权限全开 不用加限制 或者没有权限进入系统
+        if(UrightList[1] === 1) return true;
 
-        // Schedule, Launch Plan
-        if (((Urights >> 1) & 1) != 1) {
-            $("menu-itm12").classList.add("menu-dis");
-            $("menu-itm13").classList.add("menu-dis");
+        // 根据字符串 拆解出来的值
+        const permissionValues = {
+            overview: UrightList[0],
+            editAll: UrightList[1],
+            viewCosts: UrightList[2],
+            viewProgress: UrightList[3],
+            viewBasic: UrightList[4],
         }
+        const permissionIdObj = {}
+        // 对应的权限列表，menu上的id
+        permissionIdObj.viewBasic = ['menu-itm11', 'menu-itm16', 'menu-itm15', 'menu-itm41', 'menu-itm42']
+        permissionIdObj.viewProgress = [...permissionIdObj.viewBasic, 'menu-itm14', 'Milestones']
+        permissionIdObj.viewCosts = [...permissionIdObj.viewProgress, 'menu-itm10']
+        permissionIdObj.editAll = [...permissionIdObj.viewCosts, 'menuItemUserContorle']
 
-        // Design
-        if (((Urights >> 2) & 1) != 1) {
-            $("menu-itm15").classList.add("menu-dis");
-        }
+        let permissionIds = []
+        Object.entries(permissionIdObj).forEach(([key, value]) => {
+            if(permissionValues[key] === 1) {
+                permissionIds = [...permissionIds, ...value]
+            }
+        })
 
-        // Specs
-        if (((Urights >> 3) & 1) != 1) {
-            $("menu-itm11").classList.add("menu-dis");
-        }
-
-        // Business Case
-        if (((Urights >> 4) & 1) != 1) {
-            $("menu-itm14").classList.add("menu-dis");
-        }
-
-        // TMC (and status)
-        if (((Urights >> 5) & 1) != 1) {
-            $("menu-itm10").classList.add("menu-dis");
-            $("menu-itm3").classList.add("menu-dis");
-            keySOk = false;
-        }
-
-        // TMC Edit
-        if (((Urights >> 6) & 1) != 1) {
-            $("menu-itm17").classList.add("menu-dis");
-        }
-
-        // TMC Export, Delete Product
-        if (((Urights >> 7) & 1) != 1) {
-            //$("menu-itm2").classList.add("menu-dis");
-            //$("menu-itm18").classList.add("menu-dis");
-            $("menuItemUserContorle").remove();
-        }
-
-        // Create Project Edit Project
-        if (((Urights >> 8) & 1) != 1) {
-            $("menu-itm1").classList.add("menu-dis");
-            $("menu-itm18").classList.add("menu-dis");
-            $("menu-itm19").classList.add("menu-dis");
-        }
-
-        // Sell-in
-        if ((Urights & 0b00001100) != 0b00001100) $("menu-itm16").classList.add("menu-dis");
+        permissionIds = Array.from(new Set(permissionIds)) // 去重
+        console.log(permissionIds, 'permissionIds')
+        permissionIdObj.editAll.forEach(id => {
+            if(!permissionIds.includes(id)) {
+                $(id).classList.add("menu-dis");
+            }
+        })
 
         return true;
     }

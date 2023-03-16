@@ -51,6 +51,16 @@
             })
         })
     }
+
+    function addLoading(el) {
+        el.classList.add('loading')
+    }
+    function removeLoading(el) {
+        el.classList.remove('loading')
+    }
+    function hasLoading(el) {
+        return el.classList.contains('loading')
+    }
 </script>
 
 

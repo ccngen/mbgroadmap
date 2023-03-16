@@ -1,0 +1,426 @@
+<style>
+  .user-dialog {
+    display: none;
+    width: 100vw;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+  }
+
+  .user-dialog .user-manage {
+    width: 50vw;
+    min-height: 500px;
+    min-width: 800px;
+    max-width: 1000px;
+    margin: 0 auto;
+    border-radius: 10px;
+    background: #ffffff;
+    z-index: 999;
+  }
+
+  .user-dialog .user-manage-title {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 20px;
+    border-bottom: 1px solid #ddd;
+    background: #eee;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+  }
+
+  .user-manage-title-content {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .user-manage-model-close {
+    font-size: 18px;
+    display: inline-block;
+    padding: 5px;
+    cursor: pointer;
+  }
+
+  .user-manage-model-close:hover {
+    color: rgb(255, 192, 0);
+  }
+
+  .user-manage-list-wrapper {
+    max-height: 350px;
+    overflow: auto;
+  }
+
+  .user-manage-list-wrapper table {
+    width: 100%;
+    text-align: center;
+    border-collapse: collapse;
+  }
+
+  .user-manage-content {
+    padding: 15px 15px;
+    padding-top: 0;
+  }
+
+  .user-dialog .add-user-button {
+    margin-bottom: 5px;
+  }
+
+  .user-dialog .add-user-button,
+  .add-user-button-wrapper-submit button {
+    padding: 5px 10px;
+    color: #fff;
+    background-color: #1890ff;
+    border-color: #1890ff;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+
+  .add-user-button-wrapper {
+    text-align: right;
+    padding-right: 20px;
+  }
+
+  .user-manage-list-wrapper table td,
+  .user-manage-list-wrapper table th {
+    padding: 10px 8px;
+    border: none;
+  }
+
+  .user-manage-list-wrapper table td {
+    padding: 8px;
+  }
+
+  .user-manage-list-wrapper table td input[type=checkbox] {
+    transform: translateY(2px);
+  }
+
+  .user-manage-list-wrapper table thead {
+    border-bottom: 1px solid #e8e8e8;
+    color: rgba(0, 0, 0, .85);
+    font-weight: 500;
+    background: #fafafa;
+    transition: background .3s ease;
+  }
+
+  .user-manage-list-wrapper table tbody {
+    font-size: 14px;
+  }
+
+  .user-manage-list-wrapper table tbody {
+  }
+
+  .user-manage-list-wrapper table tbody tr td:first-child {
+    max-width: 222px;
+    word-break: break-word;
+  }
+
+  .user-manage-list-wrapper table tbody tr td .user-manage-action {
+    color: #1890ff;
+    cursor: pointer;
+    padding: 0 3px;
+  }
+
+  .user-manage-list-wrapper table tbody tr td .user-manage-action.save {
+    color: red;
+  }
+
+  .user-manage-list-wrapper table tbody tr td label {
+    margin-right: 8px;
+    margin-bottom: 5px;
+    display: inline-block;
+  }
+
+  .add-user-required span::before {
+    content: '*';
+    color: red;
+    font-size: 16px;
+    position: relative;
+    top: 2px;
+    margin-right: 2px;
+  }
+
+  .add-input-wrapper div.email-name-input {
+    display: flex;
+  }
+
+  .add-input-wrapper div.email-name-input label {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+  }
+
+  .add-input-wrapper div.email-name-input label span {
+    display: inline-block;
+    width: 80px;
+    text-align: right;
+    padding-right: 18px;
+    box-sizing: border-box;
+  }
+
+  .add-input-wrapper div.email-name-input label input {
+    height: 32px;
+    box-sizing: border-box;
+    flex-grow: 1;
+    border: 1px solid #999;
+    border-radius: 5px;
+    padding: 0 15px;
+  }
+
+  .add-input-wrapper .user-permission-wrapper {
+    display: flex;
+    align-items: center;
+  }
+
+  .add-input-wrapper .user-permission-wrapper span {
+    width: 85px;
+  }
+
+  .add-input-wrapper .user-permission-wrapper input[type=checkbox] {
+    position: relative;
+    top: 2px;
+    margin-right: 5px;
+  }
+
+  .add-input-wrapper .user-permission-wrapper label {
+    margin-right: 8px;
+  }
+
+  .add-user-button-wrapper-submit {
+    text-align: center;
+  }
+
+  .add-user-button-wrapper-submit button {
+    margin-right: 15px;
+  }
+
+  .user-manage .add-input-wrapper {
+    padding: 10px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    margin-bottom: 10px;
+    display: none;
+  }
+
+  .user-dialog .bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: rgba(255, 255, 255, 0.2);
+    width: 100vw;
+    height: 100vh;
+    z-index: 777;
+  }
+
+  .user-dialog .loading {
+    text-align: center;
+  }
+
+  .user-manage-list-wrapper table tbody tr:nth-child(even) {
+    background: #fafafa;
+  }
+
+  .add-user-button-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+</style>
+
+<html>
+<div id="userManageDialog" className="user-dialog">
+  <div id="userManageBg" onClick="hideUserManage()" className="bg"></div>
+  <div className="user-manage">
+    <div className="user-manage-title">
+      <span className="user-manage-title-content">Manage Users</span>
+      <span className="user-manage-model-close" onClick="hideUserManage()">X</span>
+    </div>
+    <div className="user-manage-content">
+      <p className="add-user-button-wrapper">
+        <button className="add-user-button" onClick="deleteConfirm()">Delete User</button>
+        <button className="add-user-button" onClick="addUserShow()"> + New Users</button>
+      </p>
+      <div className="add-input-wrapper">
+        <div className="email-name-input">
+          <label className="add-user-required">
+            <span>Moto</span> <input id="addUserEmail" type="text">
+          </label>
+          <label className="add-user-required">
+            <span>Username</span> <input id="addUserName" type="text">
+          </label>
+        </div>
+        <div id="addUserPermission" className="user-permission-wrapper">
+          <p>
+          </p>
+        </div>
+        <div className="add-user-button-wrapper-submit">
+          <button onClick="addNewUserToSheet(this)">Confirm</button>
+          <button onClick="addUserHide()">Cancel</button>
+        </div>
+      </div>
+      <div className="user-manage-list-wrapper">
+        <div className="loading">Loading...</div>
+        <table border="0">
+          <thead>
+          <tr>
+          </tr>
+          </thead>
+          <tbody>
+
+
+          </tbody>
+        </table>
+      </div>
+      <div style="text-align: center;margin-top: 15px;">
+        <button type="primary" onClick="userManageUpdateSave(this)">Update</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</html>
+
+<script>
+  const manageUserFns = {
+    initRender() {
+      const trLine = document.querySelector('.user-manage-list-wrapper table thead tr')
+      trLine.innerHTML = ['-', 'User', 'Email', ...permissionLabelList].map(label => `<th>${label}</th>`).join('')
+    },
+    initAddLabel() {
+      const addLine = document.querySelector('#addUserPermission p')
+      addLine.innerHTML = permissionLabelList.map(label => `<label><input type="checkbox">${label}</label>`).join('')
+    }
+  }
+
+  function renderUserItem(email, data) {
+    const permissionList = data[1]
+    return `
+              <td><input class="p-user-check" type="checkbox"/></td>
+              <td class="user-name">${data[0]}</td>
+              <td class="user-email">${email}</td>
+              ${permissionLabelList.map((label, index) => `<td><input class="permission-check" type="checkbox" ${permissionList[index] == 1 && 'checked'}></td>`).join('')}
+            `
+  }
+
+  function renderUserManageList() {
+    document.querySelector('.loading').style.display = 'block'
+    google.script.run.withSuccessHandler(function (res) {
+      manageUserFns.initRender()
+      const htmls = []
+      //  按首字母排序
+      const list = Object.entries(res).sort((a, b) => {
+        a = a[1][0]
+        b = b[1][0]
+        return a[0].charCodeAt() - b[0].charCodeAt()
+      })
+      list.forEach(function ([key, value]) {
+        htmls.push(`<tr>${renderUserItem(key, value)}</tr>`)
+      })
+      document.querySelector('.user-manage-list-wrapper table tbody').innerHTML = htmls.join('')
+      document.querySelector('.loading').style.display = 'none'
+    }).getUserList()
+  }
+
+  function showUserManage() {
+    if (document.querySelector('#userManageDialog')) {
+      renderUserManageList()
+      document.querySelector('#userManageDialog').style.display = 'flex'
+    }
+  }
+
+  function hideUserManage() {
+    if (document.querySelector('#userManageDialog')) {
+      document.querySelector('#userManageDialog').style.display = 'none'
+    }
+  }
+
+  function addUserShow() {
+    manageUserFns.initAddLabel()
+    document.querySelector('#userManageDialog .add-input-wrapper').style.display = 'block'
+  }
+
+  function addUserHide() {
+    document.querySelector('#userManageDialog .add-input-wrapper').style.display = 'none'
+  }
+
+  function deleteConfirm(email) {
+    const row = event.target
+    if (hasLoading(row)) return;
+    const parent = document.querySelector('.user-manage-list-wrapper table tbody')
+    const checkEl = parent.querySelectorAll('.p-user-check:checked')
+    if (checkEl.length === 0) return message('请选择要删除的用户！');
+    const flag = window.confirm(`确认删除选中的用户？`)
+    const emailList = [...checkEl].map(el => {
+      const trEl = el.parentElement.parentElement
+      return {
+        trEl,
+        email: trEl.querySelector('.user-email').innerHTML
+      }
+    })
+    addLoading(row)
+    console.log(JSON.stringify(emailList.map(item => item.email)), 'JSON.stringify(emailList.map(item => item.email))')
+    google.script.run.withSuccessHandler(function (res) {
+      removeLoading(row)
+      if (res.code) {
+        emailList.forEach(({trEl}) => trEl.remove())
+      }
+      message(res.message)
+    }).deleteUser(JSON.stringify(emailList.map(item => item.email)))
+
+  }
+
+  function getPermissionStr(nodeList) {
+    return [...nodeList].map(item => item.checked ? '1' : '0').join('')
+  }
+
+  function userManageUpdateSave(e) {
+    if (hasLoading(e)) return;
+    addLoading(e)
+    const parent = document.querySelector('.user-manage-list-wrapper table tbody')
+    const submitData = Array.from(parent.querySelectorAll('tr')).map(trEl => {
+      const chekcBox = trEl.querySelectorAll('.permission-check')
+      const name = trEl.querySelector('.user-name').innerHTML;
+      const email = trEl.querySelector('.user-email').innerHTML;
+      return [email, name].concat(Array.from(chekcBox).map(checkBoxEl => checkBoxEl.checked ? '1' : '0'))
+    })
+    console.log(submitData, 'submitData')
+    google.script.run.withSuccessHandler(function (res) {
+      if (res['code']) {
+        message(res.message)
+      }
+      removeLoading(e)
+    }).updateUserPermission(JSON.stringify(submitData))
+  }
+
+  function addNewUserToSheet(e) {
+    const event = e
+    if (hasLoading(event)) {
+      return;
+    }
+    const addUserEmail = document.querySelector('#addUserEmail')
+    const addUserName = document.querySelector('#addUserName')
+    const addUserPermissionList = document.querySelectorAll('#addUserPermission [type=checkbox]')
+    if (addUserEmail.value.length === 0 || addUserName.value.length === 0) {
+      message('Email and name required')
+    } else {
+      addLoading(event)
+      google.script.run.withSuccessHandler(function (res) {
+        removeLoading(event)
+        if (res.code) {
+          const html = renderUserItem(addUserEmail.value, [addUserName.value, getPermissionStr(addUserPermissionList)])
+          const parent = document.querySelector('.user-manage-list-wrapper table tbody')
+          parent.insertBefore(document.createElement('tr'), parent.querySelector('tr'))
+          parent.querySelector('tr').innerHTML = html
+          addUserEmail.value = ''
+          addUserName.value = ''
+          addUserPermissionList.forEach(el => {
+            el.checked = false
+          })
+          message('Added Successfully')
+        } else {
+          message(res.message)
+        }
+      }).addNewUser1(addUserEmail.value, addUserName.value, getPermissionStr(addUserPermissionList))
+    }
+  }
+</script>

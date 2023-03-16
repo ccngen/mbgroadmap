@@ -5,39 +5,61 @@ function addNewUser1 (email, nickname, permission) {
     const el = data.find(el => el[0] == email);
     if(el) return {code: false, message: 'User exists'}
 
-    userList.appendRow([email, nickname, `0b${permission}`])
+    userList.appendRow([email, nickname, ...permission.split('')])
     return {code: true}
 }
 
-function updateUserPermission(email, permission) {
+function updateUserPermission(list) {
+    const sheetIndex = ['A', 'G']
+    list = JSON.parse(list)
     const userList = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(UserList);
     const rng = userList.getDataRange();
     const data = rng.getValues();
-    const idx = data.findIndex(el => el[0] == email);
-
-    if (idx==-1) return {code: false, message: 'No user found'};
-    const setRange = userList.getRange("C"+(idx+1))
-    setRange.setValue('0b'+permission)
-    return {code: true, message: 'Edit OK'}
+    list.forEach(user => {
+        let index = data.findIndex(item => item[0] === user[0])
+        if(index > 0) {
+            index += 1
+            userList.getRange(sheetIndex[0] + index + ":" + sheetIndex[1] + index).setValues([user]);
+        }
+    })
+    return {code: true, message: 'Update OK'}
 }
 
-function deleteUser(email) {
+function deleteUser(emailList) {
+    emailList = JSON.parse(emailList)
     const userList = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(UserList);
     const rng = userList.getDataRange();
     const data = rng.getValues();
-    const idx = data.findIndex(el => el[0] == email);
 
-    if (idx==-1) return {code: false, message: 'No user found'};
-    userList.deleteRow(idx + 1)
+    const indexs = []
+    data.forEach((item, index) => {
+        if (emailList.includes(item[0])) {
+            indexs.push(index + 1)
+        }
+    })
+    // 必须从最后往前删除
+    indexs.sort((a, b) => b - a).forEach(index => {
+        userList.deleteRow(index)
+    })
     return {code: true, message: 'Delete OK'}
 }
 
 function doGet(e) {
     var params = e.parameter;
     if (params.rmt != null) {
-        if (testACL(0)) return HtmlService.createTemplateFromFile('rmv').evaluate().setTitle("MBG Roadmap");
+        if (checkAccess()) return HtmlService.createTemplateFromFile('rmv').evaluate().setTitle("MBG Roadmap");
         else return HtmlService.createTemplateFromFile('noaccess').evaluate();
     }
+}
+
+
+function checkAccess() {
+    var usr = Session.getActiveUser().getEmail();
+    if (usr in ACL) {
+        const rightStr = ACL[usr][1]
+        return rightStr.split('')[rightStr.length - 1] & 1
+    }
+    return false;
 }
 
 function include(filename) {
@@ -80,7 +102,7 @@ function getVersion() {
     // rights
     var usr = Session.getActiveUser().getEmail();
     if (usr in ACL) version.rights = ACL[usr][1];
-    else version.rights = 0b00000000;
+    else version.rights = '00000000';
 
     return version;
 }

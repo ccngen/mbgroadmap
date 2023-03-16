@@ -47,8 +47,10 @@ function getUserList() {
     const users = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(UserList);
     const data = users.getDataRange().getValues();
     const userMap = {}
-    data.forEach(user => {
-        userMap[user[0]] = [user[1], user[2]]
+    data.forEach((user, index) => {
+        if(index > 0) {
+            userMap[user[0]] = [user[1], user.slice(2).join('')]
+        }
     })
     return userMap
 }
