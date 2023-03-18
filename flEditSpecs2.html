@@ -3,7 +3,6 @@
         display: grid;
         width: 100%;
         grid-template-columns: 12% 8% 48% 32%;
-    //--fleddat-cellH: calc(var(--flw-height) / 31);
         --fleddat-cellH: calc(var(--flw-height) / 33);
         font-size: calc(var(--fleddat-cellH) * 0.5);
     }
@@ -207,9 +206,8 @@
                 _root: document.body,
                 _title: pname + " Specs Edit",
                 _blocking: false,
-                _scaled: false,
+                _scaled: true,
                 _headercolor: "var(--theme-color-system)",
-                //_height: 64,
                 _height: 80,
                 _width: 45,
                 _licon: null,
@@ -313,7 +311,7 @@
                     arr.push($(this.parentNode.pname + "-fleddat-cell-1-" + i).value);
                     cmt.push("");
                 }
-                arr.push($(this.parentNode.pname + "-fleddat-cell-0-27").value);
+                arr.push($(this.parentNode.pname + "-fleddat-cell-0-" + (labels.length + specsNewLabel.length)).value);
                 cmt.push("");
                 arr.push($(this.parentNode.pname + "-fleddat-cell-3-1").value);
                 cmt.push("");
