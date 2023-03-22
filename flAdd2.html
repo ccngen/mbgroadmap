@@ -28,10 +28,16 @@
     .fladd-submit:hover {
         background-color: var(--theme-color-system);
     }
+    .flg-cell.fladd-submit.submit-loading.loading{
+        flex-direction: row;
+        align-items: center;
+    }
 </style>
 
 <script>
     function flAdd(org) {
+        const labels = ["Project Name", "Family", "HW Dev", "SW Dev", "Network", "Commercial Name", "Default Color"]
+
         createLabel = function(_base, _x1, _y1, _lbl) {
             let tmp = _base.addCell(_x1, _y1);
             tmp.classList.add("fladd-label");
@@ -71,7 +77,7 @@
             _headercolor: "var(--theme-color-system)",
             _height: 25,
             _width: 18,
-            _vrows: 7,
+            _vrows: labels.length + 1,
             _cols: 3,
             _licon: null,
             _fontRatio: 0.4
@@ -87,27 +93,32 @@
         org.style.outline = "5px solid rgba(255, 0, 0, 1)";
 
         // labels
-        for ([i,lb] of ["Project Name", "Family", "Dev", "Network", "Commercial Name", "Default Color"].entries()) createLabel(flw, 1, i+1, lb);
+        labels.forEach((lb, i) => { createLabel(flw, 1, i+1, lb) })
 
         // fields
-        let f_pname = createInput(flw, "text", 2, 1);
-        let f_cat = createDropDown(flw, ["E", "G", "Premium", "Razr"], 2, 2);
-        let f_dev = createDropDown(flw, ["", "OT", "TN", "HQ", "WT", "LC", "IH"], 2, 3);
-        let f_net = createDropDown(flw, ["", "4G", "5G"], 2, 4);
-        let f_cname = createInput(flw, "text", 2, 5);
-        let f_col = createDropDown(flw, defColors, 2, 6);
+        let renderIndex = 1
+        let f_pname = createInput(flw, "text", 2, renderIndex);
+        let f_cat = createDropDown(flw, ["E", "G", "Premium", "Razr"], 2, ++renderIndex);
+        let f_dev = createDropDown(flw, ["", "OT", "TN", "HQ", "WT", "LC", "IH"], 2, ++renderIndex);
+        let f_SWdev = createDropDown(flw, ["", "ODM", "IH"], 2, ++renderIndex);
+        let f_net = createDropDown(flw, ["", "4G", "5G"], 2, ++renderIndex);
+        let f_cname = createInput(flw, "text", 2, ++renderIndex);
+        let f_col = createDropDown(flw, defColors, 2, ++renderIndex);
         f_col.value = "Crimson";
 
         // submit button
-        var subm = flw.addCell(1, 7, 4, 7);
+        var subm = flw.addCell(1, labels.length + 1, 4, labels.length + 1);
         subm.classList.add("fladd-submit");
+        subm.classList.add("submit-loading");
         subm.innerHTML = "Create Project";
         subm.onclick = function(e) {
+            if(hasLoading(this)) return;
             // control fields are valid
             a_pname = f_pname.value;
             a_cname = f_cname.value;
             a_cat = f_cat.value;
             a_dev = f_dev.value;
+            a_swDev = f_SWdev.value;
             a_col = f_col.value;
             a_net = f_net.value;
             a_geo = geoView;
@@ -116,20 +127,20 @@
             d.setUTCFullYear((2019 + Math.floor((startDate+org.x-2) / 12)), ((startDate+org.x-2) % 12)+1, 0); // last day of previous next month
             a_ok2s = (d.getUTCMonth()+1) + "/" + d.getUTCDate() + "/" + d.getUTCFullYear();
             if (a_pname=="" || a_cat=="") {
-                msgBox("Error", 8, 17, 4, "All fields are required");
+                message("All fields are required");
                 return;
             }
             // send to server
-            this.classList.add("spin-cursor");
+            addLoading(this)
             google.script.run.withSuccessHandler(ret => {
-                this.classList.remove("spin-cursor");
+                removeLoading(this)
                 if (!ret) {
-                    msgBox("Error", 8, 17, 4, "Project already exists or name is invalid.");
+                    message("Project already exists or name is invalid.");
                     return;
                 }
                 this.parentNode.root.remove();
                 doUpdate();
-            }).createProduct(a_pname, a_cat, a_geo, a_col, "", a_rpp, a_ok2s, a_dev, a_net, a_cname);
+            }).createProduct(a_pname, a_cat, a_geo, a_col, "", a_rpp, a_ok2s, a_dev, a_net, a_cname, a_swDev);
         };
     }
 </script>

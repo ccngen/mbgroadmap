@@ -36,6 +36,7 @@ const _LTF_range = "P2:W";
 const _NETWORK = "CN";
 const _CNAME = "I";
 const specsAppendIndex = ['CV', 'CX'] // Android,OD,Handbook
+const SW_DEV = 'CY'
 
 var ws;
 var data;

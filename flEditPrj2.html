@@ -25,10 +25,16 @@
     .fledprj-submit:hover {
         background-color: var(--theme-color-system);
     }
+    .flg-cell.fladd-submit.submit-loading.loading{
+        flex-direction: row;
+        align-items: center;
+    }
 </style>
 
 <script>
     function flEditPrj(org) {
+        const labels = ["Project Name", "Family","RPP", "OK2Ship", "HW Dev", "SW Dev", "Network", "Commercial Name", "Default Color"]
+
         createLabel = function(_base, _x1, _y1, _lbl) {
             let tmp = _base.addCell(_x1, _y1);
             tmp.classList.add("fladd-label");
@@ -86,7 +92,7 @@
                 _headercolor: "var(--theme-color-system)",
                 _height: 25,
                 _width: 18,
-                _vrows: 9,
+                _vrows: labels.length + 1,
                 _cols: 3,
                 _licon: null,
                 _fontRatio: 0.4
@@ -100,27 +106,31 @@
             flw.grid.style.backgroundColor = "var(--theme-color-bg)";
 
             // labels
-            for ([i,lb] of ["Project Name", "Family", "RPP", "OK2Ship", "Dev", "Network", "Commercial Name", "Default Color"].entries()) createLabel(flw, 1, i+1).innerHTML = lb;
+            labels.forEach((lb, i) => { createLabel(flw, 1, i+1, lb) })
 
+            let renderIndex = 1
             // fields
             prj_ok2s = new Date(prj_data[6]);
-            let f_pname = createInput(flw, "text", 2, 1); f_pname.value = prj_data[0];
+            let f_pname = createInput(flw, "text", 2, renderIndex); f_pname.value = prj_data[0];
             //let f_geo = createDropDown(flw, ["ROW", "NA", "JP"], 2, 2); f_geo.value = prj_data[2];
-            let f_cat = createDropDown(flw, ["E", "G", "Premium", "Razr"], 2, 2); f_cat.value = prj_data[1];
+            let f_cat = createDropDown(flw, ["E", "G", "Premium", "Razr"], 2, ++renderIndex); f_cat.value = prj_data[1];
             //let f_rpp = createInput(flw, "number", 2, 3); f_rpp.value = prj_data[5];
-            let f_rpp = createDropDown(flw, pricetgs[geoView][0], 2, 3); f_rpp.value = prj_data[5];
-            let f_ok2s = createInput(flw, "date", 2, 4); f_ok2s.value = prj_ok2s.getUTCFullYear() + "-" + (prj_ok2s.getUTCMonth()+1).toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false}) + "-" + prj_ok2s.getUTCDate().toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false});
-            let f_dev = createDropDown(flw, ["", "OT", "TN", "HQ", "WT", "LC", "IH"], 2, 5); f_dev.value = prj_data[7];
-            let f_cname = createInput(flw, "text", 2, 7); f_cname.value = prj_data[8];
-            let f_net = createDropDown(flw, ["", "4G", "5G"], 2, 6); f_net.value = prj_data[_network];
-            let f_col = createDropDown(flw, defColors, 2, 8); f_col.value = prj_data[3];
+            let f_rpp = createDropDown(flw, pricetgs[geoView][0], 2, ++renderIndex); f_rpp.value = prj_data[5];
+            let f_ok2s = createInput(flw, "date", 2, ++renderIndex); f_ok2s.value = prj_ok2s.getUTCFullYear() + "-" + (prj_ok2s.getUTCMonth()+1).toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false}) + "-" + prj_ok2s.getUTCDate().toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false});
+            let f_dev = createDropDown(flw, ["", "OT", "TN", "HQ", "WT", "LC", "IH"], 2, ++renderIndex); f_dev.value = prj_data[7];
+            let f_swDev = createDropDown(flw, ["", "ODM", "IH"], 2, ++renderIndex); f_swDev.value = prj_data[_swDev];
+            let f_net = createDropDown(flw, ["", "4G", "5G"], 2, ++renderIndex); f_net.value = prj_data[_network];
+            let f_cname = createInput(flw, "text", 2, ++renderIndex); f_cname.value = prj_data[8];
+            let f_col = createDropDown(flw, defColors, 2, ++renderIndex); f_col.value = prj_data[3];
 
             // submit button
-            var subm = flw.addCell(1, 9, 4, 9);
+            var subm = flw.addCell(1, labels.length + 1, 4, labels.length + 1);
             subm.classList.add("fladd-submit");
+            subm.classList.add("submit-loading");
             subm.innerHTML = "Save";
             subm.olpname = olpname;
             subm.onclick = function(e) {
+                if(hasLoading(this)) return;
                 // control fields are valid
                 a_olpname = this.olpname;
                 a_pname = f_pname.value;
@@ -132,21 +142,22 @@
                 a_ok2s = f_ok2s.value;
                 a_dev = f_dev.value;
                 a_net = f_net.value;
+                a_swDev = f_swDev.value
                 if (a_pname=="" || a_cat=="" || a_geo=="" || a_rpp=="" || a_ok2s=="") {
-                    msgBox("Error", 8, 17, 4, "All fields are required");
+                    message("All fields are required");
                     return;
                 }
                 // send to server
-                this.classList.add("spin-cursor");
+                addLoading(this)
                 google.script.run.withSuccessHandler(ret2 => {
-                    this.classList.remove("spin-cursor");
+                    removeLoading(this)
                     if (!ret2) {
-                        msgBox("Error", 8, 17, 4, "Project already exists or name is invalid.");
+                        message("Project already exists or name is invalid.");
                         return;
                     }
                     this.parentNode.root.remove();
                     doUpdate();
-                }).updateProductDetails(a_olpname, a_pname, a_cat, a_geo, a_col, "", a_rpp, a_ok2s, a_dev, a_net, a_cname);
+                }).updateProductDetails(a_olpname, a_pname, a_cat, a_geo, a_col, "", a_rpp, a_ok2s, a_dev, a_net, a_cname, a_swDev);
             };
 
         }).getProduct(olpname);

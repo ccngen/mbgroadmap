@@ -228,11 +228,11 @@
     function getTMCTotal(data) {
         const startIndex = getSheetIndex(TMCFileds[0])
         const endIndex = getSheetIndex(TMCFileds[1])
-        let total = data[startIndex]
+        let total = parseFloat(data[startIndex] || 0)
         for(let i = 1; i <= ((endIndex- startIndex) / 2); i++) {
-            total += data[startIndex + i*2] || 0
+            total += parseFloat(data[startIndex + i*2] || 0)
         }
-        return total;
+        return total.toFixed(2) || 0;
     }
 
     function load() {
@@ -492,7 +492,7 @@
                         { label: 'FPS', value: this.productData[mouseInterFileds['FPS']] },
                         { label: 'Memory', value: this.productData[mouseInterFileds['Memory']] },
                         { label: 'Android', value: this.productData[mouseInterFileds['Android']] },
-                        { label: 'TMC', value: getTMCTotal(this.productData).toFixed(2) },
+                        { label: 'TMC', value: getTMCTotal(this.productData) },
                     ]
                     mouseTopData.forEach((item, index) => {
                         addCell(grd, "div", "master-light", 2, index + 1).innerHTML = item.label + ": ";

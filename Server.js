@@ -148,16 +148,21 @@ function saveProductSpecs(pname, arr, cmt, appendArr) { // arr=data from AF to C
     return true;
 }
 
-function setProductNetWork(pname, Network) {
+/**
+ * 设置产品某单个数据
+ * pname 产品名 list = [{index, value}] value 值 index位置
+ * */
+function setProductOneData(pname, list = []) {
     var rng = plist.getDataRange();
     data = rng.getValues();
     idx = data.findIndex(el => el[_PNAME] == pname);
-
-    var cell = plist.getRange(_NETWORK+(idx + 1));
-    cell.setValue(Network);
+    list.forEach(({ value, index }) => {
+        var cell = plist.getRange(index+(idx + 1));
+        cell.setValue(value);
+    })
 }
 
-function updateProductDetails(olpname, pname, Cat, Geo, X, Y, RPP, OK2S, Dev, Network, Cname) {
+function updateProductDetails(olpname, pname, Cat, Geo, X, Y, RPP, OK2S, Dev, Network, Cname, swDev) {
     // check if product already exists
     plist = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(Plist);
     var rng = plist.getRange(1,1,plist.getLastRow(),plist.getLastColumn());
@@ -169,7 +174,10 @@ function updateProductDetails(olpname, pname, Cat, Geo, X, Y, RPP, OK2S, Dev, Ne
     idx++; // so that it refers to range numbers
     line = [pname, Cat, Geo, X, Y, RPP, OK2S, Dev, Cname];
     plist.getRange(_DETAILS_start + idx + ":" + _DETAILS_stop + idx).setValues([line]);
-    setProductNetWork(pname, Network);
+    setProductOneData(pname,[
+        { index: _NETWORK, value: Network },
+        { index: SW_DEV, value: swDev },
+    ]);
 
     // re-order Plist
     var rng = plist.getRange(2, 1, plist.getLastRow()-1, plist.getLastColumn());
@@ -177,7 +185,7 @@ function updateProductDetails(olpname, pname, Cat, Geo, X, Y, RPP, OK2S, Dev, Ne
     return true;
 }
 
-function createProduct(pname, Cat, Geo, X, Y, RPP, OK2S, Dev, Network, Cname) {
+function createProduct(pname, Cat, Geo, X, Y, RPP, OK2S, Dev, Network, Cname, swDev) {
     if (pname=="") return false;
     // check if product already exists
     plist = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(Plist);
@@ -190,7 +198,10 @@ function createProduct(pname, Cat, Geo, X, Y, RPP, OK2S, Dev, Network, Cname) {
     plist.insertRowBefore(2);
     line = [pname, Cat, Geo, X, Y, RPP, OK2S, Dev, Cname];
     plist.getRange(_DETAILS_start + "2:" + _DETAILS_stop + "2").setValues([line]);
-    setProductNetWork(pname, Network);
+    setProductOneData(pname,[
+        { index: _NETWORK, value: Network },
+        { index: SW_DEV, value: swDev },
+    ]);
 
     // re-order Plist
     var rng = plist.getRange(2, 1, plist.getLastRow()-1, plist.getLastColumn());

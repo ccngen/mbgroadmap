@@ -14,7 +14,8 @@
     button[type="primary"]:hover{
         background: #0983f3;
     }
-    button.loading::after{
+    button.loading::after,
+    .submit-loading.loading::after{
         content: '';
         display: inline-block;
         width: 14px;
@@ -63,6 +64,7 @@
     const _severity = 89;
     const _network = 91;
     const _cmf = 32;
+    const _swDev = getSheetIndex('CY');
 
     const mouseInterFileds = {
         Design: getSheetIndex('AG'),
