@@ -28,6 +28,10 @@
         margin-left: 5px;
         animation: loading 2s linear infinite;
     }
+    .submit-loading.loading{
+        flex-direction: row;
+        align-items: center;
+    }
     @keyframes loading {
         from {
             transform: rotate(0deg);
@@ -100,7 +104,15 @@
         Honor:  [["89", "99","129","149","179","199","249","299","349","399","499","599","699","799", "899", "999", "999+"],
             ["TMC Target $60-63", "TMC target $62-67","TMC target $79-83","TMC target $88-94","TMC target $105-113","TMC target $114-124","TMC target $139-153","TMC target $164-181","TMC target $192-211","TMC target $221-238","TMC target $218-261","TMC target $262-315","TMC target $307-368","TMC target $351-$421","TMC target $372-465", "TMC Target $414-518"]]
     };
-    const labels = ["Non-DM","Base Unit","ME/CMF","RF","NFC","WIFI","DP","Audio","Charging","WLC","IP","Pkg","Acc","Sensors","RoBU","Chipset","Memory","Charger","Battery","Display","Cam#1","Cam#2","Cam#3","Cam#4","F. Cam","FPS","Total"];
+    const labels = ["Base Unit","ME/CMF","RF","NFC","WIFI","DP","Audio","Charging","WLC","IP","Pkg","Acc","Sensors","RoBU","Chipset","Memory","Charger","Battery","Display","Cam#1","Cam#2","Cam#3","Cam#4","F. Cam","FPS","Total"];
+    const editSpecsAdditional = [
+        { label: 'Non-DM' },
+        { label: "Royalty / Software", index: 'CZ' },
+        { label: 'MVA', index: 'DA' },
+        { label: 'Logistics', index: 'DB' },
+        { label: 'Quality', index: 'DC' },
+        { label: 'Tooling & Scrap', index: 'DD' },
+    ]
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     const quarters = ["CQ1", "CQ1", "CQ1", "CQ2", "CQ2", "CQ2", "CQ3", "CQ3", "CQ3", "CQ4", "CQ4", "CQ4"];
     const rppSep = {

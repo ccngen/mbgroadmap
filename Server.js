@@ -129,7 +129,9 @@ function getProduct(pname) {
     return ret;
 }
 
-function saveProductSpecs(pname, arr, cmt, appendArr) { // arr=data from AF to CD, cmt=notes from AF to CD otherArr is width - Android
+// arr=data from AF to CD, cmt=notes from AF to CD otherArr is width - Android
+// additionalArr 2023-V03-拆分Non-DM  CZ - DD
+function saveProductSpecs(pname, arr, cmt, appendArr, additionalArr, additionalCmt ) {
     // check if product already exists
     plist = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(Plist);
     var rng = plist.getRange(1,1,plist.getLastRow(),plist.getLastColumn());
@@ -144,6 +146,10 @@ function saveProductSpecs(pname, arr, cmt, appendArr) { // arr=data from AF to C
     // plist.getRange(_SPCS_start + idx + ":" + _SPCS_stop + idx).setValues([arr]);
     plist.getRange(_SPCS_start + idx + ":" + _SPCS_stop + idx).setNotes([JSON.parse(cmt)]);
     // plist.getRange(_SPCS_start + idx + ":" + _SPCS_stop + idx).setNotes([cmt]);
+
+    plist.getRange(editSpecsAdditional[0] + idx + ":" + editSpecsAdditional[1] + idx).setValues([JSON.parse(additionalArr)]);
+    plist.getRange(editSpecsAdditional[0] + idx + ":" + editSpecsAdditional[1] + idx).setNotes([JSON.parse(additionalCmt)]);
+
     plist.getRange(specsAppendIndex[0] + idx + ":" + specsAppendIndex[1] + idx).setValues([JSON.parse(appendArr)]);
     return true;
 }
