@@ -138,8 +138,8 @@
             bu = 0;
             total = 0;
             for (i=2; i<26; i++) {
-                if (i<15) bu += parseFloat(res[_nondm + 2 * i - 2]);
-                else total += parseFloat(res[_nondm + 2 * i - 2]);
+                if (i<15) bu += toNum(res[_nondm + 2 * i - 2]);
+                else total += toNum(res[_nondm + 2 * i - 2]);
                 flw.addTMCCell("fltmc-c2", toNum(res[_nondm + 2 * i - 2]).toFixed(2), 3, i+nonLen);
                 flw.addTMCCell("fltmc-c3", res[_nondm + 2 * i - 3], 4, i+nonLen, 9, i+nonLen);
             }
