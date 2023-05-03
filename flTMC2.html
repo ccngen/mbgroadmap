@@ -26,25 +26,26 @@
         overflow: hidden;
     }
     .fltmc-l01,
-    .fltmc-l02,
-    .fltmc-l16,
-    .fltmc-l17,
-    .fltmc-l18,
-    .fltmc-l19,
-    .fltmc-l20,
+    .fltmc-l07,
     .fltmc-l21,
     .fltmc-l22,
     .fltmc-l23,
     .fltmc-l24,
     .fltmc-l25,
-    .fltmc-l26
+    .fltmc-l26,
+    .fltmc-l27,
+    .fltmc-l28,
+    .fltmc-l29,
+    .fltmc-l30,
+    .fltmc-l31,
+    .fltmc-l32
     {
         background-color: var(--theme-color-table);
     }
     .fltmc-l03 {
         background-color: white;
     }
-    .fltmc-l27 {
+    .fltmc-132 {
         background-color: white;
         font-weight: bold;
     }
@@ -57,16 +58,19 @@
 <script>
     function flTMCdetails(org) {
         pname = org.pname;
-
         // if this window is already opened, send a click to the header of it to make it come forward
         if ($(pname + " TMC")) {
             $(pname + " TMC").header.dispatchEvent(new Event('click'));
             return;
         }
-
+        const toNum = function(_in) {
+            if (_in=="") return 0;
+            return parseFloat(_in);
+        }
         // get product data
         $("spinner").style.display = "inline"; // start spinner
         google.script.run.withSuccessHandler(ret => {
+            const prj_data = JSON.parse(ret.prod);
             $("spinner").style.display = "none"; // stop spinner
             if (ret == null) return;
             res = JSON.parse(ret.prod);
@@ -78,9 +82,9 @@
                 _blocking: false,
                 _scaled: true,
                 _headercolor: "var(--theme-color-system)",
-                _height: 38.4,
-                _width: 15,
-                _vrows: 27,
+                _height: 48,
+                _width: 30,
+                _vrows: 27 + editSpecsAdditional.length - 1,
                 _cols: 8,
                 _licon: null,
                 _fontRatio: 0.6
@@ -104,32 +108,48 @@
                 };
                 return tmp;
             }
+            // editSpecsAdditional 2023-V03-拆分Non-DM
+            let nondmv = 0
+            editSpecsAdditional.forEach((data, i) => {
+                let cell1 = flw.addTMCCell("fltmc-l" + (i+1), data['label'], 1, i+1, 3, i+1);
+                flw.addTMCCell("fltmc-c3", "", 4, i, 9, i);
+                if(i > 0) {
+                    const index = getSheetIndex(data['index'])
+                    flw.addTMCCell("fltmc-c2", toNum(prj_data[index]).toFixed(2) , 3, i+1);
+                    nondmv += toNum(prj_data[index])
+                    cell1.classList.add("fltmc-c1b");
+                } else {
+                    cell1.classList.add("fltmc-c1");
+                }
 
+            })
+            flw.addTMCCell("fltmc-c2", parseFloat(nondmv).toFixed(2) , 3, 1); // non-dom
+
+
+            const nonLen = editSpecsAdditional.length
             // adding labels
             for ([i,lb] of labels.entries()) {
-                let cell = flw.addTMCCell("fltmc-l" + (i+1), lb, 1, i+1, 3, i+1);
-                if (i>=2 && i<=14) cell.classList.add("fltmc-c1b");
+                let cell = flw.addTMCCell("fltmc-l" + (i+1+nonLen), lb, 1, i+nonLen+1, 3, i+nonLen+1);
+                if (i>=1 && i<=13) cell.classList.add("fltmc-c1b");
                 else cell.classList.add("fltmc-c1");
             }
 
             // adding data in
             bu = 0;
             total = 0;
-            let nondmv = flw.addTMCCell("fltmc-c2", parseFloat(res[_nondm]).toFixed(2), 3, 1);
-            flw.addTMCCell("fltmc-c3", "", 4, 1, 9, 1);
             for (i=2; i<26; i++) {
                 if (i<15) bu += parseFloat(res[_nondm + 2 * i - 2]);
                 else total += parseFloat(res[_nondm + 2 * i - 2]);
-                flw.addTMCCell("fltmc-c2", parseFloat(res[_nondm + 2 * i - 2]).toFixed(2), 3, i+1);
-                flw.addTMCCell("fltmc-c3", res[_nondm + 2 * i - 3], 4, i+1, 9, i+1);
+                flw.addTMCCell("fltmc-c2", toNum(res[_nondm + 2 * i - 2]).toFixed(2), 3, i+nonLen);
+                flw.addTMCCell("fltmc-c3", res[_nondm + 2 * i - 3], 4, i+nonLen, 9, i+nonLen);
             }
-            total += bu + parseFloat(nondmv.innerHTML);
+            total += bu + parseFloat(nondmv);
 
             // adding totals
-            flw.addTMCCell("fltmc-c2", bu.toFixed(2), 3, 2);
-            flw.addTMCCell("fltmc-c3", "", 4, 2, 9, 2);
-            flw.addTMCCell("fltmc-c2", total.toFixed(2), 3, 27);
-            flw.addTMCCell("fltmc-c3", "", 4, 27, 9, 27);
+            flw.addTMCCell("fltmc-c2", bu.toFixed(2), 3, nonLen + 1); // basic unit value
+            flw.addTMCCell("fltmc-c3", "", 4, nonLen + 1, 9, nonLen + 1);
+            flw.addTMCCell("fltmc-c2", total.toFixed(2), 3, labels.length + nonLen);
+            flw.addTMCCell("fltmc-c3", "", 4, labels.length + nonLen, 9, labels.length + nonLen);
         }).getProduct(pname);
     }
 </script>
