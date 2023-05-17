@@ -3,21 +3,21 @@
         const UrightList = Urights.split('').map(item => item & 1)
         if(UrightList[0] !== 1) return false;// 权限全开 不用加限制 或者没有权限进入系统
         if(UrightList[1] === 1) return true;
-
+        console.log(UrightList, 'UrightList')
         // 根据字符串 拆解出来的值
         const permissionValues = {
             overview: UrightList[0],
-            editAll: UrightList[1],
-            viewCosts: UrightList[2],
-            viewProgress: UrightList[3],
-            viewBasic: UrightList[4],
+            superUser: UrightList[1],
+            productManager: UrightList[2],
+            programManager: UrightList[3],
+            normalUser: UrightList[4],
         }
         const permissionIdObj = {}
         // 对应的权限列表，menu上的id
-        permissionIdObj.viewBasic = ['menu-itm11', 'menu-itm16', 'menu-itm15', 'menu-itm41', 'menu-itm42']
-        permissionIdObj.viewProgress = [...permissionIdObj.viewBasic, 'menu-itm14', 'Milestones']
-        permissionIdObj.viewCosts = [...permissionIdObj.viewProgress, 'menu-itm10']
-        permissionIdObj.editAll = [...permissionIdObj.viewCosts, 'menuItemUserContorle']
+        permissionIdObj.normalUser = ['menu-itm11', 'menu-itm39', 'menu-itm16', 'menu-itm15', 'menu-itm41', 'menu-itm42', 'menu-itm7', 'menu-itm8']
+        permissionIdObj.programManager = [...permissionIdObj.normalUser, 'menu-itm12','menu-itm13']
+        permissionIdObj.productManager = [...permissionIdObj.programManager, 'menu-itm10', 'menu-itm14', 'menu-itm29']
+        permissionIdObj.superUser = [...permissionIdObj.productManager, 'menuItemUserContorle', 'menu-itm1', 'menu-itm19', 'menu-itm18', 'menu-itm31', 'menu-itm17']
 
         let permissionIds = []
         Object.entries(permissionIdObj).forEach(([key, value]) => {
@@ -27,8 +27,8 @@
         })
 
         permissionIds = Array.from(new Set(permissionIds)) // 去重
-        console.log(permissionIds, 'permissionIds')
-        permissionIdObj.editAll.forEach(id => {
+        //  superUser 这个权限 可以拿到全部受控制的菜单id列表，根据这个去匹配对应角色 开放的权限
+        permissionIdObj.superUser.forEach(id => {
             if(!permissionIds.includes(id)) {
                 $(id).classList.add("menu-dis");
             }
