@@ -57,7 +57,7 @@ function checkAccess() {
     var usr = Session.getActiveUser().getEmail();
     if (usr in ACL) {
         const rightStr = ACL[usr][1]
-        return rightStr.split('')[rightStr.length - 1] & 1
+        return rightStr.split('')[0] & 1
     }
     return false;
 }
