@@ -10,7 +10,7 @@ function addNewUser1 (email, nickname, permission) {
 }
 
 function updateUserPermission(list) {
-    const sheetIndex = ['A', 'G']
+    const sheetIndex = ['A', 'I']
     list = JSON.parse(list)
     const userList = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(UserList);
     const rng = userList.getDataRange();

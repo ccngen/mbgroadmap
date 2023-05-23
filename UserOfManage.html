@@ -60,9 +60,11 @@
     padding: 15px 15px;
     padding-top: 0;
   }
-  .user-dialog .add-user-button{
+
+  .user-dialog .add-user-button {
     margin-bottom: 5px;
   }
+
   .user-dialog .add-user-button,
   .add-user-button-wrapper-submit button {
     padding: 5px 10px;
@@ -104,7 +106,8 @@
     font-size: 14px;
   }
 
-  .user-manage-list-wrapper table tbody {}
+  .user-manage-list-wrapper table tbody {
+  }
 
   .user-manage-list-wrapper table tbody tr td:first-child {
     max-width: 222px;
@@ -203,18 +206,21 @@
     position: fixed;
     top: 0;
     left: 0;
-    background: rgba(255,255,255,0.2);
+    background: rgba(255, 255, 255, 0.2);
     width: 100vw;
     height: 100vh;
     z-index: 777;
   }
-  .user-dialog .loading{
+
+  .user-dialog .loading {
     text-align: center;
   }
+
   .user-manage-list-wrapper table tbody tr:nth-child(even) {
     background: #fafafa;
   }
-  .add-user-button-wrapper{
+
+  .add-user-button-wrapper {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -222,38 +228,38 @@
 </style>
 
 <html>
-<div id="userManageDialog" class="user-dialog">
-  <div id="userManageBg" onclick="hideUserManage()" class="bg"></div>
-  <div class="user-manage">
-    <div class="user-manage-title">
-      <span class="user-manage-title-content">Manage Users</span>
-      <span class="user-manage-model-close" onclick="hideUserManage()">X</span>
+<div id="userManageDialog" className="user-dialog">
+  <div id="userManageBg" onClick="hideUserManage()" className="bg"></div>
+  <div className="user-manage">
+    <div className="user-manage-title">
+      <span className="user-manage-title-content">Manage Users</span>
+      <span className="user-manage-model-close" onClick="hideUserManage()">X</span>
     </div>
-    <div class="user-manage-content">
-      <p class="add-user-button-wrapper">
-        <button class="add-user-button" onclick="deleteConfirm()">Delete User</button>
-        <button class="add-user-button" onclick="addUserShow()"> + New Users</button>
+    <div className="user-manage-content">
+      <p className="add-user-button-wrapper">
+        <button className="add-user-button" onClick="deleteConfirm()">Delete User</button>
+        <button className="add-user-button" onClick="addUserShow()"> + New Users</button>
       </p>
-      <div class="add-input-wrapper">
-        <div class="email-name-input">
-          <label class="add-user-required">
+      <div className="add-input-wrapper">
+        <div className="email-name-input">
+          <label className="add-user-required">
             <span>Moto</span> <input id="addUserEmail" type="text">
           </label>
-          <label class="add-user-required">
+          <label className="add-user-required">
             <span>Username</span> <input id="addUserName" type="text">
           </label>
         </div>
-        <div id="addUserPermission" class="user-permission-wrapper">
+        <div id="addUserPermission" className="user-permission-wrapper">
           <p>
           </p>
         </div>
-        <div class="add-user-button-wrapper-submit">
-          <button onclick="addNewUserToSheet(this)">Confirm</button>
-          <button onclick="addUserHide()">Cancel</button>
+        <div className="add-user-button-wrapper-submit">
+          <button onClick="addNewUserToSheet(this)">Confirm</button>
+          <button onClick="addUserHide()">Cancel</button>
         </div>
       </div>
-      <div class="user-manage-list-wrapper">
-        <div class="loading">Loading...</div>
+      <div className="user-manage-list-wrapper">
+        <div className="loading">Loading...</div>
         <table border="0">
           <thead>
           <tr>
@@ -265,7 +271,9 @@
           </tbody>
         </table>
       </div>
-      <div style="text-align: center;margin-top: 15px;"><button type="primary" onclick="userManageUpdateSave(this)">Update</button> </div>
+      <div style="text-align: center;margin-top: 15px;">
+        <button type="primary" onClick="userManageUpdateSave(this)">Update</button>
+      </div>
     </div>
   </div>
 </div>
@@ -284,17 +292,17 @@
     }
   }
 
-  function renderUserItem (email, data) {
+  function renderUserItem(email, data) {
     const permissionList = data[1]
     return `
               <td><input class="p-user-check" type="checkbox"/></td>
               <td class="user-name">${data[0]}</td>
               <td class="user-email">${email}</td>
-              ${ permissionLabelList.map((label, index) => `<td><input class="permission-check" type="checkbox" ${permissionList[index] == 1 && 'checked'}></td>`).join('') }
+              ${permissionLabelList.map((label, index) => `<td><input class="permission-check" id="${label.replace(/ /g, '')}" type="checkbox" ${permissionList[index] == 1 && 'checked'}></td>`).join('')}
             `
   }
 
-  function renderUserManageList () {
+  function renderUserManageList() {
     document.querySelector('.loading').style.display = 'block'
     google.script.run.withSuccessHandler(function (res) {
       manageUserFns.initRender()
@@ -309,34 +317,54 @@
         htmls.push(`<tr>${renderUserItem(key, value)}</tr>`)
       })
       document.querySelector('.user-manage-list-wrapper table tbody').innerHTML = htmls.join('')
+      document.querySelectorAll('.user-manage-list-wrapper table tbody [type=checkbox]:not(.p-user-check)').forEach(checkEL => {
+        checkEL.addEventListener('click', function (el) {
+          const trEl = el.target.parentElement.parentElement
+          const elT = el.target
+          if (elT.id === permissionLabelList[1].replace(/ /g, '')) {
+            elT.checked && trEl.querySelectorAll('[type=checkbox]:not(.p-user-check)').forEach(checkBox => {
+              checkBox.checked = true
+            })
+          } else if (elT.id !== permissionLabelList[0].replace(/ /g, '')) {
+            elT.checked && (trEl.querySelector('#' + permissionLabelList[0].replace(/ /g, '')).checked = true)
+          }
+
+        })
+      })
+
+
       document.querySelector('.loading').style.display = 'none'
     }).getUserList()
   }
+
   function showUserManage() {
     if (document.querySelector('#userManageDialog')) {
       renderUserManageList()
       document.querySelector('#userManageDialog').style.display = 'flex'
     }
   }
+
   function hideUserManage() {
     if (document.querySelector('#userManageDialog')) {
       document.querySelector('#userManageDialog').style.display = 'none'
     }
   }
-  function addUserShow () {
+
+  function addUserShow() {
     manageUserFns.initAddLabel()
     document.querySelector('#userManageDialog .add-input-wrapper').style.display = 'block'
   }
-  function addUserHide () {
+
+  function addUserHide() {
     document.querySelector('#userManageDialog .add-input-wrapper').style.display = 'none'
   }
 
   function deleteConfirm(email) {
     const row = event.target
-    if(hasLoading(row)) return;
+    if (hasLoading(row)) return;
     const parent = document.querySelector('.user-manage-list-wrapper table tbody')
     const checkEl = parent.querySelectorAll('.p-user-check:checked')
-    if(checkEl.length === 0) return message('请选择要删除的用户！');
+    if (checkEl.length === 0) return message('请选择要删除的用户！');
     const flag = window.confirm(`确认删除选中的用户？`)
     const emailList = [...checkEl].map(el => {
       const trEl = el.parentElement.parentElement
@@ -349,20 +377,20 @@
     console.log(JSON.stringify(emailList.map(item => item.email)), 'JSON.stringify(emailList.map(item => item.email))')
     google.script.run.withSuccessHandler(function (res) {
       removeLoading(row)
-      if(res.code) {
-        emailList.forEach(({ trEl }) => trEl.remove())
+      if (res.code) {
+        emailList.forEach(({trEl}) => trEl.remove())
       }
       message(res.message)
     }).deleteUser(JSON.stringify(emailList.map(item => item.email)))
 
   }
 
-  function getPermissionStr (nodeList) {
+  function getPermissionStr(nodeList) {
     return [...nodeList].map(item => item.checked ? '1' : '0').join('')
   }
 
   function userManageUpdateSave(e) {
-    if(hasLoading(e)) return;
+    if (hasLoading(e)) return;
     addLoading(e)
     const parent = document.querySelector('.user-manage-list-wrapper table tbody')
     const submitData = Array.from(parent.querySelectorAll('tr')).map(trEl => {
@@ -373,7 +401,7 @@
     })
     console.log(submitData, 'submitData')
     google.script.run.withSuccessHandler(function (res) {
-      if(res['code']) {
+      if (res['code']) {
         message(res.message)
       }
       removeLoading(e)
@@ -394,7 +422,7 @@
       addLoading(event)
       google.script.run.withSuccessHandler(function (res) {
         removeLoading(event)
-        if(res.code) {
+        if (res.code) {
           const html = renderUserItem(addUserEmail.value, [addUserName.value, getPermissionStr(addUserPermissionList)])
           const parent = document.querySelector('.user-manage-list-wrapper table tbody')
           parent.insertBefore(document.createElement('tr'), parent.querySelector('tr'))
