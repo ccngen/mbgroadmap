@@ -4,19 +4,23 @@
         if(UrightList[0] !== 1) return false;// 权限全开 不用加限制 或者没有权限进入系统
         if(UrightList[1] === 1) return true;
         console.log(UrightList, 'UrightList')
-        // 根据字符串 拆解出来的值
+        // 根据字符串 拆解出来的值Finance Monitor  Benchmark Manager
         const permissionValues = {
             overview: UrightList[0],
             superUser: UrightList[1],
-            productManager: UrightList[2],
-            programManager: UrightList[3],
-            normalUser: UrightList[4],
+            financeMonitor: UrightList[2],
+            benchmarkManager: UrightList[3],
+            productManager: UrightList[4],
+            programManager: UrightList[5],
+            superUser: UrightList[6],
         }
         const permissionIdObj = {}
         // 对应的权限列表，menu上的id
         permissionIdObj.normalUser = ['menu-itm11', 'menu-itm39', 'menu-itm16', 'menu-itm15', 'menu-itm41', 'menu-itm42', 'menu-itm7', 'menu-itm8']
         permissionIdObj.programManager = [...permissionIdObj.normalUser, 'menu-itm12','menu-itm13']
-        permissionIdObj.productManager = [...permissionIdObj.programManager, 'menu-itm10', 'menu-itm14', 'menu-itm29']
+        permissionIdObj.productManager = [...permissionIdObj.programManager, 'menu-itm14', 'menu-itm29']
+        permissionIdObj.benchmarkManager = [...permissionIdObj.productManager, 'menu-itm1', 'menu-itm19', 'menu-itm18', 'menu-itm17']
+        permissionIdObj.financeMonitor = [...permissionIdObj.normalUser, 'menu-itm14', 'menu-itm12', 'menu-itm13', 'menu-itm10']
         permissionIdObj.superUser = [...permissionIdObj.productManager, 'menuItemUserContorle', 'menu-itm1', 'menu-itm19', 'menu-itm18', 'menu-itm31', 'menu-itm17']
 
         let permissionIds = []
