@@ -472,6 +472,7 @@
   function resetSearch(e) {
     const event = e
     const inputEl = event.parentElement.querySelector('input')
+    const tbody = document.querySelector('.user-manage-list-wrapper table tbody')
 
     inputEl.value = ''
     tbody.querySelectorAll('tr').forEach(el => {
