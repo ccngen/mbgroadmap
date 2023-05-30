@@ -304,12 +304,19 @@
   }
 
   function renderUserItem (email, data) {
-    const permissionList = data[1]
+    const permissionList = data[1].split('').map(item => item === '1')
+    //  计算出每一项 是否disabled
+    const disabledList = permissionList.map((p, i) => {
+      //  如果super user是1，则除了super user项，其他项都是disabled， 如果superUser是0 则其他项看自己是否被勾选中
+      return i === 1 ? !permissionList[1] : permissionList[1] || !permissionList[i]
+    })
     return `
               <td><input class="p-user-check" type="checkbox"/></td>
               <td class="user-name">${data[0]}</td>
               <td class="user-email">${email}</td>
-              ${ permissionLabelList.map((label, index) => `<td><input class="permission-check" id="${label.replace(/ /g, '')}" type="checkbox" ${permissionList[index] == 1 && 'checked'}></td>`).join('') }
+              ${ permissionLabelList.map((label, index) => `<td>
+                <input class="permission-check" id="${label.replace(/ /g, '')}" type="checkbox" ${permissionList[index] ? 'checked' : ''} ${disabledList[index] ? 'disabled' : ''}>
+                </td>`).join('') }
             `
   }
 
@@ -329,17 +336,38 @@
         htmls.push(`<tr>${renderUserItem(key, value)}</tr>`)
       })
       document.querySelector('.user-manage-list-wrapper table tbody').innerHTML = htmls.join('')
+      // 除了删除多选框之外的选择框 check事件
       document.querySelectorAll('.user-manage-list-wrapper table tbody [type=checkbox]:not(.p-user-check)').forEach(checkEL => {
         checkEL.addEventListener('click', function() {
           const el = event
           const trEl = el.target.parentElement.parentElement
           const elT = el.target
-          if(elT.id === permissionLabelList[1].replace(/ /g, '')) {
-            elT.checked && trEl.querySelectorAll('[type=checkbox]:not(.p-user-check)').forEach(checkBox => {
-              checkBox.checked = true
+          const isSuper = elT.id === permissionLabelList[1].replace(/ /g, '')
+          // 选中， 如果是super user的话 其他按钮都要打上勾并disabled. 如果是其他按钮 则是其他按钮diabled
+          if(elT.checked) {
+            //  super 按钮
+            if(isSuper) {
+              trEl.querySelectorAll('[type=checkbox]:not(.p-user-check)').forEach(checkBox => {
+                checkBox.checked = true
+                if(checkEL !== checkBox) {
+                  checkBox.disabled = true
+                }
+              })
+            }
+            trEl.querySelector('#' + permissionLabelList[0].replace(/ /g, '')).checked = true // 无论勾谁 guest 都打上勾
+            trEl.querySelectorAll('[type=checkbox]:not(.p-user-check)').forEach(checkBox => {
+              if(checkEL !== checkBox) {
+                checkBox.disabled = true
+              }
             })
-          } else if(elT.id !== permissionLabelList[0].replace(/ /g, '')){
-            elT.checked && (trEl.querySelector('#' + permissionLabelList[0].replace(/ /g, '')).checked = true)
+          } else {
+            // 取消勾选 则其他按钮的disabled取消
+            trEl.querySelectorAll('[type=checkbox]:not(.p-user-check)').forEach(checkBox => {
+              checkBox.removeAttribute('disabled')
+              if(isSuper) {
+                checkBox.checked = false
+              }
+            })
           }
 
         })
