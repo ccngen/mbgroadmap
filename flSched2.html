@@ -24,6 +24,7 @@
         text-align: center;
     }
     .flsch-text {
+        display: block;
         background-color: var(--theme-color-bg);
         text-align: left;
         padding-left: 0.5em;
@@ -37,11 +38,62 @@
         font-size: 1.2em;
         box-shadow: 6px 6px 10px 0 rgba(0, 0, 0, 0.2);
     }
+    .schedule-metting-content-table table{
+        table-layout: fixed;
+        width: 100%;
+    }
+    .schedule-metting-content-table th:last-child,
+    .schedule-metting-content-table td:last-child{
+        width: 50%;
+        padding-left: 5px;
+    }
+    .singe-line {
+        text-overflow: ellipsis;
+        overflow: hidden;
+        word-break: break-all;
+        white-space: nowrap;
+    }
+    .schedule-view-all-content{
+        position: absolute;
+        max-width: 250px;
+        background: #fff;
+        box-shadow: 5px 5px 10px 2px rgba(0, 0, 0, .1);
+        border-radius: 5px;
+        padding: 10px;
+        transform: translate(-50%, -100%);
+        z-index: 999;
+    }
 </style>
 
 <script>
     function flSched(org) {
         pname = org.pname;
+        let mettingList = []
+        const renderMetting = (list) => {
+            if(list.length === 0) {
+                return '暂无记录'
+            }
+            return `<div class="schedule-metting-content-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 60px;">Date</th>
+                                <th>Metting</th>
+                                <th class="singe-line">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                          ${list.map(item => `<tr>
+                                <td>${item.date}</td>
+                                <td>${item.meeting}</td>
+                                <td class="singe-line" data-title="${item.actionPoints}">${item.actionPoints}</td>
+                            </tr>`).join('')}
+
+                        </tbody>
+                    </table>
+                </div>`
+        }
+
         if (org.scname!="") pname = org.scname;
 
         // if this window is already opened, send a click to the header of it to make it come forward
@@ -65,7 +117,7 @@
                 _scaled: true,
                 _headercolor: "var(--theme-color-system)",
                 _height: 35,
-                _width: 30,
+                _width: 45,
                 _vrows: 19,
                 _cols: 7,
                 _licon: null,
@@ -93,6 +145,28 @@
             cmts = flw.addCell(5, 7, 7, 18);
             cmts.classList.add("flsch-text");
             flw.cmts = cmts;
+            google.script.run.withSuccessHandler(res => {
+                mettingList = JSON.parse(res)
+                console.log(mettingList, 'lkist')
+                cmts.innerHTML = renderMetting(mettingList)
+                document.querySelectorAll('.schedule-metting-content-table td.singe-line').forEach(item => {
+
+                    item.addEventListener('mouseenter', () => {
+                        const div = document.querySelector('.schedule-view-all-content') ? document.querySelector('.schedule-view-all-content') : document.createElement('div')
+                        const { top, left } = item.getBoundingClientRect();
+                        div.classList.add('schedule-view-all-content')
+                        div.innerHTML = item.getAttribute('data-title')
+                        div.style.top = top + 'px'
+                        div.style.left = left + 'px'
+                        document.body.appendChild(div)
+                    })
+                    item.addEventListener('mouseleave', () => {
+                        const div = document.body.querySelector('.schedule-view-all-content')
+                        div.remove()
+                    })
+                })
+            }).getActionItemsByPname(pname);
+
 
             // adding data
             for (i=6; i<23; i++) {
@@ -104,8 +178,6 @@
                 if (!isNaN(dt2.getUTCMonth())) {
                     rightc = flw.addCell2((dt2.getUTCMonth()+1) + "/" + dt2.getUTCDate() + "/" + dt2.getUTCFullYear(), 3, i-4);
                     rightc.comment = res[4][i];
-                    rightc.onmouseover = function(ev) {this.parentNode.root.cmts.innerHTML = this.comment.replace(/\u000A/ig,"<br>")};
-                    rightc.onmouseout = function(ev) {this.parentNode.root.cmts.innerHTML = ""};
                     // color code the gap CWV/Plan
                     let delta = (dt2-dt1)/(1000 * 60 * 60 * 24);
                     if (isNaN(delta)) rightc.style.backgroundColor = "#99ccff";

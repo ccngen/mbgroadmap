@@ -430,6 +430,32 @@ function getActionItems() {
 }
 
 
+function getActionItemsByPname(pname) {
+    const AItemsSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(AItems);
+    const rng = AItemsSheet.getRange(1,1,AItemsSheet.getLastRow(),AItemsSheet.getLastColumn());
+    let list = rng.getValues();
+    list.splice(0, 1)
+
+    list = list.filter(item => item[1] === pname)
+    // 通过时间排序
+    const sortList = list.sort((a, b) => {
+        const time1 = a[2] ? new Date(a[2]).getTime() : 0
+        const time2 = b[2] ? new Date(b[2]).getTime() : 0
+        return time2 - time1
+    })
+
+    return JSON.stringify(sortList.map(item => {
+        const date = item[2] ? getTimeStr(item[2]) : ''
+        return {
+            id: item[0],
+            product: item[1],
+            meeting: item[3],
+            date: date,
+            actionPoints: item[4],
+        }
+    }))
+}
+
 function addMeetingSubmit(addArr) {
     addArr = JSON.parse(addArr)
     const AItemsSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(AItems);
