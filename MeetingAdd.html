@@ -110,7 +110,7 @@
       _scaled: true,
       _headercolor: "var(--theme-color-system)",
       _height: 40,
-      _width: 30,
+      _width: 40,
       _vrows: 10,
       _cols: 6,
       _licon: null,
@@ -122,7 +122,7 @@
     flw.addEventListener("flWindowClosed", function(e) {
       this.remove();
     });
-
+    renderDataListOfAllProduct()
     init()
     function init() {
       document.querySelector('.add-meeting-content').innerHTML = `
@@ -165,6 +165,14 @@
       }
     }
 
+      function renderDataListOfAllProduct() {
+        if(window.data && !document.querySelector('datalist#all-product-list')) {
+              const datalist = document.createElement('datalist')
+              datalist.setAttribute('id', 'all-product-list')
+              datalist.innerHTML = window.data.map(item => `<option value="${item[0]}">`).join('')
+              document.body.append(datalist)
+          }
+      }
 
     function addMeetingItem() {
       const trEl = document.createElement('tr')
