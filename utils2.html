@@ -11,19 +11,23 @@
 
     .flw-window {
         position: absolute;
-        display: grid;
+        /* display: grid; */
         overflow: hidden;
         box-shadow: 0.5vh 0.5vh 1vh rgba(0, 0, 0, 0.3), -0.3vh -0.3vh 0.8vh rgba(0, 0, 0, 0.2);
         visibility: visible;
     }
 
     .flw-header {
-        display: grid;
+        /* display: grid; */
         grid-template-columns: 1.5em auto 1.5em;
         color: white;
         width: 100%;
         text-align: center;
         cursor: move;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+        padding: 7px 0;
+        position: relative;
     }
 
     .flw-licon {
@@ -39,6 +43,11 @@
         font-weight: bold;
         cursor: pointer;
         transition-duration: 0.4s;
+        position: absolute;
+        top: 50%;
+        font-size: 18px;
+        right: 10px;
+        transform: translateY(-50%);
     }
 
     .flw-close:hover {
@@ -48,10 +57,15 @@
     .flw-body {
         background-color: var(--theme-color-bg);
         overflow-y: auto;
+        padding: 0 8px;
+        padding-bottom: 8px;
+        border-bottom-left-radius: 8px;
+        border-bottom-right-radius: 8px;
     }
 
     .flw-footer {
         height: 0.25vh;
+        display: none;
         cursor: nwse-resize;
     }
 
@@ -246,9 +260,9 @@
         // header
         flw.header = $$$(flw.window, "div", "flw-header");
         flw.header.root = flw;
-        flw.header.style.height = flw.headerHeight + "vh";
-        flw.header.style.lineHeight = flw.headerHeight + "vh";
-        flw.header.style.fontSize = (flw.headerHeight * 0.7) + "vh";
+        // flw.header.style.height = flw.headerHeight + "vh";
+        // flw.header.style.lineHeight = flw.headerHeight + "vh";
+        flw.header.style.fontSize = (flw.headerHeight * 0.85) + "vh";
         flw.header.style.backgroundColor = flw.headercolor;
         flw.header.onmousedown = flw.dragMouseDown;
         flw.header.onclick = function() {
@@ -277,7 +291,7 @@
         // close button
         flw.close = $$$(flw.header, "div", "flw-close");
         flw.close.root = flw;
-        flw.close.innerHTML = "&times;";
+        flw.close.innerHTML = "X";
         flw.close.onclick = function() {
             let event = new CustomEvent("flWindowClosed", { "detail": "flwindow to be closed" });
             this.root.dispatchEvent(event);
