@@ -1,8 +1,20 @@
+<style>
+    .BC-dialog .flw-licon{
+        position: absolute;
+        left: 13px;
+    }
+    .BC-type-title{
+        font-size: 16px;
+        font-weight: bolder;
+        color: orange;
+    }
+</style>
 <script>
     function flBC(org) {
         pname = org.pname;
         bcurl = org.bcurl;
         bcname = org.bcname;
+        const BCTypes = ['POR', 'ECWV'] // 之前默认只展示ECMV 现在增加了POR
 
         let fdata = {
             _root: document.body,
@@ -11,11 +23,12 @@
             _scaled: true,
             _headercolor: "var(--theme-color-system)",
             _height: 30,
-            _width: 22,
+            _width: 22 * BCTypes.length,
             _vrows: 12,
-            _cols: 6,
+            _cols: 6 * BCTypes.length,
             _licon: "&#x25A6;",
-            _fontRatio: 0.4
+            _fontRatio: 0.4,
+            className: 'BC-dialog'
         };
         const lines = ["NA", "Europe", "MEA", "LAS", "Brazil", "India", "CAP", "ANZ", "Japan", "PRC", "Total"];
         const heads = ["", "CA (ku)", "R&D ($M)", "GP", "PCON ($M)", "ROI"];
@@ -34,9 +47,9 @@
 
         // get product data
         $("spinner").style.display = "inline"; // start spinner
-        google.script.run.withSuccessHandler(ret => {
+        google.script.run.withSuccessHandler(result => {
             $("spinner").style.display = "none"; // stop spinner
-            if (ret == null) {
+            if (result == null) {
                 msgBox("Warning", 8, 17, 4, "<br>Business Case Not Available.");
                 return;
             }
@@ -53,37 +66,46 @@
             flw.addEventListener("flWindowLeftIcon", function(e) {if (this.bcurl != "") window.open(this.bcurl, '_blank');});
             flw.grid.parentNode.style.backgroundColor = "white";
 
-            // create labels
-            for ([i, itm] of lines.entries()) {
-                let tmp = flw.addCell(1, i+2);
-                tmp.innerHTML = itm;
-                tmp.style.backgroundColor = "#d1e0e0";
-                tmp.style.border = "0.05em solid white";
-                if (itm == "Total") tmp.style.fontWeight = "bold";
-            }
-            for ([j, itm] of heads.entries()) {
-                let tmp = flw.addCell(j+1, 1);
-                tmp.innerHTML = itm;
-                tmp.style.textAlign = "center";
-                tmp.style.border = "0.05em solid white";
-            }
-
-            // add data
-            for (i=1; i<=5; i++) {
-                for (j=1; j<=11; j++) {
-                    cnt = flw.addCell(i+1, j+1);
-                    if (i==1) cnt.innerHTML = (ret[i*13 + j] == "" || ret[i*13 + j] == 0) ? "" : (ret[i*13 + j] / 1000).toFixed(1);
-                    if (i==2) cnt.innerHTML = (ret[i*13 + j] == "" || ret[i*13 + j] == 0) ? "" : (ret[i*13 + j] / 1000000).toFixed(1);
-                    if (i==3) cnt.innerHTML = (ret[(i+3)*13 + j - 2] == "" || ret[(i+3)*13 + j - 2] == 0) ? "" : (ret[(i+3)*13 + j - 2] * 100).toFixed(2) + "%";
-                    if (i==4) cnt.innerHTML = (ret[i*13 + j] == "" || ret[i*13 + j] == 0) ? "" : (ret[i*13 + j] / 1000000).toFixed(1);
-                    if (i==5) cnt.innerHTML = (ret[i*13 + j - 1] == "" || ret[i*13 + j - 1] == 0) ? "" : (ret[i*13 + j - 1]).toFixed(1);
-                    cnt.style.backgroundColor = "#e5e5e5";
-                    cnt.style.textAlign = "right";
-                    cnt.style.paddingRight = "0.6em";
-                    if (j==11) cnt.style.fontWeight = "bold";
-                    cnt.style.border = "0.05em solid white";
+            BCTypes.forEach((type, typeIndex) => {
+                for ([i, itm] of lines.entries()) {
+                    let tmp = flw.addCell(1+typeIndex*(heads.length), i+2);
+                    tmp.innerHTML = itm;
+                    tmp.style.backgroundColor = "#d1e0e0";
+                    tmp.style[typeIndex > 0 ? 'border-left' : 'border'] =  typeIndex > 0 ? '0.1em solid #999' : '0.05em solid white'
+                    if (itm == "Total") tmp.style.fontWeight = "bold";
                 }
-            }
+                heads[0] = type;
+                for ([j, itm] of heads.entries()) {
+                    let tmp = flw.addCell(j+1+typeIndex*(heads.length), 1);
+                    tmp.innerHTML = itm;
+                    if(j === 0) {
+                        tmp.classList.add('BC-type-title')
+                    }
+                    tmp.style[typeIndex > 0 && j === 0 ? 'border-left' : 'border'] =  typeIndex > 0 && j === 0 ? '0.1em solid #999' : '0.05em solid white'
+                    tmp.style.textAlign = "center";
+                }
+
+                // add data
+                for (i=1; i<=heads.length - 1; i++) {
+                    for (j=1; j<=lines.length; j++) {
+                        cnt = flw.addCell(i+1+typeIndex*(heads.length), j+1);
+                        cnt.style.backgroundColor = "#e5e5e5";
+                        cnt.style.textAlign = "right";
+                        cnt.style.paddingRight = "0.6em";
+                        cnt.style.border = "0.05em solid white";
+
+                        ret = result[type]
+                        if(ret) {
+                            if (i==1) cnt.innerHTML = (ret[i*13 + j] == "" || ret[i*13 + j] == 0) ? "" : (ret[i*13 + j] / 1000).toFixed(1);
+                            if (i==2) cnt.innerHTML = (ret[i*13 + j] == "" || ret[i*13 + j] == 0) ? "" : (ret[i*13 + j] / 1000000).toFixed(1);
+                            if (i==3) cnt.innerHTML = (ret[(i+3)*13 + j - 2] == "" || ret[(i+3)*13 + j - 2] == 0) ? "" : (ret[(i+3)*13 + j - 2] * 100).toFixed(2) + "%";
+                            if (i==4) cnt.innerHTML = (ret[i*13 + j] == "" || ret[i*13 + j] == 0) ? "" : (ret[i*13 + j] / 1000000).toFixed(1);
+                            if (i==5) cnt.innerHTML = (ret[i*13 + j - 1] == "" || ret[i*13 + j - 1] == 0) ? "" : (ret[i*13 + j - 1]).toFixed(1);
+                            if (j==11) cnt.style.fontWeight = "bold";
+                        }
+                    }
+                }
+            })
 
         }).getProductBC(bcname);
 

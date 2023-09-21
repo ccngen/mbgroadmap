@@ -240,13 +240,22 @@ function getProductSchedule(scname) {
 }
 
 function getProductBC(bcname) {
-    sheet = SpreadsheetApp.openById(_finance_db).getSheetByName(bcdb);
-    bcrng = sheet.getRange(1,1,sheet.getLastRow(),sheet.getLastColumn());
-    bcdata = bcrng.getValues();
-    idx = bcdata.findIndex(el => (el[0]==bcname));
-    if (idx==-1) return null;
-    resdata = bcdata[idx];
-    return resdata;
+    sheetDB = SpreadsheetApp.openById(_finance_db)
+    const BCDatas = {};
+    const typeMap = [
+        { key: 'POR', dbName: bcdbOfPOR },
+        { key: 'ECWV', dbName: bcdb },
+    ]
+    typeMap.forEach((typeData) => {
+        sheet = sheetDB.getSheetByName(typeData.dbName);
+        bcrng = sheet.getRange(1,1,sheet.getLastRow(),sheet.getLastColumn());
+        bcdata = bcrng.getValues();
+        idx = bcdata.findIndex(el => (el[0]==bcname));
+        BCDatas[typeData.key] = idx==-1 ? null : bcdata[idx];
+    })
+
+    if (!BCDatas['POR'] && !BCDatas['ECWV']) return null;
+    return BCDatas;
 }
 
 function getDesign(pname) {

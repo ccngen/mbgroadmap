@@ -12,6 +12,7 @@ const milestn = "milestones";
 const ltfdb = "ConsolidatedDB";
 const findb = "BC Finance Database";
 const bcdb = "PCON & ROI by Geo (ECWV)";
+const bcdbOfPOR = "PCON & ROI by Geo (POR)";
 const _pics_folder = "1eb_rZ7zGanIj-V6-wJaeZYdor9bu2Z9D";
 const editSpecsSyncUpdateList = ['Chipset', 'Memory', 'Charger', 'Battery', 'Display', 'Cam#1', 'Cam#2', 'Cam#3', 'Cam#4', 'FCam', 'FPS'];
 
