@@ -1,0 +1,171 @@
+<style>
+    .overadd-modal{
+        font-size: 1.5em !important;
+    }
+    .overall-search-div{
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+    .overall-table-div{
+        flex-grow: 1;
+        overflow: scroll;
+    }
+    .overall-table-div table{
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+    }
+    .overall-table-div table td{
+        padding: 5px 8px;
+        border: 1px solid;
+    }
+    .overall-search .search-date{
+        margin-top: 10px;
+    }
+    .overall-search .search-date,.overall-search .search-actions{
+        display: flex;
+        justify-content: center;
+    }
+    .overall-search .search-date label{
+        display: inline-flex;
+        align-items: center;
+    }
+    .overall-search .search-actions button{
+        width: 100px;
+        padding: 5px 0;
+    }
+    .overall-search .search-actions{
+        margin-top: 15px;
+    }
+    .overall-search .search-actions button:first-child{
+        margin-right: 20px;
+    }
+    .overall-search .search-date span{
+        font-size: 1.3em;
+        margin-right: 15px;
+    }
+    .overall-search .search-date input{
+        height: 28px;
+        line-height: 28px;
+        font-size: 1.3em;
+    }
+</style>
+
+<script>
+    function overallOpen1(org) {
+        const tableTitles = ['Product', 'OK2s', 'CA(ku)']
+        createInput = function(_base, _type, _x1, _y1) {
+            let input = $$$(_base.grid, "input", "flg-cell");
+            input.style.gridRow = _y1 + " / " + (_y1+1);
+            input.style.gridColumn = _x1 + " / " + (_x1+2);
+            input.type = _type;
+            input.classList.add("fladd-input");
+            input.title = "";
+            return input;
+        }
+
+        function getDaysInMonth(year, month) {
+            return new Date(year, month, 0).getDate();
+        }
+
+        const checkDate = (start, end) => {
+            if(start && end) {
+                return new Date(start).getTime() <=  new Date(end).getTime()
+            }
+            return true
+        }
+
+        // create window
+        let fdata = {
+            _root: document.body,
+            _title: "Overall",
+            _blocking: true,
+            _scaled: true,
+            _headercolor: "var(--theme-color-system)",
+            _height: 35,
+            _width: 30,
+            _vrows: 1,
+            _cols: 1,
+            _licon: null,
+            _fontRatio: 0.4
+        };
+        let flw = flGrid(fdata);
+        flw.grid.style.backgroundColor = "var(--theme-color-bg)";
+        flw.grid.classList.add('overadd-modal')
+        flw.org = org;
+        flw.addEventListener("flWindowClosed", function(e) {
+            this.org.style.outline = "";
+            this.remove();
+        });
+        // outline origine cell
+        org.style.outline = "5px solid rgba(255, 0, 0, 1)";
+        const contentDiv = $$$(flw.grid, 'div', 'overall-search-div')
+        const searchDiv = $$$(contentDiv, 'div', 'overall-search')
+        searchDiv.innerHTML = `
+        <div class="search-date">
+          <label>
+            <span>From</span>
+            <input type="month" id="overallSearchStart">
+          </label>
+          <label>
+            <span style="margin-left: 20px;">To</span>
+            <input type="month" id="overallSearchEnd">
+          </label>
+        </div>
+        <div class="search-actions">
+          <button id="overallSearchOk">Ok</button>
+          <button id="overallSearchReset">Reset</button>
+        </div>
+      `
+        const startDate = $('overallSearchStart')
+        const endDate = $('overallSearchEnd')
+        const okBtn = $('overallSearchOk')
+        const resetBtn = $('overallSearchReset')
+        const tableDiv = $$$(contentDiv, 'div', 'overall-table-div')
+        const tableEl = $$$(tableDiv, 'table', 'overall-table')
+
+
+
+        okBtn.addEventListener('click', () => {
+            const startDateData = startDate.value && `${startDate.value}-01`
+            let endDateData = endDate.value && `${endDate.value}-${getDaysInMonth(endDate.value.split('-')[0], endDate.value.split('-')[1])}`
+
+            if(!startDateData && !endDateData) {
+                return message('请选择时期再进行搜索')
+            }
+            if(!checkDate(startDateData, endDateData)) {
+                return message('开始日期不能大于结束日期')
+            }
+            if(hasLoading(okBtn)) { return; }
+            addLoading(okBtn)
+            google.script.run.withSuccessHandler(function (res) {
+                const list = JSON.parse(res)
+                if(list.length > 0) {
+                    let total = 0;
+                    const htmls = list.map((item) => {
+                        total += (item['ca'] || 0)
+                        return `<tr>
+                    <td>${item['product']}</td>
+                    <td>${item['ok2s']}</td>
+                    <td>${item['ca']}</td>
+                  </tr>`
+                    })
+                    tableEl.innerHTML = `<tr>${tableTitles.map(title => `<td>${title}</td>`).join('')}` + htmls.join('')
+                } else {
+                    tableEl.innerHTML = '<tr><td>搜索结果为空</td></tr>'
+                }
+                removeLoading(okBtn)
+            }).overallSearch(startDateData, endDateData)
+
+        })
+        resetBtn.addEventListener('click', () => {
+            startDate.value = ''
+            endDate.value = ''
+            tableEl.innerHTML = ''
+        })
+    }
+</script>

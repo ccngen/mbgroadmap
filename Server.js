@@ -508,3 +508,39 @@ function saveProductDimension(pname , list) {
     plist.getRange(saveIndex[0] + idx + ":" + saveIndex[1] + idx).setValues([JSON.parse(list)]);
     return true;
 }
+
+function getProductBCList() {
+    const sheetDB = SpreadsheetApp.openById(_finance_db)
+    const sheet = sheetDB.getSheetByName(bcdb);
+    const bcrng = sheet.getRange(1,1,sheet.getLastRow(),sheet.getLastColumn());
+    const bcdata = bcrng.getValues();
+    return bcdata
+}
+
+function overallSearch(startDate, endDate) {
+    const productList = JSON.parse(getData())
+    const bcList = getProductBCList()
+    // 从产品表获取符合时间_RPP列的产品，并获取对应产品的bcname 然后通过bcname(11)比对，获取bc中对应的ECWV
+    const _bcnameIndex = 11;
+    const filterData = []
+
+    const getTime = (date) => date ? new Date(date).getTime() : 0;
+    const startDateTime = getTime(startDate)
+    const endDateTime = getTime(endDate)
+    productList.forEach((product) => {
+        if(product[_RPP]) {
+            const rpp = getTime(product[_RPP])
+            if((startDateTime > 0 && endDateTime > 0 && endDateTime >= rpp && startDateTime <=rpp)
+                || (startDateTime === 0 && endDateTime > 0 && rpp <= endDateTime)
+                || (endDateTime === 0 && startDateTime > 0 && rpp >= startDateTime)) {
+                const bcData = bcList.find((bcItem) => bcItem[0] === product[_bcnameIndex])
+                filterData.push({
+                    product: product[0],
+                    ok2s: product[_OK2S],
+                    ca: bcData ? (bcData[11] == "" || bcData[11] == 0) ? "" : (bcData[11] / 1000) : ''
+                })
+            }
+        }
+    })
+    return JSON.stringify(filterData);
+}
