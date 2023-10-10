@@ -18,10 +18,11 @@
         border-collapse: collapse;
         margin-top: 20px;
     }
-    }
+
     .overall-table-div table td{
         padding: 5px 8px;
         border: 1px solid;
+        font-size: 1.2em;
     }
     .overall-search .search-date{
         margin-top: 10px;
@@ -127,7 +128,7 @@
         const resetBtn = $('overallSearchReset')
         const tableDiv = $$$(contentDiv, 'div', 'overall-table-div')
         const tableEl = $$$(tableDiv, 'table', 'overall-table')
-
+        tableEl.setAttribute('border', '1')
 
 
         okBtn.addEventListener('click', () => {
@@ -142,19 +143,20 @@
             }
             if(hasLoading(okBtn)) { return; }
             addLoading(okBtn)
+            let numTotal = 0;
             google.script.run.withSuccessHandler(function (res) {
                 const list = JSON.parse(res)
                 if(list.length > 0) {
                     let total = 0;
                     const htmls = list.map((item) => {
-                        total += (item['ca'] || 0)
+                        numTotal += (item['ca'] || 0)
                         return `<tr>
                     <td>${item['product']}</td>
                     <td>${item['ok2s']}</td>
                     <td>${item['ca']}</td>
                   </tr>`
                     })
-                    tableEl.innerHTML = `<tr>${tableTitles.map(title => `<td>${title}</td>`).join('')}` + htmls.join('')
+                    tableEl.innerHTML = `<tr>${tableTitles.map(title => `<td>${title}</td>`).join('')}` + htmls.join('') + `<tr><td colspan="2" style="text-align: right;">总计</td><td style="font-size: 1.5em; font-weight: bold;">${numTotal}</td></tr>`
                 } else {
                     tableEl.innerHTML = '<tr><td>搜索结果为空</td></tr>'
                 }
@@ -169,3 +171,4 @@
         })
     }
 </script>
+  
