@@ -226,14 +226,23 @@
 </style>
 
 <script>
-    function getTMCTotal(data) {
-        const startIndex = getSheetIndex(TMCFileds[0])
-        const endIndex = getSheetIndex(TMCFileds[1])
-        let total = parseFloat(data[startIndex] || 0)
-        for(let i = 1; i <= ((endIndex- startIndex) / 2); i++) {
-            total += parseFloat(data[startIndex + i*2] || 0)
+    function getTMCTotal(prj_data) {
+        const toNum = function(_in) {
+            if (_in=="") return 0;
+            return parseFloat(_in);
         }
-        return total.toFixed(2) || 0;
+
+        let total = 0
+        editSpecsAdditional.forEach((item, index) => {
+            if(index > 0) {
+                const sheepIndex = getSheetIndex(item['index'])
+                total += toNum(prj_data[sheepIndex])
+            }
+        })
+        for (i=0; i<labels.length - 2; i++) {
+            total += toNum(prj_data[_nondm+2+2*i]);
+        }
+        return total.toFixed(2) || 0
     }
 
     function load() {
