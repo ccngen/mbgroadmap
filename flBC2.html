@@ -83,7 +83,7 @@
                     tmp.style[typeIndex > 0 && j === 0 ? 'border-left' : 'border'] =  typeIndex > 0 && j === 0 ? '0.1em solid #999' : '0.05em solid white'
                     tmp.style.textAlign = "center";
                 }
-                const beforeCol = type === 'POR' ? 12 : 13
+                const beforeCol = typeIndex === 0 ? 12 : 13
                 // add data
                 for (i=1; i<=heads.length - 1; i++) {
                     for (j=1; j<=lines.length; j++) {
