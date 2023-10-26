@@ -64,7 +64,7 @@
             });
             flw.addEventListener("flWindowLeftIcon", function(e) {if (this.bcurl != "") window.open(this.bcurl, '_blank');});
             flw.grid.parentNode.style.backgroundColor = "white";
-
+            console.log('result', result)
             BCTypes.forEach((type, typeIndex) => {
                 for ([i, itm] of lines.entries()) {
                     let tmp = flw.addCell(1+typeIndex*(heads.length), i+2);
@@ -83,7 +83,7 @@
                     tmp.style[typeIndex > 0 && j === 0 ? 'border-left' : 'border'] =  typeIndex > 0 && j === 0 ? '0.1em solid #999' : '0.05em solid white'
                     tmp.style.textAlign = "center";
                 }
-                const beforeCol = typeIndex === 0 ? 12 : 13
+                const lineSub = typeIndex === 0 ? -1 : 0
                 // add data
                 for (i=1; i<=heads.length - 1; i++) {
                     for (j=1; j<=lines.length; j++) {
@@ -95,11 +95,11 @@
 
                         ret = result[type]
                         if(ret) {
-                            if (i==1) cnt.innerHTML = (ret[i*beforeCol + j] == "" || ret[i*beforeCol + j] == 0) ? "" : (ret[i*beforeCol + j] / 1000).toFixed(1);
-                            if (i==2) cnt.innerHTML = (ret[i*beforeCol + j] == "" || ret[i*beforeCol + j] == 0) ? "" : (ret[i*beforeCol + j] / 1000000).toFixed(1);
-                            if (i==3) cnt.innerHTML = (ret[(i+3)*beforeCol + j - 2] == "" || ret[(i+3)*beforeCol + j - 2] == 0) ? "" : (ret[(i+3)*beforeCol + j - 2] * 100).toFixed(2) + "%";
-                            if (i==4) cnt.innerHTML = (ret[i*beforeCol + j] == "" || ret[i*beforeCol + j] == 0) ? "" : (ret[i*beforeCol + j] / 1000000).toFixed(1);
-                            if (i==5) cnt.innerHTML = (ret[i*beforeCol + j - 1] == "" || ret[i*beforeCol + j - 1] == 0) ? "" : (ret[i*beforeCol + j - 1]).toFixed(1);
+                            if (i==1)cnt.innerHTML = (ret[i*13 + j+lineSub] == "" || ret[i*13 + j+lineSub] == 0) ? "" : (ret[i*13 + j+lineSub] / 1000).toFixed(1);
+                            if (i==2) cnt.innerHTML = (ret[i*13 + j+lineSub] == "" || ret[i*13 + j+lineSub] == 0) ? "" : (ret[i*13 + j+lineSub] / 1000000).toFixed(1);
+                            if (i==3) cnt.innerHTML = (ret[(i+3)*13 + j - 2+lineSub] == "" || ret[(i+3)*13 + j - 2+lineSub] == 0) ? "" : (ret[(i+3)*13 + j - 2+lineSub] * 100).toFixed(2) + "%";
+                            if (i==4) cnt.innerHTML = (ret[i*13 + j+lineSub] == "" || ret[i*13 + j+lineSub] == 0) ? "" : (ret[i*13 + j+lineSub] / 1000000).toFixed(1);
+                            if (i==5) cnt.innerHTML = (ret[i*13 + j - 1+lineSub] == "" || ret[i*13 + j - 1+lineSub] == 0) ? "" : (ret[i*13 + j - 1+lineSub]).toFixed(1);
                             if (j==11) cnt.style.fontWeight = "bold";
                         }
                     }
