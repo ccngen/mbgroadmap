@@ -127,6 +127,9 @@
 
 
             const nonLen = editSpecsAdditional.length
+            // adding data in
+            bu = 0;
+            total = 0;
             // adding labels
             for ([i,lb] of labels.entries()) {
                 let cell = flw.addTMCCell("fltmc-l" + (i+1+nonLen), lb, 1, i+nonLen+1, 3, i+nonLen+1);
@@ -134,19 +137,25 @@
                 else cell.classList.add("fltmc-c1");
             }
 
-            // adding data in
-            bu = 0;
-            total = 0;
-            for (i=2; i<26; i++) {
-                if (i<15) bu += toNum(res[_nondm + 2 * i - 2]);
-                else total += toNum(res[_nondm + 2 * i - 2]);
-                flw.addTMCCell("fltmc-c2", toNum(res[_nondm + 2 * i - 2]).toFixed(2), 3, i+nonLen);
-                flw.addTMCCell("fltmc-c3", res[_nondm + 2 * i - 3], 4, i+nonLen, 9, i+nonLen);
+            for (i=1; i<labels.length - 1; i++) {
+                if(extraLabels[labels[i]]) {
+                    const lb = labels[i]
+                    const value = toNum(res[getSheetIndex(extraLabels[lb]) + 1])
+                    total += value;
+                    flw.addTMCCell("fltmc-c2", value.toFixed(2), 3, i+nonLen+1);
+                    flw.addTMCCell("fltmc-c3", res[getSheetIndex(extraLabels[lb])], 4, i+nonLen+1, 9, i+nonLen+1);
+                } else {
+                    const index = seriesLabels.indexOf(labels[i])
+                    if (index <= 12) bu += toNum(res[_nondm + 2 * index + 2]);
+                    else total += toNum(res[_nondm + 2 * index + 2]);
+                    flw.addTMCCell("fltmc-c2", toNum(res[_nondm + 2 * index + 2]).toFixed(2), 3, i+nonLen+1);
+                    flw.addTMCCell("fltmc-c3", res[_nondm + 2 * index + 1], 4, i+nonLen+1, 9, i+nonLen+1);
+                }
             }
             total += bu + parseFloat(nondmv);
 
             // adding totals
-            flw.addTMCCell("fltmc-c2", bu.toFixed(2), 3, nonLen + 1); // basic unit value
+            flw.addTMCCell("fltmc-c2",  bu.toFixed(2), 3, nonLen + 1); // basic unit value
             flw.addTMCCell("fltmc-c3", "", 4, nonLen + 1, 9, nonLen + 1);
             flw.addTMCCell("fltmc-c2", total.toFixed(2), 3, labels.length + nonLen);
             flw.addTMCCell("fltmc-c3", "", 4, labels.length + nonLen, 9, labels.length + nonLen);

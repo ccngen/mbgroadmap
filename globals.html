@@ -1,4 +1,5 @@
 <style>
+
     button[type="primary"]{
         height: 28px;
         border-radius: 5px;
@@ -14,6 +15,8 @@
     button[type="primary"]:hover{
         background: #0983f3;
     }
+    button[type="primary"].loading {
+    }
     button.loading::after,
     .submit-loading.loading::after{
         content: '';
@@ -26,7 +29,7 @@
         box-sizing: border-box;
         vertical-align: middle;
         margin-left: 5px;
-        animation: loading 2s linear infinite;
+        animation: loading 1s linear infinite;
     }
     .submit-loading.loading{
         flex-direction: row;
@@ -104,7 +107,13 @@
         Honor:  [["89", "99","129","149","179","199","249","299","349","399","499","599","699","799", "899", "999", "999+"],
             ["TMC Target $60-63", "TMC target $62-67","TMC target $79-83","TMC target $88-94","TMC target $105-113","TMC target $114-124","TMC target $139-153","TMC target $164-181","TMC target $192-211","TMC target $221-238","TMC target $218-261","TMC target $262-315","TMC target $307-368","TMC target $351-$421","TMC target $372-465", "TMC Target $414-518"]]
     };
-    const labels = ["Base Unit","ME/CMF","RF","NFC","WIFI","DP","Audio","Charging","WLC","IP","Pkg","Acc","Sensors","RoBU","Chipset","Memory","Charger","Battery","Display","Cam#1","Cam#2","Cam#3","Cam#4","F. Cam","FPS","Total"];
+    const labels = ["Base Unit","ME/CMF","RF","NFC","WIFI","DP","Audio","Charging","WLC","IP","Pkg","Acc","Sensors","RoBU","Chipset","Memory","Charger","Battery","Display#1","Display#2","Cam#1","Cam#2","Cam#3","Cam#4","Cam#5","F. Cam#1","F. Cam#2","FPS","Total"];
+    const seriesLabels = ["ME/CMF","RF","NFC","WIFI","DP","Audio","Charging","WLC","IP","Pkg","Acc","Sensors","RoBU","Chipset","Memory","Charger","Battery","Display#1","Cam#1","Cam#2","Cam#3","Cam#4","F. Cam#1","FPS"]
+    const extraLabels = {
+        "Display#2": 'DE',
+        "Cam#5": 'DG',
+        "F. Cam#2": 'DI'
+    }
     const editSpecsAdditional = [
         { label: 'Non-DM' },
         { label: "Royalty / Software", index: 'CZ' },
@@ -137,6 +146,7 @@
         { label: 'OD', index: 'CW' },
         { label: 'Handbook', index: 'CX' }
     ]
+
     const permissionLabelList = ['Access', 'Super User', 'Finance Monitor' , 'Benchmark Manager' ,'Product Manager', 'Program Manager', 'Normal User']
 
     var data = [];

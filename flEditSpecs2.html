@@ -114,6 +114,7 @@
         const specialStyleOfLabels = [1, 13]
         const labelsLength = labels.length
         const nonDomCssName = 'nodom'
+        const extraLabelClassName = '-extra' // 20231031 追加的labels
 
         Element.prototype.setAt = function(x1, y1, x2=x1, y2=y1) {
             this.style.gridRow = (y1+1) + " / " + (y2+2);
@@ -175,7 +176,15 @@
             $(_pname + "-fleddat-cell-1-0").value = (bu - nonDomValue).toFixed(2);
 
             total = parseFloat(bu);
-            for (let i=specialStyleOfLabels[1] + 1; i<labelsLength - 1; i++) total += parseFloat($(_pname + "-fleddat-cell-1-" + i).value);
+            for (let i=specialStyleOfLabels[1] + 1; i<labelsLength - 1; i++) {
+
+                if($(_pname + "-fleddat-cell-1-" + i)) {
+                    total += parseFloat($(_pname + "-fleddat-cell-1-" + i).value);
+                }
+                if($(_pname + extraLabelClassName + "-fleddat-cell-1-" + i)) {
+                    total += parseFloat($(_pname + extraLabelClassName + "-fleddat-cell-1-" + i).value);
+                }
+            }
             $(_pname + "-fleddat-cell-1-"+(labelsLength - 1)).value = total.toFixed(2);
         }
 
@@ -258,9 +267,17 @@
                 lbel.innerHTML = lb;
                 if (i>= specialStyleOfLabels[0] && i<=specialStyleOfLabels[1]) lbel.classList.add("fleddat-c1b");
                 // fields
-                createInput(flw.grid, "number", 1, i).title = "";
+                const numInput = createInput(flw.grid, "number", 1, i, 1, i, extraLabels[lb] ? extraLabelClassName : '')
+                numInput.title = "";
+                // 新增字段赋值
+                if(extraLabels[lb]) {
+                    numInput.value = prj_data[getSheetIndex(extraLabels[lb]) + 1]
+                }
                 if (i!=0 && i!= labelsLength - 1) {
-                    const specsInput = createInput(flw.grid, "text", 2, i);
+                    const specsInput = createInput(flw.grid, "text", 2, i, 2, i, extraLabels[lb] ? extraLabelClassName : '');
+                    if(extraLabels[lb]) {
+                        specsInput.value = prj_data[getSheetIndex(extraLabels[lb])]
+                    }
                     if(compsData[lb]) { // 代表在comps表里面存在值
                         let timer = null
                         const specsInputEvent = (e) => {
@@ -285,7 +302,10 @@
                     }
                 }
                 if (i!=labelsLength - 1) {
-                    tmp = createInput(flw.grid, "textarea", 3, i);
+                    tmp = createInput(flw.grid, "textarea", 3, i, 3, i, extraLabels[lb] ? extraLabelClassName : '' );
+                    if(extraLabels[lb]) {
+                        tmp.value = prj_note[getSheetIndex(extraLabels[lb])]
+                    }
                     tmp.addEventListener("focusin", function(e) {this.style.height = "calc(var(--fleddat-cellH) * 3 - 0.5em)";});
                     tmp.addEventListener("focusout", function(e) {this.style.height = "";});
                 }
@@ -301,25 +321,34 @@
                 cellAt(1, uiIndex).value = prj_data[getSheetIndex(index)]
             })
 
-
             createInput(flw.grid, "textarea", 0, textAreaIndex, 3, textAreaIndex).style.height = "calc(var(--fleddat-cellH) * 3 - 0.5em)";
 
             // fill in data
             // cellAt(1, 0).value = toNum(prj_data[_nondm]).toFixed(2);
             // cellAt(3, 0).value = prj_note[_nondm];
             cellAt(3, 0).value = prj_data[_comments+1];
-            for (i=0; i<24; i++) {
-                cellAt(1, i+1).value = toNum(prj_data[_nondm+2+2*i]).toFixed(2);
-                cellAt(2, i+1).value = prj_data[_nondm+1+2*i];
-                cellAt(3, i+1).value = prj_note[_nondm+1+2*i];
-            }
+            // 赋值
+            console.log(222)
+            seriesLabels.forEach((label, i) => {
+                const index = labels.indexOf(label) - 1
+                cellAt(1, index+1).value = toNum(prj_data[_nondm+2+2*i]).toFixed(2);
+                cellAt(2, index+1).value = prj_data[_nondm+1+2*i];
+                cellAt(3, index+1).value = prj_note[_nondm+1+2*i];
+            })
 
             cellAt(0, textAreaIndex).value = prj_data[_comments];
 
             // calculations
             cellAt(1,0).readOnly = true;
             cellAt(1,labelsLength - 1).readOnly = true;
-            for (i=0; i<labelsLength; i++) cellAt(1,i).onchange = function() {this.value = toNum(this.value).toFixed(2); reCalc(this.parentNode.pname);};
+            for (i=0; i<labelsLength; i++) {
+                if(cellAt(1,i)) {
+                    cellAt(1,i).onchange = function() {this.value = toNum(this.value).toFixed(2); reCalc(this.parentNode.pname);};
+                }
+                if(cellAt(1,i, extraLabelClassName)) {
+                    cellAt(1,i, extraLabelClassName).onchange = function() {this.value = toNum(this.value).toFixed(2); reCalc(this.parentNode.pname);};
+                }
+            }
             reCalc(pname);
 
             // submit button
@@ -335,14 +364,36 @@
                 const arr = [];
                 const cmt = [];
                 const appendArr = [];
+                const extraArr = []
+                const extraCmt = []
                 arr.push($(this.parentNode.pname + nonDomCssName + "-fleddat-cell-1-0").value);
                 cmt.push($(this.parentNode.pname + nonDomCssName + "-fleddat-cell-3-0").value);
                 for (i=1; i<labels.length - 1; i++) {
-                    arr.push($(this.parentNode.pname + "-fleddat-cell-2-" + i).value);
-                    cmt.push($(this.parentNode.pname + "-fleddat-cell-3-" + i).value);
-                    arr.push($(this.parentNode.pname + "-fleddat-cell-1-" + i).value);
-                    cmt.push("");
+                    const el1 = $(this.parentNode.pname + "-fleddat-cell-1-" + i)
+                    const el2 = $(this.parentNode.pname + "-fleddat-cell-2-" + i)
+                    const el3 = $(this.parentNode.pname + "-fleddat-cell-3-" + i)
+                    const extraEl1 = $(this.parentNode.pname + extraLabelClassName + "-fleddat-cell-1-" + i)
+                    const extraEl2 = $(this.parentNode.pname + extraLabelClassName + "-fleddat-cell-2-" + i)
+                    const extraEl3 = $(this.parentNode.pname + extraLabelClassName + "-fleddat-cell-3-" + i)
+
+                    if(el1) {
+                        arr.push(el2.value);
+                        cmt.push(el3.value);
+                        arr.push(el1.value);
+                        cmt.push("");
+                    }
+
+                    if(extraEl1) {
+                        extraArr.push(extraEl2.value);
+                        extraCmt.push(extraEl3.value);
+                        extraArr.push(extraEl1.value);
+                        extraCmt.push("");
+                    }
+
                 }
+
+                console.log(extraArr, 'extraArr')
+                console.log(extraCmt, 'extraCmt')
                 // 最后的备注
                 arr.push($(this.parentNode.pname + "-fleddat-cell-0-" + (labelsLength + specsNewLabel.length)).value);
                 cmt.push("");
@@ -369,7 +420,7 @@
                     }
                     this.parentNode.parentNode.root.remove();
                     doUpdate();
-                }).saveProductSpecs(pname, JSON.stringify(arr), JSON.stringify(cmt), JSON.stringify(appendArr), JSON.stringify(additionalArr), JSON.stringify(additionalCmt));
+                }).saveProductSpecs(pname, JSON.stringify(arr), JSON.stringify(cmt), JSON.stringify(appendArr), JSON.stringify(additionalArr), JSON.stringify(additionalCmt), JSON.stringify(extraArr), JSON.stringify(extraCmt));
 
             };
         }).getProduct(pname);

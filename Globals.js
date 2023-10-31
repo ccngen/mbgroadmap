@@ -38,6 +38,7 @@ const _NETWORK = "CN";
 const _CNAME = "I";
 const specsAppendIndex = ['CV', 'CX'] // Android,OD,Handbook
 const editSpecsAdditional = ['CZ', 'DD']
+const extraSpecsAdditional = ['DE', 'DJ']
 const SW_DEV = 'CY'
 
 var ws;
