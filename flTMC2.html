@@ -38,9 +38,14 @@
     .fltmc-l29,
     .fltmc-l30,
     .fltmc-l31,
-    .fltmc-l32
+    .fltmc-l32,
+    .fltmc-l33,
+    .fltmc-l34
     {
         background-color: var(--theme-color-table);
+    }
+    .fltmc-l35{
+        font-weight: bold;
     }
     .fltmc-l03 {
         background-color: white;
@@ -82,9 +87,9 @@
                 _blocking: false,
                 _scaled: true,
                 _headercolor: "var(--theme-color-system)",
-                _height: 48,
+                _height: 60,
                 _width: 30,
-                _vrows: 27 + editSpecsAdditional.length - 1,
+                _vrows: labels.length + editSpecsAdditional.length,
                 _cols: 8,
                 _licon: null,
                 _fontRatio: 0.6
