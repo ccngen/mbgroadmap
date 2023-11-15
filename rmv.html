@@ -7,7 +7,7 @@
 <?!= include('globals'); ?>
 <?!= include('utils1'); ?>
 <?!= include('utils2'); ?>
-<?!= include('userManage'); ?>
+<?!= include('UserOfManage'); ?>
 <?!= include('menu'); ?>
 <?!= include('interactions'); ?>
 <?!= include('checkRights'); ?>
@@ -432,11 +432,14 @@
             tmp.rf = prd[91];
             tmp.chipset = prd[_chipset];
             tmp.display = prd[_display];
+            tmp.display2 = prd[getSheetIndex(extraLabels['Display#2'])];
             tmp.cam1 = prd[_cam1];
             tmp.cam2 = prd[_cam2];
             tmp.cam3 = prd[_cam3];
             tmp.cam4 = prd[_cam4];
+            tmp.cam5 = prd[getSheetIndex(extraLabels['Cam#5'])];
             tmp.selfie = prd[_cam4+2];
+            tmp.fCam2 = prd[getSheetIndex(extraLabels['F. Cam#2'])];
             tmp.battery = prd[_display-2];
             tmp.charging = prd[_chipset-14];
             if ((detLevel == 0) || (detLevel == 2)) {
@@ -489,12 +492,15 @@
                         { label: 'Family', value: this.family },
                         { label: 'Design', value: this.cmf },
                         { label: 'Chipset', value: this.chipset },
-                        { label: 'Display', value: this.display ? (this.display.split(" ", 4).join(" ") + " " + (this.display.split(" ", 6)[5] || '')) : '' },
+                        { label: 'Display#1', value: this.display ? (this.display.split(" ", 4).join(" ") + " " + (this.display.split(" ", 6)[5] || '')) : '' },
+                        { label: 'Display#2', value: this.display2 ? (this.display2.split(" ", 4).join(" ") + " " + (this.display2.split(" ", 6)[5] || '')) : '' },
                         { label: 'R. Cam#1', value: this.cam1 },
                         { label: 'Cam#2', value: this.cam2 },
                         { label: 'Cam#3', value: this.cam3 },
                         { label: 'Cam#4', value: this.cam4 },
+                        { label: 'Cam#5', value: this.cam5 },
                         { label: 'F. Cam #1', value: this.selfie },
+                        { label: 'F. Cam #2', value: this.fCam2 },
                         { label: 'Audio', value: this.productData[mouseInterFileds['Audio']] },
                         { label: 'Battery', value: this.battery },
                         { label: 'Charger', value: this.productData[mouseInterFileds['Charger']] },
