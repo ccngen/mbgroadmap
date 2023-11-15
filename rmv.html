@@ -489,7 +489,7 @@
                         { label: 'Family', value: this.family },
                         { label: 'Design', value: this.cmf },
                         { label: 'Chipset', value: this.chipset },
-                        { label: 'Display', value: this.display ? (this.display.split(" ", 4).join(" ") + " " + this.display.split(" ", 6)[5]) : '' },
+                        { label: 'Display', value: this.display ? (this.display.split(" ", 4).join(" ") + " " + (this.display.split(" ", 6)[5] || '')) : '' },
                         { label: 'R. Cam#1', value: this.cam1 },
                         { label: 'Cam#2', value: this.cam2 },
                         { label: 'Cam#3', value: this.cam3 },
