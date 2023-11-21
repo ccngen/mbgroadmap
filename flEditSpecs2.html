@@ -2,8 +2,8 @@
     .fleddat-matrix {
         display: grid;
         width: 100%;
+    //grid-template-columns: 12% 8% 48% 32%;
         grid-template-columns: 15% 10% 45% 30%;
-    //--fleddat-cellH: calc(var(--flw-height) / 31);
         --fleddat-cellH: calc(var(--flw-height) / 33);
         font-size: calc(var(--fleddat-cellH) * 0.5);
     }
@@ -100,7 +100,6 @@
     .edit-specs-component .flw-body {
         --flw-height: 78vh !important;
         padding-bottom: 21px;
-
     }
     .edit-specs-component .fleddat-matrix .fleddat-submit{
         position: absolute;
@@ -111,10 +110,10 @@
 
 <script>
     function flEditSpecs(org) {
-        const specialStyleOfLabels = [1, 13]
-        const labelsLength = labels.length
-        const nonDomCssName = 'nodom'
-        const extraLabelClassName = '-extra' // 20231031 追加的labels
+        const specialStyleOfLabels = [1, 13];
+        const labelsLength = labels.length;
+        const nonDomCssName = 'nodom';
+        const extraLabelClassName = '-extra';
 
         Element.prototype.setAt = function(x1, y1, x2=x1, y2=y1) {
             this.style.gridRow = (y1+1) + " / " + (y2+2);
@@ -139,6 +138,12 @@
             return select;
         }
 
+        createEmptyInput = function(_base, _x1, _y1) {
+            var input = $$$(_base, "input", "fleddat-cell fleddat-inp fleddat-text", pname + "-fleddat-cell-other-" + _x1 + "-" + _y1);
+            input.type = 'text';
+            return input;
+        }
+
         createInput = function(_base, _type, _x1, _y1, _x2, _y2, cssName = '') {
             switch (_type) {
                 case "textarea":
@@ -154,6 +159,10 @@
 
         cellAt = function(_x, _y, cssName = '') {
             return $(pname + cssName + "-fleddat-cell-" + _x + "-" + _y);
+        }
+
+        cellOtherAt = function(_x, _y) {
+            return $(pname + "-fleddat-cell-other-" + _x + "-" + _y);
         }
 
         createSelOfInput = function (selInput, _id, _options) {
@@ -177,7 +186,6 @@
 
             total = parseFloat(bu);
             for (let i=specialStyleOfLabels[1] + 1; i<labelsLength - 1; i++) {
-
                 if($(_pname + "-fleddat-cell-1-" + i)) {
                     total += parseFloat($(_pname + "-fleddat-cell-1-" + i).value);
                 }
@@ -229,6 +237,7 @@
                 className: 'edit-specs-component'
             };
             flw = makeFLW(fdata);
+            //flw.grid2 = $$$(flw.body, "div", "fleddat-matrix-1 android");
             flw.grid1 = $$$(flw.body, "div", "fleddat-matrix");
             flw.grid = $$$(flw.body, "div", "fleddat-matrix");
             flw.grid.pname = pname;
@@ -238,7 +247,6 @@
                 this.remove();
             });
 
-            // editSpecsAdditional 2023-V03-拆分Non-DM
             editSpecsAdditional.forEach((data, i) => {
                 const label = data['label']
                 const lbel = createLabel(flw.grid1, 0, i,0, i, nonDomCssName);
@@ -257,22 +265,23 @@
                 } else {
                     inputNum.readOnly = true;
                 }
-
             })
 
-
+            // labels & fields
             for ([i,lb] of labels.entries()) {
                 // labels
                 lbel = createLabel(flw.grid, 0, i);
                 lbel.innerHTML = lb;
+                //if (i>=2 && i<=14) lbel.classList.add("fleddat-c1b");
                 if (i>= specialStyleOfLabels[0] && i<=specialStyleOfLabels[1]) lbel.classList.add("fleddat-c1b");
                 // fields
                 const numInput = createInput(flw.grid, "number", 1, i, 1, i, extraLabels[lb] ? extraLabelClassName : '')
                 numInput.title = "";
                 // 新增字段赋值
                 if(extraLabels[lb]) {
-                    numInput.value = prj_data[getSheetIndex(extraLabels[lb]) + 1]
+                    numInput.value = toNum(prj_data[getSheetIndex(extraLabels[lb])+1]).toFixed(2)
                 }
+
                 if (i!=0 && i!= labelsLength - 1) {
                     const specsInput = createInput(flw.grid, "text", 2, i, 2, i, extraLabels[lb] ? extraLabelClassName : '');
                     if(extraLabels[lb]) {
@@ -310,7 +319,6 @@
                     tmp.addEventListener("focusout", function(e) {this.style.height = "";});
                 }
             }
-
             const labelsAfterStartIndex = labelsLength
             const textAreaIndex = labelsAfterStartIndex + specsNewLabel.length
             specsNewLabel.forEach((item, i) => {
@@ -324,13 +332,13 @@
             createInput(flw.grid, "textarea", 0, textAreaIndex, 3, textAreaIndex).style.height = "calc(var(--fleddat-cellH) * 3 - 0.5em)";
 
             // fill in data
-            // cellAt(1, 0).value = toNum(prj_data[_nondm]).toFixed(2);
-            // cellAt(3, 0).value = prj_note[_nondm];
+            //cellAt(1, 0).value = toNum(prj_data[_nondm]).toFixed(2);
+            //cellAt(3, 0).value = prj_note[_nondm];
+            //cellAt(3, 1).value = prj_data[_comments+1];
             cellAt(3, 0).value = prj_data[_comments+1];
-            // 赋值
-            console.log(222)
+
             seriesLabels.forEach((label, i) => {
-                const index = labels.indexOf(label) - 1
+                const index = labels.indexOf(label) - 1;
                 cellAt(1, index+1).value = toNum(prj_data[_nondm+2+2*i]).toFixed(2);
                 cellAt(2, index+1).value = prj_data[_nondm+1+2*i];
                 cellAt(3, index+1).value = prj_note[_nondm+1+2*i];
@@ -364,10 +372,11 @@
                 const arr = [];
                 const cmt = [];
                 const appendArr = [];
-                const extraArr = []
-                const extraCmt = []
+                const extraArr = [];
+                const extraCmt = [];
                 arr.push($(this.parentNode.pname + nonDomCssName + "-fleddat-cell-1-0").value);
                 cmt.push($(this.parentNode.pname + nonDomCssName + "-fleddat-cell-3-0").value);
+
                 for (i=1; i<labels.length - 1; i++) {
                     const el1 = $(this.parentNode.pname + "-fleddat-cell-1-" + i)
                     const el2 = $(this.parentNode.pname + "-fleddat-cell-2-" + i)
@@ -389,12 +398,8 @@
                         extraArr.push(extraEl1.value);
                         extraCmt.push("");
                     }
-
                 }
 
-                console.log(extraArr, 'extraArr')
-                console.log(extraCmt, 'extraCmt')
-                // 最后的备注
                 arr.push($(this.parentNode.pname + "-fleddat-cell-0-" + (labelsLength + specsNewLabel.length)).value);
                 cmt.push("");
                 arr.push($(this.parentNode.pname + "-fleddat-cell-3-0").value);
@@ -405,6 +410,7 @@
                     appendArr.push(cellAt(1, uiIndex).value)
                 })
 
+                // send to server
                 editSpecsAdditional.forEach((item, i) => {
                     if(i > 0) {
                         additionalArr.push($(pname + nonDomCssName + "-fleddat-cell-1-" + i).value);
@@ -425,5 +431,5 @@
             };
         }).getProduct(pname);
     }
-</script>
 
+</script>        
