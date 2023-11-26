@@ -547,3 +547,20 @@ function overallSearch(startDate, endDate) {
     })
     return JSON.stringify(filterData);
 }
+
+
+function searchOfByComponent(startDate, endDate, componentName = 'Charger') {
+    const plist = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(Plist);
+    const rng = plist.getRange(1,1,1,plist.getLastColumn());
+    const firstLineOfTitle = rng.getValues()[0]
+    const searchListOfDate = JSON.parse(overallSearch(startDate, endDate)) // 筛选了时间
+    const componentIndex = firstLineOfTitle.indexOf(componentName)
+    const list = searchListOfDate.map(item => {
+        return {
+            specs: item.sourceData[componentIndex],
+            product: item.product,
+            caTotal: item.caTotal
+        }
+    })
+    return JSON.stringify(list)
+}
