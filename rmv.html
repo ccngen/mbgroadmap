@@ -230,7 +230,8 @@
     function getTMCTotal(prj_data) {
         const toNum = function(_in) {
             if (_in=="") return 0;
-            return parseFloat(_in);
+            const value = parseFloat(_in);
+            return isNaN(value) ? 0 : value;
         }
 
         let total = 0
@@ -240,9 +241,13 @@
                 total += toNum(prj_data[sheepIndex])
             }
         })
-        for (i=0; i<labels.length - 2; i++) {
-            total += toNum(prj_data[_nondm+2+2*i]);
+        for (i=0; i<seriesLabels.length; i++) {
+            total += toNum(prj_data[_nondm+2*(i+1)]);
         }
+        Object.values(extraLabels).forEach(col => {
+            const sheepIndex = getSheetIndex(col)
+            total += toNum(prj_data[sheepIndex + 1])
+        })
         return total.toFixed(2) || 0
     }
 
