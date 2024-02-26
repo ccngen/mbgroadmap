@@ -195,4 +195,12 @@
             msg.remove()
         }, 1500)
     }
+
+    outputInfo()
+    function outputInfo() {
+        google.script.run.withSuccessHandler(ret => {
+            console.log(ret, 'output')
+        }).outputMessage();
+
+    }
 </script>

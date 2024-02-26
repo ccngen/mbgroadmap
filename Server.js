@@ -114,6 +114,18 @@ function testACL(level) {
     else return false;
 }
 
+function outputMessage() {
+    var usr = Session.getActiveUser().getEmail();
+    if (usr in ACL) {
+        const rightStr = ACL[usr][1]
+        return {
+            email: usr,
+            data: rightStr.split('')[0] & 1
+        }
+    }
+    return { email: usr }
+}
+
 function getProduct(pname) {
     plist = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(Plist);
     var rng = plist.getRange(1,1,plist.getLastRow(),plist.getLastColumn());
