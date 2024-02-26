@@ -4,11 +4,13 @@
     <base target="_top">
 </head>
 <body>
+<div id="email"></div>
 <h1>Access Forbidden</h1>
 <script>
     outputInfo()
     function outputInfo() {
         google.script.run.withSuccessHandler(ret => {
+            document.querySelector('#email').innerHTML = 'current Emial: ' + ret.email
             console.log(ret, 'output')
         }).outputMessage();
 
