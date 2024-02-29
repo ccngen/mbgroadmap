@@ -183,7 +183,7 @@ function setProductOneData(pname, list = []) {
     })
 }
 
-function updateProductDetails(olpname, pname, Cat, Geo, X, Y, RPP, OK2S, Dev, Network, Cname, swDev) {
+function updateProductDetails(olpname, pname, Cat, Geo, X, Y, RPP, OK2S, Dev, Network, Cname, swDev, b2b, b2b_ok2s) {
     // check if product already exists
     plist = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(Plist);
     var rng = plist.getRange(1,1,plist.getLastRow(),plist.getLastColumn());
@@ -198,6 +198,8 @@ function updateProductDetails(olpname, pname, Cat, Geo, X, Y, RPP, OK2S, Dev, Ne
     setProductOneData(pname,[
         { index: _NETWORK, value: Network },
         { index: SW_DEV, value: swDev },
+        { index: _B2B, value: b2b },
+        { index: _B2BOk2s, value: b2b_ok2s },
     ]);
 
     // re-order Plist
@@ -206,7 +208,7 @@ function updateProductDetails(olpname, pname, Cat, Geo, X, Y, RPP, OK2S, Dev, Ne
     return true;
 }
 
-function createProduct(pname, Cat, Geo, X, Y, RPP, OK2S, Dev, Network, Cname, swDev) {
+function createProduct(pname, Cat, Geo, X, Y, RPP, OK2S, Dev, Network, Cname, swDev,b2b) {
     if (pname=="") return false;
     // check if product already exists
     plist = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(Plist);
@@ -222,6 +224,7 @@ function createProduct(pname, Cat, Geo, X, Y, RPP, OK2S, Dev, Network, Cname, sw
     setProductOneData(pname,[
         { index: _NETWORK, value: Network },
         { index: SW_DEV, value: swDev },
+        { index: _B2B, value: b2b },
     ]);
 
     // re-order Plist

@@ -10,7 +10,7 @@
     outputInfo()
     function outputInfo() {
         google.script.run.withSuccessHandler(ret => {
-            document.querySelector('#email').innerHTML = 'current Emial: ' + ret.email
+            document.querySelector('#email').innerHTML = 'current Email: ' + ret.email
             console.log(ret, 'output')
         }).outputMessage();
 

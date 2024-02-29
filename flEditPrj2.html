@@ -33,8 +33,12 @@
 
 <script>
     function flEditPrj(org) {
-        const labels = ["Project Name", "Family","RPP", "OK2Ship", "HW Dev", "SW Dev", "Network", "Commercial Name", "Default Color"]
+        const labels = ["Project Name", "Family","RPP", "OK2Ship", "HW Dev", "SW Dev", "Network", "B2B", "B2B OK2S", "Commercial Name", "Default Color"]
 
+        const getDateStr = (date) => {
+            return date.getUTCFullYear() + "-" + (date.getUTCMonth()+1).toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false}) + "-"
+                + date.getUTCDate().toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false});
+        }
         createLabel = function(_base, _x1, _y1, _lbl) {
             let tmp = _base.addCell(_x1, _y1);
             tmp.classList.add("fladd-label");
@@ -110,16 +114,20 @@
 
             let renderIndex = 1
             // fields
-            prj_ok2s = new Date(prj_data[6]);
+            const prj_ok2s = new Date(prj_data[6]);
+            const prj_b2b_ok2s = prj_data[_b2b_ok2s] && new Date(prj_data[_b2b_ok2s])
+
             let f_pname = createInput(flw, "text", 2, renderIndex); f_pname.value = prj_data[0];
             //let f_geo = createDropDown(flw, ["ROW", "NA", "JP"], 2, 2); f_geo.value = prj_data[2];
             let f_cat = createDropDown(flw, ["E", "G", "Premium", "Razr"], 2, ++renderIndex); f_cat.value = prj_data[1];
             //let f_rpp = createInput(flw, "number", 2, 3); f_rpp.value = prj_data[5];
             let f_rpp = createDropDown(flw, pricetgs[geoView][0], 2, ++renderIndex); f_rpp.value = prj_data[5];
-            let f_ok2s = createInput(flw, "date", 2, ++renderIndex); f_ok2s.value = prj_ok2s.getUTCFullYear() + "-" + (prj_ok2s.getUTCMonth()+1).toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false}) + "-" + prj_ok2s.getUTCDate().toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false});
+            let f_ok2s = createInput(flw, "date", 2, ++renderIndex); f_ok2s.value = getDateStr(prj_ok2s);
             let f_dev = createDropDown(flw, ["", "OT", "TN", "HQ", "WT", "LC", "IH"], 2, ++renderIndex); f_dev.value = prj_data[7];
             let f_swDev = createDropDown(flw, ["", "ODM", "IH"], 2, ++renderIndex); f_swDev.value = prj_data[_swDev];
             let f_net = createDropDown(flw, ["", "4G", "5G"], 2, ++renderIndex); f_net.value = prj_data[_network];
+            let f_b2b = createDropDown(flw, ["N", "Y"], 2, ++renderIndex); f_b2b.value = prj_data[_b2b];
+            let f_b2b_ok2s = createInput(flw, "date", 2, ++renderIndex); f_b2b_ok2s.value = prj_b2b_ok2s ? getDateStr(prj_b2b_ok2s) : prj_b2b_ok2s;
             let f_cname = createInput(flw, "text", 2, ++renderIndex); f_cname.value = prj_data[8];
             let f_col = createDropDown(flw, defColors, 2, ++renderIndex); f_col.value = prj_data[3];
 
@@ -142,6 +150,8 @@
                 a_ok2s = f_ok2s.value;
                 a_dev = f_dev.value;
                 a_net = f_net.value;
+                a_b2b = f_b2b.value;
+                a_b2b_ok2s = f_b2b_ok2s.value;
                 a_swDev = f_swDev.value
                 if (a_pname=="" || a_cat=="" || a_geo=="" || a_rpp=="" || a_ok2s=="") {
                     message("All fields are required");
@@ -157,7 +167,7 @@
                     }
                     this.parentNode.root.remove();
                     doUpdate();
-                }).updateProductDetails(a_olpname, a_pname, a_cat, a_geo, a_col, "", a_rpp, a_ok2s, a_dev, a_net, a_cname, a_swDev);
+                }).updateProductDetails(a_olpname, a_pname, a_cat, a_geo, a_col, "", a_rpp, a_ok2s, a_dev, a_net, a_cname, a_swDev, a_b2b, a_b2b_ok2s);
             };
 
         }).getProduct(olpname);
