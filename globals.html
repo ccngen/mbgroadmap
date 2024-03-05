@@ -88,9 +88,11 @@
     }
     const TMCFileds = ['AF', 'CB']
 
-    var curSymb = {ROW: "€", NA: "$", JP: "¥", Samsung: "€", Xiaomi: "€", Oppo: "€", Vivo: "€", Realme: "€", Honor: "€"};
+    var curSymb = {ROW: "€",B2B: "€", NA: "$", JP: "¥", Samsung: "€", Xiaomi: "€", Oppo: "€", Vivo: "€", Realme: "€", Honor: "€"};
     var pricetgs = {
         ROW:  [["89", "99","129","149","179","199","249","299","349","399","499","599","699","799", "899", "999", "999+"],
+            ["TMC Target $60-63", "TMC target $62-67","TMC target $79-83","TMC target $88-94","TMC target $105-113","TMC target $114-124","TMC target $139-153","TMC target $164-181","TMC target $192-211","TMC target $221-238","TMC target $218-261","TMC target $262-315","TMC target $307-368","TMC target $351-$421","TMC target $372-465", "TMC Target $414-518"]],
+        B2B:  [["89", "99","129","149","179","199","249","299","349","399","499","599","699","799", "899", "999", "999+"],
             ["TMC Target $60-63", "TMC target $62-67","TMC target $79-83","TMC target $88-94","TMC target $105-113","TMC target $114-124","TMC target $139-153","TMC target $164-181","TMC target $192-211","TMC target $221-238","TMC target $218-261","TMC target $262-315","TMC target $307-368","TMC target $351-$421","TMC target $372-465", "TMC Target $414-518"]],
         NA:   [["99","149","179","199","249","299","399","449","499", "599", "699","799","899","999","999+"],
             ["TMC target $60-61","TMC target $85-87","TMC target $99-102","TMC target $105-108","TMC target $130-133","TMC target $156-160","TMC target $208-213","TMC target $234-240","TMC target $260-267","TMC target $288-295","TMC target $336-344","TMC target $384-394","TMC target $432-443","TMC target $480-492"]],
@@ -128,6 +130,7 @@
     const quarters = ["CQ1", "CQ1", "CQ1", "CQ2", "CQ2", "CQ2", "CQ3", "CQ3", "CQ3", "CQ4", "CQ4", "CQ4"];
     const rppSep = {
         "ROW": ["999+", "349", "99"],
+        "B2B": ["999+", "349", "99"],
         "NA": ["999+", "399", "149"],
         "JP": ["21800","49800"],
         "Samsung": ["999+", "349", "99"],

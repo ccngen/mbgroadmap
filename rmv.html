@@ -403,10 +403,19 @@
         // display products
         for ([i,prd] of data.entries()) {
             // filter out non-relevant ones
-            if (prd[_geo] != geoView) continue;
+            // b2b row check _b2b col
+            if(geoView === 'B2B') {
+                if(prd[_b2b] !== 'Y') {
+                    continue
+                }
+            } else {
+                if(prd[_geo] != geoView) {
+                    continue
+                }
+            }
             if (!pricetgs[geoView][0].includes(String(prd[5]))) continue; // if RPP is not in the RPP list
-            let month = (new Date(prd[_ok2s])).getUTCMonth();
-            let year = (new Date(prd[_ok2s])).getUTCFullYear() - 2019;
+            let month = geoView === 'B2B' && prd[_b2b_ok2s] ? (new Date(prd[_b2b_ok2s])).getUTCMonth() : (new Date(prd[_ok2s])).getUTCMonth();
+            let year = geoView === 'B2B' && prd[_b2b_ok2s] ? (new Date(prd[_b2b_ok2s])).getUTCFullYear() - 2019 : (new Date(prd[_ok2s])).getUTCFullYear() - 2019;
             let date = year*12 + month;
             if ((date<startDate) || (date>endDate)) continue;
 
