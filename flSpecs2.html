@@ -70,7 +70,7 @@
                 ]
             },
             { label: 'F. Cam#1', row: 'BY'},
-            { label: 'F. Cam#2', row: 'DM'},
+            { label: 'F. Cam#2', row: 'DI'},
             { label: 'Selfie Camera', row: 'BY'},
             { label: 'Sound', row: 'AQ'},
             {
@@ -97,6 +97,8 @@
                 ]
             },
             { label: 'Android', row: 'CV'},
+            { label: 'B2B Specs Diff', row: 'DM', extraLine: 0},
+            { label: 'B2B Customers', row: 'DN', extraLine: 0},
         ]
         let totalRow = 0
         specsData.forEach(item => {
@@ -124,8 +126,8 @@
                 _blocking: false,
                 _scaled: true,
                 _headercolor: "var(--theme-color-system)",
-                _height: 60,
-                _width: 25,
+                _height: 75,
+                _width: 30,
                 _vrows: totalRow,
                 _cols: 6,
                 _licon: null,
@@ -153,9 +155,10 @@
             // 因为第一列 会出现跨多行的情况
             let line = 1
             specsData.forEach((item, index) => {
+                const extraLine = item.extraLine || 0
                 let len = item.children ? item.children.length : 1
                 let width = item.children ? 1 : 2
-                flw.addCell2(1, index + 1, item.label, 1, line, 1+width, line+len, true);
+                flw.addCell2(1, index + 1, item.label, 1, line, 1+width, line + len + extraLine, true);
 
                 if(item.children) {
                     item.children.forEach((item1, index1) => {
@@ -166,9 +169,12 @@
                         flw.addCell2(3, index + 1, value + ` ${item1.unit && value ? item1.unit : ''}`, 3, line + index1, 7, line + index1 + 1, border);
                     })
                 } else {
+
+
                     let value = res[getSheetIndex(item.row)]
                     value = item.type === 'date' && value ? getDate(value) : value
-                    flw.addCell2(3, index + 1, value + ` ${item.unit && value ? item.unit : ''}`, 3, line, 7, line+len, true);
+                    flw.addCell2(3, index + 1, value + ` ${item.unit && value ? item.unit : ''}`, 3, line, 7, line+len+extraLine, true);
+                    line += extraLine
                 }
                 line += len
             })
@@ -176,4 +182,5 @@
         }).getProduct(pname);
     }
 </script>
+
 

@@ -325,7 +325,12 @@
                 const { label, index } = item
                 const uiIndex = labelsAfterStartIndex + i
                 createLabel(flw.grid, 0, uiIndex).innerHTML = label;
-                createInput(flw.grid, "text", 1, uiIndex, 3);
+                if(item.type === 'textarea') {
+                    const el = createInput(flw.grid, "textarea", 1, uiIndex, 3, uiIndex);
+                    el.style.height = '60px'
+                } else {
+                    createInput(flw.grid, "text", 1, uiIndex, 3);
+                }
                 cellAt(1, uiIndex).value = prj_data[getSheetIndex(index)]
             })
 

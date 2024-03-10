@@ -165,7 +165,14 @@ function saveProductSpecs(pname, arr, cmt, appendArr, additionalArr, additionalC
     plist.getRange(extraSpecsAdditional[0] + idx + ":" + extraSpecsAdditional[1] + idx).setValues([JSON.parse(extraArr)]);
     plist.getRange(extraSpecsAdditional[0] + idx + ":" + extraSpecsAdditional[1] + idx).setNotes([JSON.parse(extraCmt)]);
 
-    plist.getRange(specsAppendIndex[0] + idx + ":" + specsAppendIndex[1] + idx).setValues([JSON.parse(appendArr)]);
+    appendArr = JSON.parse(appendArr)
+
+    // rowI 为对应在sheet中的列数， i为当前数组的索引值
+    specsAppendIndex.forEach((item, i) => {
+        const rowI = item.index
+        plist.getRange(rowI+(idx)).setValue(appendArr[i]);
+    })
+    
     return true;
 }
 

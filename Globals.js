@@ -38,7 +38,13 @@ const _NETWORK = "CN";
 const _B2B = "DK";
 const _B2BOk2s = "DL";
 const _CNAME = "I";
-const specsAppendIndex = ['CV', 'CX'] // Android,OD,Handbook
+const specsAppendIndex = [
+    { label: 'Android', index: 'CV' },
+    { label: 'B2B Specs Diff', index: 'DM' , type: 'textarea'},
+    { label: 'B2B Customers', index: 'DN' , type: 'textarea'},
+    { label: 'OD', index: 'CW' },
+    { label: 'Handbook', index: 'CX' }
+] // Android,OD,Handbook
 const editSpecsAdditional = ['CZ', 'DD']
 const extraSpecsAdditional = ['DE', 'DJ']
 const SW_DEV = 'CY'
