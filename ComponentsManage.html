@@ -55,14 +55,14 @@
         border: 1px solid #333;
         text-align: left;
         padding: 5px 10px;
-        font-size: 0.9rem;
+        font-size: 14px;
     }
 
     .manage-components-table .title-tr {
         color: rgba(0, 0, 0, .85);
         font-weight: bolder;
         background: #b3aeae;
-        font-size: 0.8rem;
+        font-size: 14px;
         transition: background .3s ease;
         text-align: left;
     }
@@ -89,6 +89,10 @@
         min-width: 150px;
         padding: 2px;
         margin-right: 15px;
+    }
+
+    .manage-components-content .value-text, .manage-components-content .target-text{
+        width: 60px;
     }
     @keyframes loading {
         from {
@@ -188,7 +192,6 @@
         }
 
         const renderTable = (base, list) => {
-            console.log(list, 'list')
             if(list) {
                 list.forEach(item => {
                     createEditTr(base, item)
@@ -205,7 +208,7 @@
                 _scaled: true,
                 _headercolor: "var(--theme-color-system)",
                 _height: 50,
-                _width: 50,
+                _width: 65,
                 _vrows: 10,
                 _cols: 6,
                 _licon: null,
@@ -260,22 +263,20 @@
                         deleteArr.push(item['data'])
                     }
                 })
+
                 saveData = saveData.filter(item => !item.checked).map(item => item.data)
 
                 let checkFlag = true
                 addData.forEach(item => {
                     const { val } = item
-                    const list = saveData.filter(item => !item.checked).map(item => item.data)
-                    if(list.find(comps => comps.val[1] === val[1])) {
+                    if(saveData.find(comps => comps.val[1] === val[1])) {
                         checkFlag = false
                     }
                 })
-
                 const saveDataSpecs = Array.from(new Set(saveData.map(item => item.val[1])))
                 if(!checkFlag || saveDataSpecs.length !== saveData.length) {
                     return msgBox("Tip", 8, 17, 4, "不能有重复的specs");
                 }
-
                 console.log(addData, 'addData')
                 console.log(saveData, 'saveData')
                 console.log(deleteArr, 'deleteArr')
@@ -300,7 +301,7 @@
                     setTimeout(() => {
                         msg.remove()
                     }, 1000)
-                }).saveComponentsAndSync(JSON.stringify(deleteArr), JSON.stringify(addData), JSON.stringify(saveData.filter(item => !item.checked).map(item => item.data)))
+                }).saveComponentsAndSync(JSON.stringify(deleteArr), JSON.stringify(addData), JSON.stringify(saveData))
 
             })
 
