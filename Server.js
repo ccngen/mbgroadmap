@@ -370,7 +370,8 @@ function getComponentsData() {
     const data = {}
     comList.forEach(com => {
         const obj = { specs: com[1], value: com[2], target: com[3], products: [] }
-        if(data[com[0]]) {
+
+        if(data[com[0]]) { // 去除重复项
             return data[com[0]][com[1]] = obj
         }
         data[com[0]] = { [com[1]]: obj }
@@ -379,7 +380,7 @@ function getComponentsData() {
     productList.forEach(product => {
         componentNameArr.forEach(filed => {
             const comData = data[filed]
-            const filedIndex = filedArr.indexOf(filed)
+            const filedIndex = filedArr.findIndex(name => name.toUpperCase().trim().indexOf(filed.toUpperCase().trim()) > -1) // 完全匹配
             if (comData[product[filedIndex]]) {
                 comData[product[filedIndex]].products.push(product[0])
             }
