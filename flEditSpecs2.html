@@ -322,16 +322,23 @@
             const labelsAfterStartIndex = labelsLength
             const textAreaIndex = labelsAfterStartIndex + specsNewLabel.length
             specsNewLabel.forEach((item, i) => {
-                const { label, index } = item
-                const uiIndex = labelsAfterStartIndex + i
-                createLabel(flw.grid, 0, uiIndex).innerHTML = label;
-                if(item.type === 'textarea') {
-                    const el = createInput(flw.grid, "textarea", 1, uiIndex, 3, uiIndex);
-                    el.style.height = '60px'
-                } else {
-                    createInput(flw.grid, "text", 1, uiIndex, 3);
-                }
-                cellAt(1, uiIndex).value = prj_data[getSheetIndex(index)]
+              if(item.hideCheck && item.hideCheck(prj_data)) {
+	            return
+	          }
+	          const { label, index } = item
+	          const uiIndex = labelsAfterStartIndex + i
+	          createLabel(flw.grid, 0, uiIndex).innerHTML = label;
+	          if(item.type === 'textarea') {
+	            const el = createInput(flw.grid, "textarea", 1, uiIndex, 3, uiIndex);
+	            el.style.height = '60px'
+	          } else if(item.cmt) {
+	            createInput(flw.grid, "text", 1, uiIndex, 2);
+	            createInput(flw.grid, "text", 3, uiIndex, 3);
+	            cellAt(3, uiIndex).value = prj_note[getSheetIndex(index)]
+	          } else {
+	            createInput(flw.grid, "text", 1, uiIndex, 3);
+	          }
+	          cellAt(1, uiIndex).value = prj_data[getSheetIndex(index)]
             })
 
             createInput(flw.grid, "textarea", 0, textAreaIndex, 3, textAreaIndex).style.height = "calc(var(--fleddat-cellH) * 3 - 0.5em)";
@@ -410,10 +417,13 @@
                 arr.push($(this.parentNode.pname + "-fleddat-cell-3-0").value);
                 cmt.push("");
 
-                specsNewLabel.forEach((item, i) => {
-                    const uiIndex = labelsAfterStartIndex + i
-                    appendArr.push(cellAt(1, uiIndex).value)
-                })
+            specsNewLabel.forEach((item, i) => {
+              const uiIndex = labelsAfterStartIndex + i
+              item.cellValue = cellAt(1, uiIndex).value
+              if(item.cmt) {
+                item.cmtValue = cellAt(3, uiIndex).value
+              }
+            })
 
                 // send to server
                 editSpecsAdditional.forEach((item, i) => {
@@ -431,7 +441,7 @@
                     }
                     this.parentNode.parentNode.root.remove();
                     doUpdate();
-                }).saveProductSpecs(pname, JSON.stringify(arr), JSON.stringify(cmt), JSON.stringify(appendArr), JSON.stringify(additionalArr), JSON.stringify(additionalCmt), JSON.stringify(extraArr), JSON.stringify(extraCmt));
+                }).saveProductSpecs(pname, JSON.stringify(arr), JSON.stringify(cmt), JSON.stringify(specsNewLabel), JSON.stringify(additionalArr), JSON.stringify(additionalCmt), JSON.stringify(extraArr), JSON.stringify(extraCmt));
 
             };
         }).getProduct(pname);

@@ -143,7 +143,7 @@ function getProduct(pname) {
 
 // arr=data from AF to CD, cmt=notes from AF to CD otherArr is width - Android
 // additionalArr 2023-V03-拆分Non-DM  CZ - DD
-function saveProductSpecs(pname, arr, cmt, appendArr, additionalArr, additionalCmt, extraArr, extraCmt ) {
+function saveProductSpecs(pname, arr, cmt, specsNewLabel, additionalArr, additionalCmt, extraArr, extraCmt ) {
     // check if product already exists
     plist = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(Plist);
     var rng = plist.getRange(1,1,plist.getLastRow(),plist.getLastColumn());
@@ -165,17 +165,19 @@ function saveProductSpecs(pname, arr, cmt, appendArr, additionalArr, additionalC
     plist.getRange(extraSpecsAdditional[0] + idx + ":" + extraSpecsAdditional[1] + idx).setValues([JSON.parse(extraArr)]);
     plist.getRange(extraSpecsAdditional[0] + idx + ":" + extraSpecsAdditional[1] + idx).setNotes([JSON.parse(extraCmt)]);
 
-    appendArr = JSON.parse(appendArr)
+    specsNewLabel = JSON.parse(specsNewLabel)
 
     // rowI 为对应在sheet中的列数， i为当前数组的索引值
-    specsAppendIndex.forEach((item, i) => {
-        const rowI = item.index
-        plist.getRange(rowI+(idx)).setValue(appendArr[i]);
+    specsNewLabel.forEach((item, i) => {
+      const rowI = item.index
+      plist.getRange(rowI+(idx)).setValue(item.cellValue);
+      if(item.cmt) {
+        plist.getRange(rowI+(idx)).setNote(item.cmtValue);
+      }
     })
     
     return true;
 }
-
 /**
  * 设置产品某单个数据
  * pname 产品名 list = [{index, value}] value 值 index位置

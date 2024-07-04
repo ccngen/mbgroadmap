@@ -374,8 +374,11 @@
                     this.style.backgroundColor = "#00264d"; // freeze highlight
                     $("menu-bg").style.display = "inline";
                     $("menu-bg").callingCell = this;
+                    // b2b 的权限比较少 其他的模式正常
+                    const menuId = geoView === 'B2B' ? 'ctx-menu3' : 'ctx-menu2';
+                    $(menuId).style.display = "none";
+
                     $("ctx-menu1").style.display = "flex";
-                    $("ctx-menu2").style.display = "none";
                     if (ev.clientX + $("ctx-menu1").offsetWidth <= window.innerWidth)
                         $("ctx-menu1").style.left = ev.clientX + "px";
                     else
@@ -479,19 +482,23 @@
             tmp.onclick = function(ev) {
                 $("menu-bg").style.display = "inline";
                 $("menu-bg").callingCell = this;
-                $("ctx-menu2").style.display = "flex";
-                if(ev.target.parentElement.id !== 'master-grid2') {
-                    $("ctx-menu2").setAttribute('data-id', ev.target.parentElement.id)
-                }
+
                 $("ctx-menu1").style.display = "none";
-                if (ev.clientX + $("ctx-menu2").offsetWidth <= window.innerWidth)
-                    $("ctx-menu2").style.left = ev.clientX + "px";
+
+                const clickProductMenuId = geoView === 'B2B' ? 'ctx-menu3' : 'ctx-menu2'
+                if(ev.target.parentElement.id !== 'master-grid2') {
+                $(clickProductMenuId).setAttribute('data-id', ev.target.parentElement.id)
+                }
+                $(clickProductMenuId).style.display = "flex";
+
+                if (ev.clientX + $(clickProductMenuId).offsetWidth <= window.innerWidth)
+                $(clickProductMenuId).style.left = ev.clientX + "px";
                 else
-                    $("ctx-menu2").style.left = (ev.clientX - $("ctx-menu2").offsetWidth) + "px";
-                if (ev.clientY + $("ctx-menu2").offsetHeight <= window.innerHeight)
-                    $("ctx-menu2").style.top = ev.clientY + "px";
+                $(clickProductMenuId).style.left = (ev.clientX - $(clickProductMenuId).offsetWidth) + "px";
+                if (ev.clientY + $(clickProductMenuId).offsetHeight <= window.innerHeight)
+                $(clickProductMenuId).style.top = ev.clientY + "px";
                 else
-                    $("ctx-menu2").style.top = (ev.clientY - $("ctx-menu2").offsetHeight) + "px";
+                $(clickProductMenuId).style.top = (ev.clientY - $(clickProductMenuId).offsetHeight) + "px";
             };
 
             // contextual bubble

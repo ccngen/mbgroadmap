@@ -97,13 +97,11 @@
                 ]
             },
             { label: 'Android', row: 'CV'},
-            { label: 'B2B Specs Diff', row: 'DM', extraLine: 0},
-            { label: 'B2B Customers', row: 'DN', extraLine: 0},
+            { label: 'B2B OK2Ship', row: 'DF', extraLine: 0},
+            { label: 'B2B Diffrence', row: 'DG', extraLine: 0},
         ]
-        let totalRow = 0
-        specsData.forEach(item => {
-            totalRow += item.children ? item.children.length : 1
-        })
+        const checkLabels = ['B2B OK2Ship', 'B2B Diffrence']
+
         pname = org.pname;
 
         // if this window is already opened, send a click to the header of it to make it come forward
@@ -118,6 +116,17 @@
             $("spinner").style.display = "none"; // stop spinner
             if (ret == null) return;
             res = JSON.parse(ret.prod);
+
+            if(res[_b2b] !== 'Y') {
+                checkLabels.forEach((label) => {
+                    const index = specsData.findIndex(item => item.label === label)
+                    specsData.splice(index, 1)
+                })
+            }
+            let totalRow = 0
+            specsData.forEach(item => {
+            totalRow += item.children ? item.children.length : 1
+            })
 
             // create window
             let fdata = {
