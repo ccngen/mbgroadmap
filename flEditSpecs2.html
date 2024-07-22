@@ -4,7 +4,7 @@
         width: 100%;
     //grid-template-columns: 12% 8% 48% 32%;
         grid-template-columns: 15% 10% 45% 30%;
-        --fleddat-cellH: calc(var(--flw-height) / 33);
+        --fleddat-cellH: calc(var(--flw-height) / 35);
         font-size: calc(var(--fleddat-cellH) * 0.5);
     }
     .fleddat-cell {
@@ -231,7 +231,7 @@
                 _blocking: false,
                 _scaled: true,
                 _headercolor: "var(--theme-color-system)",
-                _height: 80,
+                _height: 90,
                 _width: 45,
                 _licon: null,
                 className: 'edit-specs-component'
@@ -322,31 +322,31 @@
             const labelsAfterStartIndex = labelsLength
             const textAreaIndex = labelsAfterStartIndex + specsNewLabel.length
             specsNewLabel.forEach((item, i) => {
-              if(item.hideCheck && item.hideCheck(prj_data)) {
-	            return
-	          }
-	          const { label, index } = item
-	          const uiIndex = labelsAfterStartIndex + i
-	          createLabel(flw.grid, 0, uiIndex).innerHTML = label;
-	          if(item.type === 'textarea') {
-	            const el = createInput(flw.grid, "textarea", 1, uiIndex, 3, uiIndex);
-	            el.style.height = '60px'
-	          } else if(item.cmt) {
-	            createInput(flw.grid, "text", 1, uiIndex, 2);
-	            createInput(flw.grid, "text", 3, uiIndex, 3);
-	            cellAt(3, uiIndex).value = prj_note[getSheetIndex(index)]
-	          } else {
-	            createInput(flw.grid, "text", 1, uiIndex, 3);
-	          }
-	          cellAt(1, uiIndex).value = prj_data[getSheetIndex(index)]
+                const hideFlag = item.hideCheck && item.hideCheck(prj_data)
+                const { label, index } = item
+                const uiIndex = labelsAfterStartIndex + i
+                const labelTextEl = createLabel(flw.grid, 0, uiIndex);
+                labelTextEl.innerHTML = label
+                labelTextEl.style.display = hideFlag ? 'none' : 'inline-block'
+                if(item.type === 'textarea') {
+                    const el = createInput(flw.grid, "textarea", 1, uiIndex, 3, uiIndex);
+                    el.style.height = '60px'
+                    el.style.display = hideFlag ? 'none' : 'inline-block'
+                } else if(item.cmt) {
+                    const labelEl = createInput(flw.grid, "text", 1, uiIndex, 2);
+                    const cmtLabel = createInput(flw.grid, "text", 3, uiIndex, 3);
+                    cellAt(3, uiIndex).value = prj_note[getSheetIndex(index)]
+                    labelEl.style.display = hideFlag ? 'none' : 'inline-block'
+                    cmtLabel.style.display = hideFlag ? 'none' : 'inline-block'
+                } else {
+                    const el = createInput(flw.grid, "text", 1, uiIndex, 3);
+                    el.style.display = hideFlag ? 'none' : 'inline-block'
+                }
+                cellAt(1, uiIndex).value = prj_data[getSheetIndex(index)]
             })
 
             createInput(flw.grid, "textarea", 0, textAreaIndex, 3, textAreaIndex).style.height = "calc(var(--fleddat-cellH) * 3 - 0.5em)";
 
-            // fill in data
-            //cellAt(1, 0).value = toNum(prj_data[_nondm]).toFixed(2);
-            //cellAt(3, 0).value = prj_note[_nondm];
-            //cellAt(3, 1).value = prj_data[_comments+1];
             cellAt(3, 0).value = prj_data[_comments+1];
 
             seriesLabels.forEach((label, i) => {
@@ -376,7 +376,6 @@
             subm.innerHTML = "Save Data";
             subm.classList.add("submit-loading");
             subm.onclick = function(e) {
-                console.log(e, 'e')
                 if(hasLoading(e.target)) { return }
 
                 const additionalArr = []
