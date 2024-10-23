@@ -503,79 +503,99 @@
 
             // contextual bubble
             tmp.onmouseenter = function(ev) {
-                $("master-data").x = this.x;
-                $("master-data").y = this.y;
-                $("master-bubble").style.display = "block";
-                $("master-bubble").innerHTML = "";
-                if ((detLevel == 0) || (detLevel == 2)) {
-                    let grd = $$$($("master-bubble"), "div", "master-bubble-grid0");
-                    const mouseTopData = [
-                        { label: 'Launch', value: this.Launch },
-                        { label: 'Family', value: this.family },
-                        { label: 'Design', value: this.cmf },
-                        { label: 'Chipset', value: this.chipset },
-                        { label: 'Display#1', value: this.display ? (this.display.split(" ", 4).join(" ") + " " + (this.display.split(" ", 6)[5] || '')) : '' },
-                        { label: 'Display#2', value: this.display2 ? (this.display2.split(" ", 4).join(" ") + " " + (this.display2.split(" ", 6)[5] || '')) : '' },
-                        { label: 'R. Cam#1', value: this.cam1 },
-                        { label: 'Cam#2', value: this.cam2 },
-                        { label: 'Cam#3', value: this.cam3 },
-                        { label: 'Cam#4', value: this.cam4 },
-                        { label: 'Cam#5', value: this.cam5 },
-                        { label: 'F. Cam #1', value: this.selfie },
-                        { label: 'F. Cam #2', value: this.fCam2 },
-                        { label: 'Audio', value: this.productData[mouseInterFileds['Audio']] },
-                        { label: 'Battery', value: this.battery },
-                        { label: 'Charger', value: this.productData[mouseInterFileds['Charger']] },
-                        { label: 'WLC', value: this.productData[mouseInterFileds['WLC']] },
-                        { label: 'FPS', value: this.productData[mouseInterFileds['FPS']] },
-                        { label: 'Memory', value: this.productData[mouseInterFileds['Memory']] },
-                        { label: 'Android', value: this.productData[mouseInterFileds['Android']] },
-                        { label: 'TMC', value: getTMCTotal(this.productData) },
-                    ]
-                    mouseTopData.forEach((item, index) => {
-                        addCell(grd, "div", "master-light", 2, index + 1).innerHTML = item.label + ": ";
-                        addCell(grd, "div", "", 3, index + 1).innerHTML = item.value;
-                    })
-                    grd.style = `grid-template-rows: repeat(${mouseTopData.length}, ${parseFloat(100 / mouseTopData.length)}%);`
-                    let pic = addCell(grd, "img", "master-pic", 1, 1, 1, 10);
-                    pic.src = this.picbytes;
-                    if (this.picbytes!="") pic.style.display = "block";
-                    else pic.style.display = "none";
-                }
-                if (detLevel == 1) {
-                    let grd = $$$($("master-bubble"), "div", "master-bubble-grid1");
-                    addCell2(grd, "div", "master-light", 1, 1).innerHTML = "<mark>CWV OK2S:</mark>";
-                    if (!isNaN(new Date(tmp.cwvok2s))) {
-                        addCell2(grd, "div", "", 2, 1).innerHTML = ((new Date(tmp.cwvok2s)).getUTCMonth()+1) + "/" + ((new Date(tmp.cwvok2s)).getUTCDate()) + "/" + ((new Date(tmp.cwvok2s)).getUTCFullYear());
+              $("master-data").x = this.x;
+              $("master-data").y = this.y;
+              $("master-bubble").style.display = "block";
+              $("master-bubble").innerHTML = "";
+              if ((detLevel == 0) || (detLevel == 2)) {
+                 let grd = $$$($("master-bubble"), "div", "master-bubble-grid0");
+                 const mouseTopData = [
+                    { label: 'Network', row: 'CN',},
+                    { label: 'RF', row: 'AI',},
+                    { label: 'OK2Ship', row: 'G', type: 'date'},
+                    { label: 'Dimension', row: ['CO', 'CP', 'CQ'], unit: 'mm'},
+                    { label: 'Bezel', row: 'CR', unit: 'mm'},
+                    { label: 'Head', row: 'CS', unit: 'mm'},
+                    { label: 'Chin', row: 'CT', unit: 'mm'},
+                    { label: 'Weight', row: 'CU', unit: 'g'},
+                    { label: 'CMF', row: 'AG'},
+                    { label: 'Display#1', row: 'BO'},
+                    { label: 'Display#2', row: 'DF'},
+                    { label: 'Platform', row: 'BG'},
+                    { label: 'Memory', row: 'BI'},
+                    { label: 'Cam #1', row: 'BQ'},
+                    { label: 'Cam #2', row: 'BS',},
+                    { label: 'Cam #3', row: 'BU',},
+                    { label: 'Cam #4', row: 'BW',},
+                    { label: 'Cam #5', row: 'DH',},
+                    { label: 'F. Cam#1', row: 'BY'},
+                    { label: 'F. Cam#2', row: 'DI'},
+                    { label: 'Selfie Camera', row: 'BY'},
+                    { label: 'Sound', row: 'AQ'},
+                    { label: 'Comms - WLAN', row: 'AM'},
+                    { label: 'Comms - NFC', row: 'AK',},
+                    { label: 'Comms - DP', row: 'AO',},
+                    { label: 'FPS', row: 'CA', },
+                    { label: 'Sensors', row: 'BC'},
+                    { label: 'Power - Battery', row: 'BM'},
+                    { label: 'Power - Charging', row: 'AS'},
+                    { label: 'Power - Wireless', row: 'AU'},
+                    { label: 'Android', row: 'CV'},
+                    { label: 'TMC', value: getTMCTotal(this.productData)},
+                 ]
+                 const res = prd
+                 mouseTopData.forEach((item, index) => {
+                    addCell(grd, "div", "master-light", 2, index + 1).innerHTML = item.label + ": ";
+                    let value = ''
+                    if(item.label === 'TMC') {
+                       value = item.value
+                    } else {
+                       value = typeof item.row === 'string' ? res[getSheetIndex(item.row)] : item.row.map(row1 => res[getSheetIndex(row1)] || 0).join(' x ')
+                       value = item.type === 'date' && value ? getDate(value) : value
                     }
-                    addCell2(grd, "div", "master-light", 1, 2).innerHTML = "<mark>ACTIONS:</mark>";
-                    addCell2(grd, "div", "", 2, 2).innerHTML = tmp.comments.replace(/\u000A/ig,"<br>");
-                    addCell2(grd, "div", "master-light", 1, 3).innerHTML = "<mark>STATUS:</mark>";
-                    addCell2(grd, "div", "", 2, 3).innerHTML = tmp.status.replace(/\u000A/ig,"<br>");
-                    $("master-bubble").style.overflowY = "auto";
-                    tmp.onwheel = function(e) {$("master-bubble").scrollBy(0, e.deltaY)};
-                }
-                const gap = 20;
-                if (ev.clientX + gap + $("master-bubble").offsetWidth <= window.innerWidth)
-                    $("master-bubble").style.left = (ev.clientX + gap) + "px";
-                else
-                    $("master-bubble").style.left = (ev.clientX - gap - $("master-bubble").offsetWidth) + "px";
-                if (ev.clientY + gap + $("master-bubble").offsetHeight <= window.innerHeight)
-                    $("master-bubble").style.top = (ev.clientY + gap) + "px";
-                else
-                    $("master-bubble").style.top = (ev.clientY - gap - $("master-bubble").offsetHeight) + "px";
-            }
-            tmp.onmousemove = function(ev) {
-                const gap = 20;
-                if (ev.clientX + gap + $("master-bubble").offsetWidth <= window.innerWidth)
-                    $("master-bubble").style.left = (ev.clientX + gap) + "px";
-                else
-                    $("master-bubble").style.left = (ev.clientX - gap - $("master-bubble").offsetWidth) + "px";
-                if (ev.clientY + gap + $("master-bubble").offsetHeight <= window.innerHeight)
-                    $("master-bubble").style.top = (ev.clientY + gap) + "px";
-                else
-                    $("master-bubble").style.top = (ev.clientY - gap - $("master-bubble").offsetHeight) + "px";
-            };
+
+                    addCell(grd, "div", "", 3, index + 1).innerHTML = value;
+                 })
+                 grd.style = `grid-template-rows: repeat(${mouseTopData.length}, ${parseFloat(100 / mouseTopData.length)}%);`
+                 let pic = addCell(grd, "img", "master-pic", 1, 1, 1, 10);
+                 pic.src = this.picbytes;
+                 if (this.picbytes!="") pic.style.display = "block";
+                 else pic.style.display = "none";
+              }
+              if (detLevel == 1) {
+                 let grd = $$$($("master-bubble"), "div", "master-bubble-grid1");
+                 addCell2(grd, "div", "master-light", 1, 1).innerHTML = "<mark>CWV OK2S:</mark>";
+                 if (!isNaN(new Date(tmp.cwvok2s))) {
+                    addCell2(grd, "div", "", 2, 1).innerHTML = ((new Date(tmp.cwvok2s)).getUTCMonth()+1) + "/" + ((new Date(tmp.cwvok2s)).getUTCDate()) + "/" + ((new Date(tmp.cwvok2s)).getUTCFullYear());
+                 }
+                 addCell2(grd, "div", "master-light", 1, 2).innerHTML = "<mark>ACTIONS:</mark>";
+                 addCell2(grd, "div", "", 2, 2).innerHTML = tmp.comments.replace(/\u000A/ig,"<br>");
+                 addCell2(grd, "div", "master-light", 1, 3).innerHTML = "<mark>STATUS:</mark>";
+                 addCell2(grd, "div", "", 2, 3).innerHTML = tmp.status.replace(/\u000A/ig,"<br>");
+                 $("master-bubble").style.overflowY = "auto";
+                 tmp.onwheel = function(e) {$("master-bubble").scrollBy(0, e.deltaY)};
+              }
+              const gap = 10;
+              if (ev.clientX + gap + $("master-bubble").offsetWidth <= window.innerWidth)
+                 $("master-bubble").style.left = (ev.clientX + gap) + "px";
+              else
+                 $("master-bubble").style.left = (ev.clientX - gap - $("master-bubble").offsetWidth) + "px";
+              if (ev.clientY + gap + $("master-bubble").offsetHeight <= window.innerHeight)
+                 $("master-bubble").style.top = (ev.clientY + gap) + "px";
+              else
+                 $("master-bubble").style.top = (window.innerHeight - gap - $("master-bubble").offsetHeight) + "px";
+           }
+           tmp.onmousemove = function(ev) {
+              const gap = 10;
+              if (ev.clientX + gap + $("master-bubble").offsetWidth <= window.innerWidth)
+                 $("master-bubble").style.left = (ev.clientX + gap) + "px";
+              else
+                 $("master-bubble").style.left = (ev.clientX - gap - $("master-bubble").offsetWidth) + "px";
+              if (ev.clientY + gap + $("master-bubble").offsetHeight <= window.innerHeight)
+                 $("master-bubble").style.top = (ev.clientY + gap) + "px";
+              else
+                 $("master-bubble").style.top = (window.innerHeight - gap - $("master-bubble").offsetHeight) + "px";
+           };
             tmp.onmouseleave = function() {
                 $("master-bubble").style.display = "none";
             };
