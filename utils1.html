@@ -61,6 +61,18 @@
     function hasLoading(el) {
         return el.classList.contains('loading')
     }
+    function getProductTime(time) {
+        const dateObj = new Date(time)
+        const year = dateObj.getFullYear()
+        const month = dateObj.getMonth()
+        const dateStr = `${year}-${month}-01 00:00:00`
+        return {
+            year,
+            month,
+            dateStr,
+            dateStrTime: new Date(dateStr).getTime()
+        }
+    }
 </script>
 
 

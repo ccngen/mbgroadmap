@@ -277,6 +277,7 @@
         // render roadmap
         data = JSON.parse(ret);
         data.shift();
+        window.allProductList = data
         renderRM();
         // stop spinner
         $("spinner").style.display = "none";

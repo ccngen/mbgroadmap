@@ -1,0 +1,335 @@
+<style>
+
+    .competitor-geo-div{
+        width: 100%;
+        font-size: 16px;
+    }
+    .competitor-geo-div label:hover{
+        color: blue;
+    }
+    .competitors-wrapper{
+        display: flex;
+        font-size: 16px;
+    }
+    .competitor-item-div{
+        flex: 1;
+        display: grid;
+    }
+    .competitor-item-div:first-child{
+        flex: 2;
+    }
+    .flspecs-c1 {
+        text-align: left;
+        padding-left: 0.5em;
+        color: black;
+        background-color: var(--theme-color-table);
+    }
+    .flspecs-c2 {
+        text-align: right;
+        font-style: italic;
+        padding-right: 0.5em;
+        color: #666;
+        height: 28px;
+        background-color: var(--theme-color-table);
+    }
+    .flspecs-c3 {
+        text-align: left;
+        background-color: #eee;
+        padding-left: 0.5em;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+        height: 28px;
+        border-right: 2px solid #45818E;
+    }
+    .competitor-item-div:last-child .flspecs-c3{
+        border-right: none;
+    }
+    .flspecs-c3.flspecs-l1{
+        color: #45818E;
+        font-weight: bold;
+        position: sticky;
+        top: 0;
+    }
+    .flspecs-c1.flspecs-l1{
+        position: sticky;
+        top: 0;
+    }
+    .flspecs-cell-hover {
+        background-color: #cbd9e6;
+        color: #000;
+    }
+    .competitor-geo-div label{
+        line-height: 24px;
+        display: inline-block;
+        width: 100%;
+    }
+    .competitor-geo-submit{
+        text-align: center;
+    }
+    .competitor-geo-submit button{
+        width: 200px;
+        height: 32px;
+        line-height: 28px;
+        /* border-radius: 5px; */
+        border-color: #45818e;
+        background: #45818e;
+        color: #ffffff;
+        font-size: 20px;
+    }
+</style>
+<script>
+    function findCompetitorsHandler(org) {
+        const specsData = [
+            { label: 'pName', row: 'A'},
+            {
+                label: 'Network',
+                children: [
+                    { label: 'Network', row: 'CN',},
+                    { label: 'RF', row: 'AI',}
+                ]
+            },
+            {
+                label: 'Launch',
+                children: [
+                    { label: 'OK2Ship', row: 'G', type: 'date'}
+                ]
+            },
+            {
+                label: 'Body',
+                children: [
+                    { label: 'Dimension', row: ['CO', 'CP', 'CQ'], unit: 'mm'},
+                    { label: 'Bezel', row: 'CR', unit: 'mm'},
+                    { label: 'Head', row: 'CS', unit: 'mm'},
+                    { label: 'Chin', row: 'CT', unit: 'mm'},
+                    { label: 'Weight', row: 'CU', unit: 'g'},
+                    { label: 'CMF', row: 'AG'},
+                ]
+            },
+            { label: 'Display#1', row: 'BO'},
+            { label: 'Display#2', row: 'DF'},
+            { label: 'Platform', row: 'BG'},
+            { label: 'Memory', row: 'BI'},
+            {
+                label: 'Main Camera',
+                children: [
+                    { label: 'Cam #1', row: 'BQ'},
+                    { label: 'Cam #2', row: 'BS',},
+                    { label: 'Cam #3', row: 'BU',},
+                    { label: 'Cam #4', row: 'BW',},
+                    { label: 'Cam #5', row: 'DH',},
+
+                ]
+            },
+            { label: 'F. Cam#1', row: 'BY'},
+            { label: 'F. Cam#2', row: 'DI'},
+            { label: 'Selfie Camera', row: 'BY'},
+            { label: 'Sound', row: 'AQ'},
+            {
+                label: 'Comms',
+                children: [
+                    { label: 'WLAN', row: 'AM'},
+                    { label: 'NFC', row: 'AK',},
+                    { label: 'DP', row: 'AO',},
+                ]
+            },
+            {
+                label: 'Biometrics',
+                children: [
+                    { label: 'FPS', row: 'CA',},
+                ]
+            },
+            { label: 'Sensors', row: 'BC'},
+            {
+                label: 'Power',
+                children: [
+                    { label: 'Battery', row: 'BM',},
+                    { label: 'Charging', row: 'AS',},
+                    { label: 'Wireless', row: 'AU',},
+                ]
+            },
+            { label: 'Android', row: 'CV'},
+            { label: 'B2B OK2Ship', row: 'DF', extraLine: 0},
+            { label: 'B2B Diffrence', row: 'DG', extraLine: 0},
+        ]
+
+        const addCell = (parent, colstyle, rowstyle, value, x1, y1, x2 = x1+1, y2 = y1+1, border = false) => {
+            let cell = $$$(parent, "div", "flg-cell");
+            cell.style.gridRow = y1 + " / " + y2;
+            cell.style.gridColumn = x1 + " / " + x2;
+            cell.classList.add("flspecs-c" + colstyle);
+            cell.classList.add("flspecs-l" + rowstyle);
+            cell.line = "flspecs-l" + rowstyle
+            if (border) cell.style.borderBottom = "2px solid white";
+            cell.innerHTML = value;
+            cell.onmouseover = cell.onmouseout = function() {
+                let query = `.competitor-item-div div.${this.line}`;
+                let elems = document.querySelectorAll(query);
+                for (el of elems) el.classList.toggle("flspecs-cell-hover");
+            };
+            return cell;
+        };
+
+        let totalRow = 0 // 总行数
+        specsData.forEach(item => {
+            totalRow += item.children ? item.children.length : 1
+        })
+
+        const renderProduct = (renderEle, product, productIndex) => {
+            const divEl = $$$(renderEle, 'div', 'competitor-item-div')
+            // 因为第一列 会出现跨多行的情况
+            let line = 1
+
+            specsData.forEach((item, index) => {
+                const extraLine = item.extraLine || 0
+                let len = item.children ? item.children.length : 1
+                let width = item.children ? 1 : 2
+                if (productIndex === 0) {
+                    addCell(divEl, 1 , index + 1, item.label, 1, line, 1+width, line + len + extraLine, true)
+                }
+
+                if(item.children) {
+                    item.children.forEach((item1, index1) => {
+                        let value = typeof item1.row === 'string' ? product[getSheetIndex(item1.row)] : item1.row.map(row1 => product[getSheetIndex(row1)] || 0).join(' x ')
+                        value = item1.type === 'date' && value ? getDate(value) : value
+                        const border = item.children.length === index1 + 1
+                        if (productIndex === 0) {
+                            addCell(divEl, 2, index + 1, item1.label, 2, line + index1, 2 + 1, line + index1 + 1,border);
+                            addCell(divEl, 3, index + 1, value + ` ${item1.unit && value ? item1.unit : ''}`, 3, line + index1, 7, line + index1 + 1, border);
+                        } else {
+                            addCell(divEl, 3, index + 1, value + ` ${item1.unit && value ? item1.unit : ''}`, 1, line + index1, 2, line + index1 + 1, border);
+                        }
+                    })
+                } else {
+                    let value = product[getSheetIndex(item.row)]
+                    value = item.type === 'date' && value ? getDate(value) : value
+                    if (productIndex === 0) {
+                        addCell(divEl, 3, index + 1, value + ` ${item.unit && value ? item.unit : ''}`, 3, line, 7, line+len+extraLine, true);
+                    } else {
+                        addCell(divEl, 3, index + 1, value + ` ${item.unit && value ? item.unit : ''}`, 1, line, 2, line+len+extraLine, true);
+                    }
+                    line += extraLine
+                }
+                line += len
+            })
+        }
+
+        let renderOptions = [] // 选项
+        let selectOptions = [] // 选中的选项
+        let rppListByGeo = pricetgs[geoView][0] // 打开项目的 geo
+        const currentRppIndex = rppListByGeo.findIndex(item => item === `${org.productData[5]}`)
+        let checkedRppList = [rppListByGeo[currentRppIndex + 1], rppListByGeo[currentRppIndex + 2]] // 待搜索的 rpp
+        const currentProductOk2ship = getProductTime(org.productData[6]).dateStrTime
+        const prevMonthTime = currentProductOk2ship - 33 * 24 * 60 * 60 * 1000 // 前一个月
+        const nextMonthTime = currentProductOk2ship + 33 * 24 * 60 * 60 * 1000 // 后一个月
+
+        // 根据所有的产品列表，罗列出已有的选项
+        const createOptions = () => {
+            const obj = {}
+            window.allProductList.forEach(item => {
+                obj[item[2]] = true
+            })
+            renderOptions = Object.keys(obj)
+
+            // pricetgs  坐标数据
+            //  geoView
+        }
+
+        // 检查是否符合条件
+        const checkThisItemIsRight = (data) => {
+            // 3为 geo  5为rpp 6为ok2s
+            const time = getProductTime(data[6]).dateStrTime
+            //  if(selectOptions.includes(data[2])) {
+            //   console.log(data[0], data[2], 1)
+            //  }
+            if(time > prevMonthTime && time < nextMonthTime) {
+                console.log(data[0], data[2], data[5], 2)
+                console.log(checkedRppList.includes(data[5]), selectOptions.includes(data[2]), data[0] !== org.pname)
+            }
+            //  if(checkedRppList.includes(data[5])) {
+            //   console.log(data[0], data[5], 3)
+            //  }
+            return checkedRppList.includes(`${data[5]}`) &&  (time > prevMonthTime && time < nextMonthTime) && selectOptions.includes(data[2]) && data[0] !== org.pname
+        }
+
+        // 筛选出所有符合搜索条件的
+        const findAllIsChecked = () => {
+            return window.allProductList.filter(checkThisItemIsRight)
+        }
+
+        createOptions()
+
+
+        // create window
+        let fdata = {
+            _root: document.body,
+            _title: "竞品生成",
+            _blocking: true,
+            _scaled: true,
+            _headercolor: "var(--theme-color-system)",
+            className: 'find-competitors-modal',
+            _height: 30,
+            _width: 30,
+            _vrows: 1,
+            _cols: 1,
+            _licon: null,
+            _fontRatio: 0.4
+        };
+        let flw = flGrid(fdata);
+        flw.grid.style.backgroundColor = "var(--theme-color-bg)";
+        flw.org = org;
+        flw.addEventListener("flWindowClosed", function(e) {
+            this.org.style.outline = "";
+            this.remove();
+        });
+
+        flw.grid.innerHTML = `
+      <div class="competitor-geo-div">
+        ${ renderOptions.map(item => `<div><label><input type="checkbox" name="${item}" class="competitor-geo"/> ${ item }</label></div>`).join('') }
+        <div><label><input type="checkbox" id="competitorsSelectedAll"/>ALL</label></div>
+
+        <div class="competitor-geo-submit"> <button class="submit-loading" id="competitorLoading">Create</button> </div>
+      </div>
+
+    `
+        document.querySelector('#competitorsSelectedAll').addEventListener('change', function() {
+            const checkBoxList = document.querySelectorAll('.competitor-geo-div input.competitor-geo')
+            checkBoxList.forEach(item => {
+                item.checked = this.checked
+            })
+        })
+
+        document.querySelector('#competitorLoading').addEventListener('click', function() {
+            const elList = document.querySelectorAll('.competitor-geo-div input.competitor-geo:checked')
+            if(elList.length === 0) {
+                return window.alert('请选择要筛选的geo！')
+            }
+            selectOptions = [...elList].map(item => item.getAttribute('name'))
+            const productList = findAllIsChecked()
+            const renderList = [org.productData, ...productList]
+            let fdata = {
+                _root: document.body,
+                _title: org.pname +  " Competitors",
+                _blocking: false,
+                _scaled: true,
+                _headercolor: "var(--theme-color-system)",
+                _height: 85,
+                _width: 17 * renderList.length,
+                _vrows: 1,
+                _cols: 1,
+            };
+            let flw = flGrid(fdata);
+            flw.grid.style.backgroundColor = "white";
+            flw.addEventListener("flWindowClosed", function(e) {
+                this.remove();
+            });
+
+            const wrapper = $$$(flw.grid, 'div', 'competitors-wrapper')
+
+            renderList.forEach((product, index) => {
+                renderProduct(wrapper, product, index)
+            })
+
+        })
+    }
+</script>
