@@ -1,0 +1,75 @@
+<style></style>
+<script>
+    function editGeosOfManage(org) {
+        const pname = org.pname;
+        const createTableTh = (base) => {
+            const thList = ['GEOs', 'OK2S', 'RPP', 'Specs Differences']
+            const tableHead = $$$(base, "thead");
+            const trEl = $$$(tableHead, "tr", 'title-tr');
+            thList.forEach(text => {
+                const thEl = $$$(trEl, "th");
+                thEl.innerHTML = text
+            })
+        }
+        const createTableTr = (base, config, data) => {
+            const trEl = $$$(base, "tr");
+
+            const tdEl1 = $$$(trEl, "td");
+            tdEl1.innerText = config.geo
+
+            const tdEl2 = $$$(trEl, "td");
+            const inputTd = $$$(tdEl2, "input");
+            inputTd.type = 'date'
+            inputTd.value = getDateStr(new Date(data[1]))
+
+            const tdEl3 = $$$(trEl, "td");
+            tdEl3.innerText = config.rpp
+            const inputTd3 = $$$(tdEl3, "input");
+            inputTd3.value = data[0]
+
+            const tdEl4 = $$$(trEl, "td");
+            const inputTd4 = $$$(tdEl4, "textarea");
+            inputTd4.value = data[2]
+        }
+
+        let fdata = {
+            _root: document.body,
+            _title: `Manage GEOs  (${pname})`,
+            _blocking: true,
+            _scaled: true,
+            _headercolor: "var(--theme-color-system)",
+            _height: 29,
+            _width: 35,
+            _vrows: 7,
+            _cols: 3,
+            _licon: null,
+            _fontRatio: 0.4
+        };
+        let flw = makeFLW(fdata);
+        flw.layout = $$$(flw.body, "div", "manage-geos-modal");
+        flw.addEventListener("flWindowClosed", function(e) {
+            this.remove();
+        });
+
+        const tableEl = $$$(flw.layout, "table", "manage-components-table");
+        createTableTh(tableEl)
+        const tableBody = $$$(tableEl, "tbody");
+
+        google.script.run.withSuccessHandler(ret => {
+            const prod = JSON.parse(ret.prod)
+            const startIndex = getSheetIndex(geosManageIndexs[0])
+            const dataList = prod.splice(startIndex, 12)
+            const geos = ['BR', 'MX', 'IN', 'PRC']
+            const rpps = ['BRL', 'MXN', 'INR', 'CNY']
+
+            for (let i = 0; i < 12; i += 3) {
+                const data = {
+                    geo: geos[i / 3],
+                    data: dataList.slice(i, i + 3)
+                }
+                createTableTr(tableBody, { geo: geos[i / 3], rpp: rpps[i / 3] }, dataList.slice(i, i + 3))
+            }
+
+        }).getProduct(pname);
+    }
+</script>
